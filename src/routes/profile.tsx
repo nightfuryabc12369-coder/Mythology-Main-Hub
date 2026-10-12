@@ -25,6 +25,7 @@ function ProfilePage() {
   const cards = useArchiveStore((state) => state.cards);
   const pills = useArchiveStore((state) => state.pills);
   const upgradeCard = useArchiveStore((state) => state.upgradeCard);
+  const openOverlay = useArchiveStore((state) => state.openOverlay);
   const { player, isPending, accountsOn } = usePlayer();
 
   const owned = hydrated
@@ -79,7 +80,7 @@ function ProfilePage() {
             {owned.map((god) => {
               const level = cards[god.id];
               return (
-                <CardTile key={god.id} god={god} level={level}>
+                <CardTile key={god.id} god={god} level={level} onOpen={() => openOverlay({ type: "god", id: god.id })}>
                   <button
                     type="button"
                     disabled={pills < 1 || level >= MAX_LEVEL}

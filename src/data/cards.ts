@@ -42,9 +42,13 @@ export function godPower(god: God) {
 }
 
 /** A level 1 card shows 40% of its power. Level 10 shows all of it. */
-export function cardPower(god: God, level: number) {
+export function levelFactor(level: number) {
   const clamped = Math.min(MAX_LEVEL, Math.max(1, level));
-  return Math.round(godPower(god) * (0.4 + (0.6 * (clamped - 1)) / (MAX_LEVEL - 1)));
+  return 0.4 + (0.6 * (clamped - 1)) / (MAX_LEVEL - 1);
+}
+
+export function cardPower(god: God, level: number) {
+  return Math.round(godPower(god) * levelFactor(level));
 }
 
 const ranked = [...gods].sort((a, b) => godPower(b) - godPower(a));

@@ -43,13 +43,13 @@ export function CardArt({ god, className }: { god: God; className?: string }) {
   );
 }
 
-export function CardTile({ god, level, children }: { god: God; level: number; children?: ReactNode }) {
+export function CardTile({ god, level, onOpen, children }: { god: God; level: number; onOpen?: () => void; children?: ReactNode }) {
   const rarity = rarityOf(god.id);
   const color = RARITY_COLOR[rarity];
-  return (
-    <div className="overflow-hidden rounded-md bg-surface" style={{ boxShadow: `0 0 0 1px ${color}66` }}>
+  const face = (
+    <>
       <CardArt god={god} className="aspect-[3/4] w-full" />
-      <div className="space-y-1 px-3 py-3">
+      <div className={cn("space-y-1 px-3 pt-3", children ? "pb-0" : "pb-3")}>
         <p className="text-[10px] tracking-kicker uppercase" style={{ color }}>
           {RARITY_LABEL[rarity]}
         </p>
@@ -57,8 +57,19 @@ export function CardTile({ god, level, children }: { god: God; level: number; ch
         <p className="text-xs text-muted">
           Level {level}/{MAX_LEVEL} · Power {cardPower(god, level)}
         </p>
-        {children}
       </div>
+    </>
+  );
+  return (
+    <div className="overflow-hidden rounded-md bg-surface" style={{ boxShadow: `0 0 0 1px ${color}66` }}>
+      {onOpen ? (
+        <button type="button" onClick={onOpen} aria-label={`Open ${god.name}`} className="pressable block w-full text-left">
+          {face}
+        </button>
+      ) : (
+        face
+      )}
+      {children ? <div className="px-3 pb-3">{children}</div> : null}
     </div>
   );
 }

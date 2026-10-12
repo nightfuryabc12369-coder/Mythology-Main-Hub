@@ -1,6 +1,7 @@
 import { NameChips } from "@/components/archive/cards";
 import { EmblemMark } from "@/components/archive/emblem";
 import { FavoriteButton, StatRow, usePresence } from "@/components/archive/widgets";
+import { MAX_LEVEL, RARITY_COLOR, RARITY_LABEL, cardPower, levelFactor, rarityOf } from "@/data/cards";
 import { getGod, realmLabel } from "@/data/gods";
 import { searchArchive, searchLabel } from "@/data/search";
 import { STAT_KEYS, type FavoriteKind } from "@/data/types";
@@ -69,6 +70,10 @@ export function Dossier() {
   const { render, shown } = usePresence(Boolean(god));
   const [epithetId, setEpithetId] = useState<string | null>(null);
   const [tab, setTab] = useState<"file" | "kin" | "deeds">("file");
+  const hydrated = useArchiveStore((state) => state.hydrated);
+  const cards = useArchiveStore((state) => state.cards);
+  const pills = useArchiveStore((state) => state.pills);
+  const upgradeCard = useArchiveStore((state) => state.upgradeCard);
 
   useEffect(() => {
     setEpithetId(null);
@@ -76,6 +81,12 @@ export function Dossier() {
   }, [god?.id]);
 
   if (!render || !god) return null;
+
+  const level = hydrated ? cards[god.id] : undefined;
+  const factor = level ? levelFactor(level) : 1;
+  const rarity = rarityOf(god.id);
+  const rarityColor = RARITY_COLOR[rarity];
+  const maxed = Boolean(level) && (level ?? 0) >= MAX_LEVEL;
 
   return (
     <div className={cn("fixed inset-0 z-50 transition-opacity duration-200", shown ? "opacity-100" : "opacity-0")}>
@@ -135,6 +146,40 @@ export function Dossier() {
               {god.name}
             </h2>
             <p className="mt-2 text-sm text-gold">{epithetId ? epithetMap[epithetId]?.meaning : god.line}</p>
+            {level ? (
+              <div className="mt-4 rounded-md bg-surface p-4" style={{ boxShadow: `0 0 0 1px ${rarityColor}66` }}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] tracking-kicker uppercase" style={{ color: rarityColor }}>
+                      {RARITY_LABEL[rarity]} card · in your collection
+                    </p>
+                    <p className="mt-1 font-display text-2xl text-fg">
+                      Level {level}/{MAX_LEVEL}
+                    </p>
+                    <p className="text-xs text-muted">
+                      Power {cardPower(god, level)} · {Math.round(factor * 100)}% of full strength
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-display text-3xl text-primary">x{pills}</p>
+                    <p className="text-[10px] tracking-kicker text-muted uppercase">Ambrosia</p>
+                  </div>
+                </div>
+                <div className="mt-3 grid grid-cols-10 gap-1" aria-hidden="true">
+                  {Array.from({ length: MAX_LEVEL }, (_, index) => (
+                    <span key={index} className={cn("h-1.5 rounded-full", index < level ? "bg-primary" : "bg-bg-deep")} />
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  disabled={pills < 1 || maxed}
+                  onClick={() => upgradeCard(god.id)}
+                  className="pressable mt-3 min-h-11 w-full rounded-sm bg-primary text-xs tracking-kicker text-primary-fg uppercase disabled:opacity-40"
+                >
+                  {maxed ? "Max level" : pills < 1 ? "No ambrosia left" : "Use ambrosia to level up"}
+                </button>
+              </div>
+            ) : null}
             <div className="mt-4 flex gap-2">
               {(["file", "kin", "deeds"] as const).map((item) => (
                 <button
@@ -154,10 +199,14 @@ export function Dossier() {
                   <p className="text-sm text-muted">{epithetId ? epithetMap[epithetId]?.note : god.nature}</p>
                   <div className="space-y-3">
                     {STAT_KEYS.map(([key, label], index) => (
-                      <StatRow key={key} label={label} value={god.stats[key]} delay={index * 40} />
+                      <StatRow key={`${key}-${level ?? 0}`} label={label} value={Math.round(god.stats[key] * factor)} delay={index * 40} />
                     ))}
                   </div>
-                  <p className="text-xs text-subtle">Temple measures for the compare table. Not a ranking from any ancient text.</p>
+                  <p className="text-xs text-subtle">
+                    {level
+                      ? `Traits shown at Level ${level} of ${MAX_LEVEL}. Each level unlocks more of this figure's full strength.`
+                      : "Temple measures for the compare table. Not a ranking from any ancient text."}
+                  </p>
                 </>
               ) : null}
               {tab === "kin" ? (
