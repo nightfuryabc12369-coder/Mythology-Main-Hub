@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Aether Codex",
+      "hasCanvas": false,
+      "bodyTextLen": 6811,
+      "bodyTextHash": "c21bb908381d34b92714d4cbfec3907043361e2c7de6a94a40cdfda82d1d7f61",
+      "bodyTextPrefix": "AETHER CODEX GODS AGES MYTHS EPITHETS EPICS TIME MEASURE MYTH AR",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Aether Codex",
+      "hasCanvas": false,
+      "bodyTextLen": 6817,
+      "bodyTextHash": "0faee3458e0a1c6a7ef5d3ddac80eeb9618e002e31fff44a6bbd3f847abb69a0",
+      "bodyTextPrefix": "AETHER CODEX GODS AGES MYTHS EPITHETS EPICS TIME MEASURE ABOUT M",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
