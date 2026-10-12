@@ -1,4 +1,4 @@
-import { NameChips } from "@/components/archive/cards";
+import { GodPhoto, NameChips } from "@/components/archive/cards";
 import { EmblemMark } from "@/components/archive/emblem";
 import { StatRow } from "@/components/archive/widgets";
 import { gods, getGod } from "@/data/gods";
@@ -642,7 +642,7 @@ function BattleCard({ god, side, lunging, hurt, ko, won }: { god: God; side: "L"
         zIndex: lunging ? 2 : 1,
       }}
     >
-      <img src={god.image} alt="" className="h-full w-full object-cover" style={{ objectPosition: god.focus }} />
+      <GodPhoto god={god} className="h-full w-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-transparent to-transparent" />
       <EmblemMark name={god.emblem} className="absolute top-2 left-2 size-6 text-gold" />
       <p className="absolute right-2 bottom-2 left-2 font-display text-xl text-fg sm:text-2xl">{god.name}</p>

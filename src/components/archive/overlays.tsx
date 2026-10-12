@@ -1,4 +1,4 @@
-import { NameChips } from "@/components/archive/cards";
+import { GodPhoto, NameChips } from "@/components/archive/cards";
 import { EmblemMark } from "@/components/archive/emblem";
 import { FavoriteButton, StatRow, usePresence } from "@/components/archive/widgets";
 import { MAX_LEVEL, RARITY_COLOR, RARITY_LABEL, cardPower, levelFactor, rarityOf } from "@/data/cards";
@@ -112,7 +112,7 @@ export function Dossier() {
         <div className="grid min-h-0 flex-1 gap-0 overflow-y-auto md:grid-cols-[240px_1fr]">
           <div className="px-4 md:px-6">
             <div className="relative h-72 overflow-hidden rounded-md md:h-[420px]">
-              <img src={god.image} alt="" className="h-full w-full object-cover" style={{ objectPosition: god.focus }} />
+              <GodPhoto god={god} className="h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-bg/10" />
               <EmblemMark name={god.emblem} className="absolute bottom-4 left-4 size-8 text-gold" />
             </div>

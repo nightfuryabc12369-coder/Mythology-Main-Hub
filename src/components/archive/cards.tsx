@@ -4,7 +4,27 @@ import { getGod, realmLabel } from "@/data/gods";
 import type { Age, Epic, God, Myth } from "@/data/types";
 import { useArchiveStore } from "@/lib/archive-store";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+/**
+ * A god's picture. Uses the card art at /cards/<id>.jpg when it exists,
+ * and falls back to the older scene picture for figures without card art yet.
+ */
+export function GodPhoto({ god, className, style }: { god: God; className?: string; style?: React.CSSProperties }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [god.id]);
+  return failed ? (
+    <img src={god.image} alt="" className={className} style={{ objectPosition: god.focus, ...style }} />
+  ) : (
+    <img
+      src={`/cards/${god.id}.jpg`}
+      alt={god.name}
+      className={className}
+      style={{ objectPosition: "center 22%", ...style }}
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 export function GodCard({ god, index = 0 }: { god: God; index?: number }) {
   const openOverlay = useArchiveStore((state) => state.openOverlay);
@@ -26,12 +46,7 @@ export function GodCard({ god, index = 0 }: { god: God; index?: number }) {
       <div className="relative overflow-hidden rounded-md bg-surface shadow-border transition-shadow duration-200 hover:shadow-glow">
         <button type="button" onClick={() => openOverlay({ type: "god", id: god.id })} className="pressable group w-full text-left">
           <div className="relative h-52 overflow-hidden">
-            <img
-              src={god.image}
-              alt=""
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              style={{ objectPosition: god.focus }}
-            />
+            <GodPhoto god={god} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/25 to-bg/10" />
             <EmblemMark name={god.emblem} className="absolute bottom-3 left-4 size-7 text-gold" />
           </div>
