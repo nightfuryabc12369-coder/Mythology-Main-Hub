@@ -3,7 +3,7 @@ import { playTone } from "@/lib/audio";
 import { useArchiveStore } from "@/lib/archive-store";
 import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Bookmark, Menu, Search, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, Menu, Search, UserRound, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const links = [
@@ -75,6 +75,16 @@ export function Navbar() {
           >
             {sound ? <Volume2 className="size-5" /> : <VolumeX className="size-5" />}
           </button>
+          <Link
+            to="/profile"
+            aria-label="My cards"
+            className={cn(
+              "inline-flex size-11 items-center justify-center rounded-sm text-muted hover:text-fg",
+              pathname === "/profile" && "text-primary",
+            )}
+          >
+            <UserRound className="size-5" />
+          </Link>
           <Link
             to="/votive"
             aria-label="Votive shelf"

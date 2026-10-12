@@ -24,6 +24,9 @@ type ArchiveState = {
   sound: boolean;
   oracleBest: number;
   favorites: Favorites;
+  cards: Record<string, number>;
+  pills: number;
+  nextWishAt: number;
   setHydrated: (value: boolean) => void;
   setSearchOpen: (open: boolean) => void;
   setSearchQuery: (query: string) => void;
@@ -37,6 +40,10 @@ type ArchiveState = {
   setOracleBest: (score: number) => void;
   isFavorite: (kind: FavoriteKind, id: string) => boolean;
   toggleFavorite: (kind: FavoriteKind, id: string) => void;
+  grantCard: (id: string) => void;
+  addPills: (count: number) => void;
+  upgradeCard: (id: string) => void;
+  startRest: (ms: number) => void;
 };
 
 const emptyFavorites: Favorites = { god: [], myth: [], epithet: [], epic: [] };
@@ -55,6 +62,9 @@ export const useArchiveStore = create<ArchiveState>()(
       sound: false,
       oracleBest: 0,
       favorites: emptyFavorites,
+      cards: {},
+      pills: 0,
+      nextWishAt: 0,
       setHydrated: (hydrated) => set({ hydrated }),
       setSearchOpen: (searchOpen) => set({ searchOpen, searchQuery: searchOpen ? get().searchQuery : "" }),
       setSearchQuery: (searchQuery) => set({ searchQuery }),
@@ -87,6 +97,18 @@ export const useArchiveStore = create<ArchiveState>()(
         const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
         set({ favorites: { ...get().favorites, [kind]: next } });
       },
+      grantCard: (id) => {
+        const cards = get().cards;
+        if (cards[id]) return;
+        set({ cards: { ...cards, [id]: 1 } });
+      },
+      addPills: (count) => set({ pills: get().pills + count }),
+      upgradeCard: (id) => {
+        const level = get().cards[id];
+        if (!level || level >= 10 || get().pills < 1) return;
+        set({ cards: { ...get().cards, [id]: level + 1 }, pills: get().pills - 1 });
+      },
+      startRest: (ms) => set({ nextWishAt: Date.now() + ms }),
     }),
     {
       name: "aether-codex-v1",
@@ -98,6 +120,9 @@ export const useArchiveStore = create<ArchiveState>()(
         sound: state.sound,
         oracleBest: state.oracleBest,
         favorites: state.favorites,
+        cards: state.cards,
+        pills: state.pills,
+        nextWishAt: state.nextWishAt,
       }),
     },
   ),

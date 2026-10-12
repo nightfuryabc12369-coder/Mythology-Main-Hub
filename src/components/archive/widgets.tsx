@@ -16,6 +16,7 @@ export type AppTo =
   | "/timeline"
   | "/compare"
   | "/votive"
+  | "/profile"
   | "/about";
 
 export function SectionHeader({

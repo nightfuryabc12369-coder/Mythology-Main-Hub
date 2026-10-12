@@ -13,6 +13,7 @@ import {
   TimelineList,
 } from "@/components/archive/home-interactive";
 import { SectionHeader, TextLink } from "@/components/archive/widgets";
+import { WishSystem } from "@/components/archive/wish";
 import { featuredGods } from "@/data/gods";
 import { ages, epics, myths, timeline } from "@/data/world";
 import { playTone } from "@/lib/audio";
@@ -90,6 +91,16 @@ function Home() {
             <AgeCard key={age.id} age={age} />
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6" id="wish">
+        <SectionHeader
+          kicker="Wish / The seven"
+          title="Gather the seven stars"
+          subtitle="Collect them, make a wish, and keep the figures you win on your profile."
+          action={<TextLink to="/profile">My cards</TextLink>}
+        />
+        <WishSystem />
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">

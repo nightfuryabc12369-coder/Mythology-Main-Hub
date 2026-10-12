@@ -17,6 +17,7 @@ import { Route as EpicsRouteImport } from './routes/epics'
 import { Route as EpithetsRouteImport } from './routes/epithets'
 import { Route as GodsRouteImport } from './routes/gods'
 import { Route as MythsRouteImport } from './routes/myths'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as TimelineRouteImport } from './routes/timeline'
 import { Route as VotiveRouteImport } from './routes/votive'
 
@@ -60,6 +61,11 @@ const MythsRoute = MythsRouteImport.update({
   path: '/myths',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TimelineRoute = TimelineRouteImport.update({
   id: '/timeline',
   path: '/timeline',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/epithets': typeof EpithetsRoute
   '/gods': typeof GodsRoute
   '/myths': typeof MythsRoute
+  '/profile': typeof ProfileRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
 }
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/epithets': typeof EpithetsRoute
   '/gods': typeof GodsRoute
   '/myths': typeof MythsRoute
+  '/profile': typeof ProfileRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
 }
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/epithets': typeof EpithetsRoute
   '/gods': typeof GodsRoute
   '/myths': typeof MythsRoute
+  '/profile': typeof ProfileRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
 }
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/epithets'
     | '/gods'
     | '/myths'
+    | '/profile'
     | '/timeline'
     | '/votive'
   fileRoutesByTo: FileRoutesByTo
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/epithets'
     | '/gods'
     | '/myths'
+    | '/profile'
     | '/timeline'
     | '/votive'
   id:
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/epithets'
     | '/gods'
     | '/myths'
+    | '/profile'
     | '/timeline'
     | '/votive'
   fileRoutesById: FileRoutesById
@@ -156,6 +168,7 @@ export interface RootRouteChildren {
   EpithetsRoute: typeof EpithetsRoute
   GodsRoute: typeof GodsRoute
   MythsRoute: typeof MythsRoute
+  ProfileRoute: typeof ProfileRoute
   TimelineRoute: typeof TimelineRoute
   VotiveRoute: typeof VotiveRoute
 }
@@ -218,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MythsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/timeline': {
       id: '/timeline'
       path: '/timeline'
@@ -244,6 +264,7 @@ const rootRouteChildren: RootRouteChildren = {
   EpithetsRoute: EpithetsRoute,
   GodsRoute: GodsRoute,
   MythsRoute: MythsRoute,
+  ProfileRoute: ProfileRoute,
   TimelineRoute: TimelineRoute,
   VotiveRoute: VotiveRoute,
 }
