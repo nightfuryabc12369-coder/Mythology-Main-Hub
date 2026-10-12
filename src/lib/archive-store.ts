@@ -22,6 +22,7 @@ type ArchiveState = {
   compareLeft: string;
   compareRight: string;
   sound: boolean;
+  volume: number;
   oracleBest: number;
   favorites: Favorites;
   cards: Record<string, number>;
@@ -37,6 +38,7 @@ type ArchiveState = {
   setCouncilOpen: (open: boolean) => void;
   setCompare: (side: "left" | "right", id: string) => void;
   toggleSound: () => void;
+  setVolume: (volume: number) => void;
   setOracleBest: (score: number) => void;
   isFavorite: (kind: FavoriteKind, id: string) => boolean;
   toggleFavorite: (kind: FavoriteKind, id: string) => void;
@@ -60,6 +62,7 @@ export const useArchiveStore = create<ArchiveState>()(
       compareLeft: "zeus",
       compareRight: "hades",
       sound: false,
+      volume: 0.5,
       oracleBest: 0,
       favorites: emptyFavorites,
       cards: {},
@@ -90,6 +93,7 @@ export const useArchiveStore = create<ArchiveState>()(
         set(side === "left" ? { compareLeft: id } : { compareRight: id });
       },
       toggleSound: () => set({ sound: !get().sound }),
+      setVolume: (volume) => set({ volume: Math.min(1, Math.max(0, volume)) }),
       setOracleBest: (score) => set({ oracleBest: Math.max(get().oracleBest, score) }),
       isFavorite: (kind, id) => get().favorites[kind].includes(id),
       toggleFavorite: (kind, id) => {
@@ -118,6 +122,7 @@ export const useArchiveStore = create<ArchiveState>()(
         compareLeft: state.compareLeft,
         compareRight: state.compareRight,
         sound: state.sound,
+        volume: state.volume,
         oracleBest: state.oracleBest,
         favorites: state.favorites,
         cards: state.cards,

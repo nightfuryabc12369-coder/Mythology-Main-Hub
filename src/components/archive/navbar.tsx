@@ -1,11 +1,11 @@
 import { Avatar } from "@/components/archive/avatar";
 import { CodexMark } from "@/components/archive/mark";
+import { SoundControl } from "@/components/archive/sound-control";
 import { useAccountStore, usePlayer } from "@/lib/account";
-import { playTone } from "@/lib/audio";
 import { useArchiveStore } from "@/lib/archive-store";
 import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Bookmark, Menu, Search, UserRound, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, Menu, Search, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const links = [
@@ -21,8 +21,6 @@ const links = [
 export function Navbar() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const setSearchOpen = useArchiveStore((state) => state.setSearchOpen);
-  const sound = useArchiveStore((state) => state.sound);
-  const toggleSound = useArchiveStore((state) => state.toggleSound);
   const [compact, setCompact] = useState(false);
   const [open, setOpen] = useState(false);
   const { player, accountsOn } = usePlayer();
@@ -67,18 +65,7 @@ export function Navbar() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-1">
-          <button
-            type="button"
-            aria-pressed={sound}
-            aria-label={sound ? "Mute the lyre" : "Enable the lyre"}
-            onClick={() => {
-              toggleSound();
-              if (!sound) playTone(494, 0.12, 0.04);
-            }}
-            className="inline-flex size-11 items-center justify-center rounded-sm text-muted hover:text-fg"
-          >
-            {sound ? <Volume2 className="size-5" /> : <VolumeX className="size-5" />}
-          </button>
+          <SoundControl />
           <Link
             to={accountsOn && !player ? "/login" : "/profile"}
             aria-label={player ? "My profile" : accountsOn ? "Sign in or create an account" : "My cards"}

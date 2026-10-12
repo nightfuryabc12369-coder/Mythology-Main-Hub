@@ -1,5 +1,6 @@
 import { AccountSync } from "@/components/archive/account-sync";
 import { Footer } from "@/components/archive/footer";
+import { MusicPlayer } from "@/components/archive/sound-control";
 import { Navbar, ScrollProgress } from "@/components/archive/navbar";
 import { CouncilModal, DetailSheet, Dossier, SearchOverlay } from "@/components/archive/overlays";
 import { useArchiveStore } from "@/lib/archive-store";
@@ -55,6 +56,7 @@ export function AppShell() {
     <div className="ink-grid min-h-screen bg-bg text-fg">
       <ScrollProgress />
       <AccountSync />
+      <MusicPlayer />
       <Navbar />
       <div key={pathname} className="page-enter pt-16">
         <Outlet />
