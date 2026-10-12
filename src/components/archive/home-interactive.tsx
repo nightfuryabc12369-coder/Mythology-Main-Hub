@@ -2,6 +2,7 @@ import { NameChips } from "@/components/archive/cards";
 import { EmblemMark } from "@/components/archive/emblem";
 import { StatRow } from "@/components/archive/widgets";
 import { gods, getGod } from "@/data/gods";
+import type { God } from "@/data/types";
 import { STAT_KEYS, THRONES, type StatKey, type TimelineEvent } from "@/data/types";
 import { constellations, epithetLines, epithets, myths, oracles, realms, timeline } from "@/data/world";
 import { playSeal, playSummon, playTone } from "@/lib/audio";
@@ -596,6 +597,217 @@ export function DrawLot() {
   );
 }
 
+
+const BATTLE_WEIGHTS: Record<StatKey, number> = {
+  might: 0.3,
+  wrath: 0.15,
+  cunning: 0.15,
+  endurance: 0.2,
+  dominion: 0.1,
+  craft: 0.05,
+  favor: 0.05,
+};
+
+function battlePower(god: God) {
+  return STAT_KEYS.reduce((sum, [key]) => sum + god.stats[key as StatKey] * BATTLE_WEIGHTS[key as StatKey], 0);
+}
+
+/** Chance that `a` beats `b`. A steep exponent makes bigger gaps count, but upsets stay possible. */
+function winChance(a: God, b: God) {
+  const pa = battlePower(a) ** 6;
+  const pb = battlePower(b) ** 6;
+  return pa / (pa + pb);
+}
+
+const POPS = ["POW!", "BAM!", "WHAM!", "CRASH!", "SMASH!", "THOOM!"];
+
+type BattlePhase = "idle" | "fighting" | "done";
+
+function BattleCard({ god, side, lunging, hurt, ko, won }: { god: God; side: "L" | "R"; lunging: boolean; hurt: boolean; ko: boolean; won: boolean }) {
+  const dir = side === "L" ? 1 : -1;
+  let transform = "none";
+  if (ko) transform = `translateX(${dir * -24}px) translateY(14px) rotate(${dir * -9}deg) scale(0.94)`;
+  else if (lunging) transform = `translateX(${dir * 70}px) rotate(${dir * 4}deg) scale(1.05)`;
+  else if (hurt) transform = `translateX(${dir * -14}px) rotate(${dir * -3}deg)`;
+  return (
+    <div
+      className="relative w-36 overflow-hidden rounded-md border border-border bg-bg-deep sm:w-48"
+      style={{
+        aspectRatio: "3 / 4",
+        transform,
+        transition: "transform 160ms ease-out, filter 300ms, opacity 300ms, box-shadow 300ms",
+        filter: ko ? "grayscale(1) brightness(0.6)" : hurt ? "brightness(1.5) saturate(1.3)" : "none",
+        opacity: ko ? 0.75 : 1,
+        boxShadow: won ? "0 0 0 2px var(--color-gold), 0 0 36px color-mix(in oklab, var(--color-gold) 55%, transparent)" : "none",
+        zIndex: lunging ? 2 : 1,
+      }}
+    >
+      <img src={god.image} alt="" className="h-full w-full object-cover" style={{ objectPosition: god.focus }} />
+      <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-transparent to-transparent" />
+      <EmblemMark name={god.emblem} className="absolute top-2 left-2 size-6 text-gold" />
+      <p className="absolute right-2 bottom-2 left-2 font-display text-xl text-fg sm:text-2xl">{god.name}</p>
+    </div>
+  );
+}
+
+function HealthBar({ name, hp, side, tone }: { name: string; hp: number; side: "L" | "R"; tone: string }) {
+  return (
+    <div className={cn("min-w-0 flex-1", side === "R" && "text-right")}>
+      <p className="mb-1 truncate text-xs tracking-kicker text-fg uppercase">{name}</p>
+      <div className="h-3 overflow-hidden rounded-full bg-bg-deep">
+        <div
+          className={cn("h-full rounded-full", side === "R" && "ml-auto")}
+          style={{ width: `${Math.max(0, hp)}%`, background: tone, transition: "width 380ms ease-out" }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function BattleArena({ left, right }: { left: God; right: God }) {
+  const [phase, setPhase] = useState<BattlePhase>("idle");
+  const [hp, setHp] = useState<[number, number]>([100, 100]);
+  const [lunging, setLunging] = useState<"L" | "R" | null>(null);
+  const [hurt, setHurt] = useState<"L" | "R" | null>(null);
+  const [pop, setPop] = useState<{ text: string; n: number } | null>(null);
+  const [winnerSide, setWinnerSide] = useState<"L" | "R" | null>(null);
+  const timers = useRef<number[]>([]);
+
+  const clear = () => {
+    timers.current.forEach((id) => window.clearTimeout(id));
+    timers.current = [];
+  };
+  useEffect(() => clear, []);
+  // A new pairing wipes the arena.
+  useEffect(() => {
+    clear();
+    setPhase("idle");
+    setHp([100, 100]);
+    setLunging(null);
+    setHurt(null);
+    setPop(null);
+    setWinnerSide(null);
+  }, [left.id, right.id]);
+
+  const pLeft = winChance(left, right);
+  const leftPct = Math.round(pLeft * 100);
+  const rightPct = 100 - leftPct;
+  const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function fight() {
+    clear();
+    const leftWins = Math.random() < pLeft;
+    const win: "L" | "R" = leftWins ? "L" : "R";
+    const lose: "L" | "R" = leftWins ? "R" : "L";
+    const pWin = leftWins ? pLeft : 1 - pLeft;
+    const winnerEnd = Math.round(Math.min(78, Math.max(14, 20 + 60 * (pWin - 0.5) * 2 + (Math.random() * 12 - 6))));
+    setWinnerSide(null);
+    setHp([100, 100]);
+    setPhase("fighting");
+
+    // Seven exchanges: the winner lands four, the loser three.
+    const order: Array<"W" | "L"> = ["W", "L", "W", "L", "W", "L", "W"];
+    const step = reduced ? 120 : 700;
+    let hpW = 100;
+    let hpL = 100;
+    order.forEach((who, i) => {
+      const at = 500 + i * step;
+      const attacker = who === "W" ? win : lose;
+      const defender = who === "W" ? lose : win;
+      timers.current.push(
+        window.setTimeout(() => {
+          if (who === "W") hpL = i === order.length - 1 ? 0 : Math.max(8, hpL - (100 / 4) * (0.8 + Math.random() * 0.4));
+          else hpW = Math.max(winnerEnd, hpW - ((100 - winnerEnd) / 3) * (0.8 + Math.random() * 0.4));
+          const next: [number, number] = [0, 0];
+          next[win === "L" ? 0 : 1] = Math.round(hpW);
+          next[lose === "L" ? 0 : 1] = Math.round(hpL);
+          setLunging(attacker);
+          setHurt(defender);
+          setPop({ text: POPS[Math.floor(Math.random() * POPS.length)], n: i });
+          setHp(next);
+          playTone(150 + Math.random() * 90, 0.09, 0.05);
+          timers.current.push(window.setTimeout(() => setLunging(null), reduced ? 60 : 200));
+          timers.current.push(window.setTimeout(() => setHurt(null), reduced ? 100 : 320));
+        }, at),
+      );
+    });
+    timers.current.push(
+      window.setTimeout(() => {
+        setPop(null);
+        setWinnerSide(win);
+        setPhase("done");
+        playSeal();
+      }, 500 + order.length * step + (reduced ? 100 : 500)),
+    );
+  }
+
+  const winner = winnerSide === "L" ? left : winnerSide === "R" ? right : null;
+  const loser = winnerSide === "L" ? right : winnerSide === "R" ? left : null;
+  let reason = "";
+  let upset = false;
+  if (winner && loser) {
+    let best: { label: string; a: number; b: number; gap: number } | null = null;
+    for (const [key, label] of STAT_KEYS) {
+      const a = winner.stats[key as StatKey];
+      const b = loser.stats[key as StatKey];
+      if (a - b > (best?.gap ?? 0)) best = { label, a, b, gap: a - b };
+    }
+    reason = best ? `Won on ${best.label.toLowerCase()} (${best.a} vs ${best.b}).` : "Won on fortune alone.";
+    upset = (winnerSide === "L" ? pLeft : 1 - pLeft) < 0.5;
+  }
+
+  return (
+    <div className="mt-8 border-t border-border pt-8">
+      <div className="flex justify-center">
+        <button
+          type="button"
+          disabled={phase === "fighting"}
+          onClick={fight}
+          className="pressable inline-flex min-h-12 items-center rounded-sm bg-primary px-8 text-sm tracking-kicker text-primary-fg uppercase disabled:opacity-60"
+        >
+          {phase === "idle" ? "Battle" : phase === "fighting" ? "Fighting…" : "Battle again"}
+        </button>
+      </div>
+
+      {phase !== "idle" ? (
+        <div className="panel-in mt-6 overflow-hidden rounded-md border border-border bg-bg-deep p-4 sm:p-6">
+          <div className="flex items-start gap-4 sm:gap-8">
+            <HealthBar name={left.name} hp={hp[0]} side="L" tone="var(--color-primary)" />
+            <HealthBar name={right.name} hp={hp[1]} side="R" tone="var(--color-wine)" />
+          </div>
+          <div className="relative mt-5 flex min-h-64 items-center justify-between gap-2 sm:min-h-80 sm:px-10">
+            <BattleCard god={left} side="L" lunging={lunging === "L"} hurt={hurt === "L"} ko={winnerSide === "R"} won={winnerSide === "L"} />
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+              {pop ? (
+                <span key={pop.n} className="battle-pop font-display text-4xl text-gold sm:text-6xl">
+                  {pop.text}
+                </span>
+              ) : null}
+              {winnerSide ? <span className="battle-pop font-display text-5xl text-wine sm:text-7xl">K.O.!</span> : null}
+            </div>
+            <BattleCard god={right} side="R" lunging={lunging === "R"} hurt={hurt === "R"} ko={winnerSide === "L"} won={winnerSide === "R"} />
+          </div>
+        </div>
+      ) : null}
+
+      {winner ? (
+        <div className="panel-in mt-6 text-center">
+          <p className="text-xs tracking-kicker text-muted uppercase">{upset ? "Winner · an upset" : "Winner"}</p>
+          <p className="mt-1 font-display text-5xl text-gold">{winner.name}</p>
+          <p className="mt-2 text-sm text-fg">{reason}</p>
+          <p className="mt-1 text-xs text-muted">
+            Odds: {left.name} {leftPct}% · {right.name} {rightPct}%. A temple game, not a canon.
+          </p>
+        </div>
+      ) : phase === "idle" ? (
+        <p className="mt-4 text-center text-xs text-muted">
+          Odds before the fight: {left.name} {leftPct}% · {right.name} {rightPct}%.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export function CompareLab() {
   const leftId = useArchiveStore((state) => state.compareLeft);
   const rightId = useArchiveStore((state) => state.compareRight);
@@ -636,6 +848,7 @@ export function CompareLab() {
           </div>
         </div>
       </div>
+      <BattleArena left={left} right={right} />
     </div>
   );
 }
