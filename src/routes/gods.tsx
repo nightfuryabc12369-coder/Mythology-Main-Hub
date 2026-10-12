@@ -8,7 +8,7 @@ import { useMemo, useState } from "react";
 export const Route = createFileRoute("/gods")({ component: GodsPage });
 
 const realms: Array<RealmId | "all"> = ["all", "olympus", "sky", "sea", "earth", "underworld", "tartarus", "wild"];
-const tags = ["all", "olympian", "chthonic", "titan", "wild", "hearth"] as const;
+const tags = ["all", "olympian", "chthonic", "titan", "primordial", "hero", "creature", "wild", "hearth"] as const;
 const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 function GodsPage() {

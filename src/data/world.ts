@@ -12,7 +12,7 @@ export const ages: Age[] = [
     image: "/scenes/chaos.jpg",
     focus: "center top",
     aura: "marble",
-    gods: ["hecate"],
+    gods: ["gaia", "uranus", "eros", "nemesis"],
     myths: ["titanomachy"],
   },
   {
@@ -26,7 +26,7 @@ export const ages: Age[] = [
     image: "/scenes/war.jpg",
     focus: "center",
     aura: "ember",
-    gods: ["zeus", "prometheus", "hecate"],
+    gods: ["zeus", "prometheus", "hecate", "cronus", "rhea", "leto", "helios", "selene"],
     myths: ["titanomachy", "prometheus-fire"],
   },
   {
@@ -54,7 +54,7 @@ export const ages: Age[] = [
     image: "/scenes/heroic.jpg",
     focus: "center",
     aura: "wine",
-    gods: ["athena", "poseidon", "aphrodite", "apollo", "hermes"],
+    gods: ["athena", "poseidon", "aphrodite", "apollo", "hermes", "heracles", "odysseus", "theseus", "perseus", "ariadne", "orpheus", "medusa", "minotaur"],
     myths: ["labyrinth", "argonauts", "troy", "odyssey", "orpheus"],
   },
 ];
@@ -68,7 +68,7 @@ export const realms: Realm[] = [
     blurb: "A mountain that is also a government. Thrones, grudges, and the forge under the floor.",
     image: "/scenes/olympus.jpg",
     focus: "center",
-    gods: ["hera", "athena", "ares", "hephaestus", "hestia"],
+    gods: ["hera", "athena", "ares", "hephaestus", "hestia", "nike", "hebe", "heracles"],
   },
   {
     id: "sky",
@@ -78,7 +78,7 @@ export const realms: Realm[] = [
     blurb: "Eagles, oracles, and the road Hermes uses when a message cannot wait for a ship.",
     image: "/scenes/hero.jpg",
     focus: "center 30%",
-    gods: ["zeus", "apollo", "hermes"],
+    gods: ["zeus", "apollo", "hermes", "uranus", "eros", "helios", "selene", "pegasus"],
   },
   {
     id: "sea",
@@ -88,7 +88,7 @@ export const realms: Realm[] = [
     blurb: "Harbor, earthquake, and the foam that one poet says was Aphrodite's first shore.",
     image: "/scenes/sea.jpg",
     focus: "center",
-    gods: ["poseidon", "aphrodite"],
+    gods: ["poseidon", "aphrodite", "odysseus", "ariadne"],
   },
   {
     id: "earth",
@@ -98,7 +98,7 @@ export const realms: Realm[] = [
     blurb: "Wheat, shrines, and the months when the queen below is missing from the field.",
     image: "/scenes/earth.jpg",
     focus: "center 55%",
-    gods: ["demeter"],
+    gods: ["demeter", "gaia", "rhea", "nemesis", "asclepius", "minotaur", "theseus", "perseus"],
   },
   {
     id: "underworld",
@@ -108,7 +108,7 @@ export const realms: Realm[] = [
     blurb: "Rivers, a gate, a dog, and a queenship Demeter forced the sky to recognize.",
     image: "/scenes/underworld.jpg",
     focus: "center",
-    gods: ["hades", "persephone", "hecate"],
+    gods: ["hades", "persephone", "hecate", "hypnos", "thanatos", "cerberus", "orpheus"],
   },
   {
     id: "tartarus",
@@ -118,7 +118,7 @@ export const realms: Realm[] = [
     blurb: "Where the Titans were thrown, and where forethought was chained for taking fire downward.",
     image: "/scenes/tartarus.jpg",
     focus: "center",
-    gods: ["prometheus"],
+    gods: ["prometheus", "cronus"],
   },
   {
     id: "wild",
@@ -128,7 +128,7 @@ export const realms: Realm[] = [
     blurb: "Hunt, ivy, and every festival a city invents so this place can visit without staying.",
     image: "/scenes/oracle.jpg",
     focus: "left center",
-    gods: ["artemis", "dionysus"],
+    gods: ["artemis", "dionysus", "leto", "pan", "medusa", "orion"],
   },
 ];
 
@@ -334,6 +334,30 @@ export const myths: Myth[] = [
 ];
 
 export const epithets: Epithet[] = [
+  {
+    id: "agrotera",
+    name: "Agrotera",
+    god: "artemis",
+    line: "Lady of the hunt",
+    stage: 1,
+    meaning: "Of the wild places",
+    description: "The huntress title. Athens kept a temple to Artemis Agrotera, and vowed her a sacrifice for each enemy killed before the battle of Marathon.",
+    signs: ["Bow", "Hunting dogs", "Goat offerings"],
+    note: "Agrotera is the public title of a goddess who is the law of the untamed edge.",
+    aura: "marble",
+  },
+  {
+    id: "cynthia",
+    name: "Cynthia",
+    god: "artemis",
+    line: "Lady of the hunt",
+    stage: 2,
+    meaning: "Of Mount Cynthus",
+    description: "A name taken from the mountain on Delos, the island where Leto bore the twins. It places Artemis at her own birthplace, not on a hunt.",
+    signs: ["Delos", "The twin shrine", "Moonlight on the island"],
+    note: "Poets use Cynthia when the hunt is not the point and the origin is.",
+    aura: "marble",
+  },
   {
     id: "olympios",
     name: "Olympios",
