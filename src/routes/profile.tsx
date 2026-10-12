@@ -34,11 +34,11 @@ function ProfilePage() {
           {!hydrated ? <p className="mt-6 text-sm text-muted">Opening your hand…</p> : null}
           {hydrated && owned.length === 0 ? (
             <p className="mt-6 text-sm text-muted">
-              No cards yet. Gather all seven stars on the{" "}
+              No cards yet. Ask the Pantheon for a wish on the{" "}
               <Link to="/" hash="wish" className="text-primary underline">
                 home page
-              </Link>{" "}
-              and make a wish.
+              </Link>
+              .
             </p>
           ) : null}
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">

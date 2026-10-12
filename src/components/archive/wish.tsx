@@ -13,14 +13,13 @@ import {
   rollCard,
   type WishKind,
 } from "@/data/cards";
-import type { God } from "@/data/types";
-import { playSeal, playSummon, playTone } from "@/lib/audio";
+import { getGod } from "@/data/gods";
+import { THRONES, type God } from "@/data/types";
+import { playSeal, playTone } from "@/lib/audio";
 import { useArchiveStore } from "@/lib/archive-store";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-
-const SEVEN = [1, 2, 3, 4, 5, 6, 7];
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 /** Card art. Drop /public/cards/<god-id>.jpg in later and it replaces the placeholder on its own. */
 export function CardArt({ god, className }: { god: God; className?: string }) {
@@ -43,7 +42,7 @@ export function CardArt({ god, className }: { god: God; className?: string }) {
   );
 }
 
-export function CardTile({ god, level, children }: { god: God; level: number; children?: React.ReactNode }) {
+export function CardTile({ god, level, children }: { god: God; level: number; children?: ReactNode }) {
   const rarity = rarityOf(god.id);
   const color = RARITY_COLOR[rarity];
   return (
@@ -79,6 +78,23 @@ const WISHES: Array<{ kind: WishKind; title: string; blurb: string }> = [
 
 type Result = { kind: "card"; god: God } | { kind: "pills" } | { kind: "none" };
 
+/** Banner and lineup art. Drop /public/wish/banner.jpg and /public/wish/pantheon.jpg in later and they replace the placeholders. */
+function PlaceholderImage({ src, className, children }: { src: string; className?: string; children: ReactNode }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <div className={cn("relative overflow-hidden bg-bg-deep", className)}>
+      {!failed ? <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" onError={() => setFailed(true)} /> : null}
+      {failed ? (
+        <div
+          className="absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at 50% 20%, color-mix(in oklab, var(--color-primary) 28%, #1c1712), #0b0907 78%)" }}
+        />
+      ) : null}
+      {children}
+    </div>
+  );
+}
+
 export function WishSystem() {
   const hydrated = useArchiveStore((state) => state.hydrated);
   const storedCards = useArchiveStore((state) => state.cards);
@@ -91,8 +107,7 @@ export function WishSystem() {
   const cards = hydrated ? storedCards : {};
   const owned = useMemo(() => Object.keys(cards), [cards]);
 
-  const [gathered, setGathered] = useState<number[]>([]);
-  const [phase, setPhase] = useState<"gather" | "summoning" | "wish">("gather");
+  const [hall, setHall] = useState(false);
   const [detail, setDetail] = useState<WishKind | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [now, setNow] = useState(0);
@@ -104,39 +119,22 @@ export function WishSystem() {
   }, []);
 
   useEffect(() => {
-    if (!detail) return;
+    if (!hall) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key !== "Escape") return;
+      if (detail) {
         setDetail(null);
         setResult(null);
+      } else {
+        setHall(false);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [detail]);
+  }, [hall, detail]);
 
   const restMs = hydrated && nextWishAt > now ? nextWishAt - now : 0;
   const resting = restMs > 0;
-
-  function toggleStar(n: number) {
-    if (phase !== "gather") return;
-    const has = gathered.includes(n);
-    const next = has ? gathered.filter((x) => x !== n) : [...gathered, n];
-    setGathered(next);
-    if (sound) playTone(262 + n * 44, 0.14, 0.04);
-    if (next.length === 7) {
-      setPhase("summoning");
-      if (sound) playSummon();
-      window.setTimeout(() => setPhase("wish"), 2000);
-    }
-  }
-
-  function scatter() {
-    setGathered([]);
-    setPhase("gather");
-    setDetail(null);
-    setResult(null);
-  }
 
   function rowsFor(kind: WishKind) {
     return kind === "warrior" ? pullTable(owned, "any") : kind === "legend" ? pullTable(owned, "legendary") : [];
@@ -171,95 +169,113 @@ export function WishSystem() {
   const rows = detail ? rowsFor(detail) : [];
   const rates = rarityRates(rows);
   const lock = detail ? lockReason(detail) : null;
+  const lineup = THRONES.map((id) => getGod(id)).filter((god): god is God => Boolean(god));
 
   return (
-    <div className="relative overflow-hidden rounded-md bg-surface shadow-border">
-      <img src="/scenes/oracle.jpg" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-20" />
-      <div className="absolute inset-0 bg-gradient-to-b from-bg/60 via-bg/80 to-bg" />
-      <div className="relative px-4 py-8 sm:px-8 sm:py-10">
-        {phase === "gather" ? (
-          <>
-            <p className="text-xs tracking-kicker text-gold uppercase">Collect the seven</p>
-            <h3 className="mt-2 font-display text-3xl text-fg sm:text-4xl">The Pleiades</h3>
-            <p className="mt-2 max-w-xl text-sm text-muted">
-              Select every star. When the seven are gathered, the Fates weave one wish for you. Cards you win live on your profile.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-5">
-              {SEVEN.map((n) => {
-                const on = gathered.includes(n);
-                return (
-                  <button
-                    key={n}
-                    type="button"
-                    aria-pressed={on}
-                    aria-label={`Star ${n}`}
-                    onClick={() => toggleStar(n)}
-                    className="wish-star pressable"
-                    data-on={on}
-                  >
-                    <span className="flex max-w-[3.2rem] flex-wrap items-center justify-center gap-0.5 text-[9px] leading-none text-bg-deep">
-                      {Array.from({ length: n }, (_, i) => (
-                        <span key={i}>◆</span>
-                      ))}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            <p className="mt-6 text-center text-xs tracking-kicker text-muted uppercase">{gathered.length} / 7 gathered</p>
-          </>
-        ) : null}
-
-        {phase === "summoning" ? (
-          <div className="panel-in flex min-h-64 flex-col items-center justify-center text-center">
-            <div className="wish-pulse size-24 rounded-full" />
-            <p className="mt-6 text-xs tracking-kicker text-gold uppercase">The seven align</p>
-            <p className="mt-2 font-display text-3xl text-fg">The Fates are listening…</p>
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          setHall(true);
+          if (sound) playTone(392, 0.2, 0.04);
+        }}
+        className="pressable group block w-full overflow-hidden rounded-md text-left shadow-border"
+        aria-label="Ask a wish from the Pantheon"
+      >
+        <PlaceholderImage src="/wish/banner.jpg" className="h-60 w-full sm:h-80">
+          <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg/30 to-transparent" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
+            <p className="text-xs tracking-kicker text-gold uppercase">The Pantheon listens</p>
+            <h3 className="mt-3 font-display text-4xl text-fg uppercase transition-transform duration-300 group-hover:scale-105 sm:text-6xl">
+              Ask a wish from the Pantheon
+            </h3>
+            <p className="mt-4 text-xs tracking-kicker text-primary uppercase">Open the hall →</p>
           </div>
-        ) : null}
+          <span className="absolute top-3 left-3 rounded-full border border-border bg-bg/70 px-3 py-1 text-[10px] tracking-kicker text-muted uppercase">
+            Placeholder banner
+          </span>
+        </PlaceholderImage>
+      </button>
 
-        {phase === "wish" ? (
-          <div className="panel-in">
-            <p className="text-xs tracking-kicker text-gold uppercase">Summon complete</p>
-            <h3 className="mt-2 font-display text-3xl text-fg sm:text-4xl">Speak your wish</h3>
-            <p className="mt-2 max-w-2xl text-sm text-muted">
-              One wish at a time. After any wish the Fates rest for {REST_HOURS} hours. This is a game: the odds below are the real odds.
-            </p>
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-              {WISHES.map((wish) => {
-                const locked = lockReason(wish.kind);
-                return (
-                  <button
-                    key={wish.kind}
-                    type="button"
-                    onClick={() => {
-                      setResult(null);
-                      setDetail(wish.kind);
-                    }}
-                    className="pressable rounded-md border border-border bg-bg/70 p-5 text-left"
-                  >
-                    <h4 className="font-display text-xl text-fg">{wish.title}</h4>
-                    <p className="mt-2 text-sm text-muted">{wish.blurb}</p>
-                    <p className="mt-4 text-xs tracking-kicker text-primary uppercase">See details →</p>
-                    {locked ? <p className="mt-2 text-xs tracking-kicker text-gold uppercase">{locked}</p> : null}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="mt-4 text-sm text-muted">
-              {resting ? `The Fates are resting. Your next wish is in ${formatRest(restMs)}.` : "The Fates are ready."}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <button type="button" onClick={scatter} className="pressable inline-flex min-h-11 items-center rounded-sm border border-border px-4 text-xs tracking-kicker text-muted uppercase">
-                Scatter the stars
+      {hall ? (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-bg-deep/85 p-3 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="The Pantheon"
+          onClick={() => setHall(false)}
+        >
+          <div className="panel-in max-h-[94svh] w-full max-w-5xl overflow-y-auto rounded-md border border-border bg-surface" onClick={(event) => event.stopPropagation()}>
+            <PlaceholderImage src="/wish/pantheon.jpg" className="h-64 w-full sm:h-96">
+              <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-bg/30" />
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setHall(false)}
+                className="pressable absolute top-3 right-3 z-10 inline-flex size-11 items-center justify-center rounded-full border border-border bg-bg/70 text-lg text-fg"
+              >
+                ×
               </button>
-              <Link to="/profile" className="pressable inline-flex min-h-11 items-center rounded-sm bg-primary px-4 text-xs tracking-kicker text-primary-fg uppercase">
-                My cards
-              </Link>
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-center gap-1 px-2 pb-4 sm:gap-3 sm:px-6">
+                {lineup.map((god, index) => (
+                  <div
+                    key={god.id}
+                    className="flex min-w-0 flex-1 flex-col items-center"
+                    style={{ marginBottom: `${Math.abs(5.5 - index) * -3}px`, maxWidth: "5.5rem" }}
+                  >
+                    <div className="flex aspect-[1/2.4] w-full items-start justify-center rounded-t-full bg-gradient-to-b from-fg/20 to-fg/5 pt-2 sm:pt-3">
+                      <EmblemMark name={god.emblem} className="size-4 text-gold/80 sm:size-6" />
+                    </div>
+                    <span className="mt-1 hidden truncate text-[9px] tracking-kicker text-muted uppercase sm:block">{god.name}</span>
+                  </div>
+                ))}
+              </div>
+              <span className="absolute top-3 left-3 rounded-full border border-border bg-bg/70 px-3 py-1 text-[10px] tracking-kicker text-muted uppercase">
+                Placeholder lineup
+              </span>
+            </PlaceholderImage>
+            <div className="px-5 pt-4 pb-6 sm:px-8 sm:pb-8">
+              <p className="text-xs tracking-kicker text-gold uppercase">The Pantheon stands ready</p>
+              <h3 className="mt-2 font-display text-3xl text-fg sm:text-5xl">Speak your wish</h3>
+              <p className="mt-2 max-w-2xl text-sm text-muted">
+                One wish at a time. After any wish the Pantheon rests for {REST_HOURS} hours. This is a game: the odds in the details are the real odds.
+              </p>
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                {WISHES.map((wish) => {
+                  const locked = lockReason(wish.kind);
+                  return (
+                    <button
+                      key={wish.kind}
+                      type="button"
+                      onClick={() => {
+                        setResult(null);
+                        setDetail(wish.kind);
+                      }}
+                      className="pressable rounded-md border border-border bg-bg/70 p-5 text-left"
+                    >
+                      <h4 className="font-display text-xl text-fg">{wish.title}</h4>
+                      <p className="mt-2 text-sm text-muted">{wish.blurb}</p>
+                      <p className="mt-4 text-xs tracking-kicker text-primary uppercase">See details →</p>
+                      {locked ? <p className="mt-2 text-xs tracking-kicker text-gold uppercase">{locked}</p> : null}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-4 text-sm text-muted">
+                {resting ? `The Pantheon is resting. Your next wish is in ${formatRest(restMs)}.` : "The Pantheon is ready."}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link to="/profile" className="pressable inline-flex min-h-11 items-center rounded-sm bg-primary px-4 text-xs tracking-kicker text-primary-fg uppercase">
+                  My cards
+                </Link>
+                <button type="button" onClick={() => setHall(false)} className="pressable inline-flex min-h-11 items-center rounded-sm border border-border px-4 text-xs tracking-kicker text-muted uppercase">
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       {open ? (
         <div
@@ -301,7 +317,6 @@ export function WishSystem() {
                     onClick={() => {
                       setDetail(null);
                       setResult(null);
-                      scatter();
                     }}
                     className="pressable inline-flex min-h-11 items-center rounded-sm border border-border px-5 text-xs tracking-kicker text-muted uppercase"
                   >
@@ -345,9 +360,9 @@ export function WishSystem() {
                     </ul>
                   </>
                 )}
-                <p className="mt-4 text-xs text-muted">After any wish the Fates rest for {REST_HOURS} hours.</p>
+                <p className="mt-4 text-xs text-muted">After any wish the Pantheon rests for {REST_HOURS} hours.</p>
                 {resting ? (
-                  <p className="mt-2 text-xs tracking-kicker text-gold uppercase">The Fates are resting. Next wish in {formatRest(restMs)}.</p>
+                  <p className="mt-2 text-xs tracking-kicker text-gold uppercase">The Pantheon is resting. Next wish in {formatRest(restMs)}.</p>
                 ) : lock ? (
                   <p className="mt-2 text-xs tracking-kicker text-gold uppercase">{lock}</p>
                 ) : null}
@@ -369,6 +384,6 @@ export function WishSystem() {
           </div>
         </div>
       ) : null}
-    </div>
+    </>
   );
 }

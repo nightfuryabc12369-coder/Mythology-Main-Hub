@@ -95,9 +95,9 @@ function Home() {
 
       <section className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6" id="wish">
         <SectionHeader
-          kicker="Wish / The seven"
-          title="Gather the seven stars"
-          subtitle="Collect them, make a wish, and keep the figures you win on your profile."
+          kicker="Wish / The Pantheon"
+          title="Ask the Pantheon for a wish"
+          subtitle="Open the hall, speak a wish, and keep the figures you win on your profile."
           action={<TextLink to="/profile">My cards</TextLink>}
         />
         <WishSystem />
