@@ -20,6 +20,7 @@ import { useArchiveStore } from "@/lib/archive-store";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 /** Card art. Drop /public/cards/<god-id>.jpg in later and it replaces the placeholder on its own. */
 export function CardArt({ god, className }: { god: God; className?: string }) {
@@ -95,6 +96,13 @@ function PlaceholderImage({ src, className, children }: { src: string; className
   );
 }
 
+/** Renders on document.body so the windows are centred on the screen, not inside the page section. */
+function Portal({ children }: { children: ReactNode }) {
+  const [target, setTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => setTarget(document.body), []);
+  return target ? createPortal(children, target) : null;
+}
+
 export function WishSystem() {
   const hydrated = useArchiveStore((state) => state.hydrated);
   const storedCards = useArchiveStore((state) => state.cards);
@@ -117,6 +125,24 @@ export function WishSystem() {
     const id = window.setInterval(() => setNow(Date.now()), 15000);
     return () => window.clearInterval(id);
   }, []);
+
+  // While a window is open, the page behind it must not scroll.
+  const locked = hall || detail !== null;
+  useEffect(() => {
+    if (!locked) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const gap = window.innerWidth - html.clientWidth;
+    const prev = { html: html.style.overflow, body: body.style.overflow, pad: body.style.paddingRight };
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    if (gap > 0) body.style.paddingRight = `${gap}px`;
+    return () => {
+      html.style.overflow = prev.html;
+      body.style.overflow = prev.body;
+      body.style.paddingRight = prev.pad;
+    };
+  }, [locked]);
 
   useEffect(() => {
     if (!hall) return;
@@ -197,15 +223,16 @@ export function WishSystem() {
         </PlaceholderImage>
       </button>
 
+      <Portal>
       {hall ? (
         <div
-          className="fixed inset-0 z-40 flex items-center justify-center bg-bg-deep/85 p-3 backdrop-blur-sm"
+          className="fixed inset-0 z-[60] flex items-center justify-center overscroll-contain bg-bg-deep/85 p-3 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
           aria-label="The Pantheon"
           onClick={() => setHall(false)}
         >
-          <div className="panel-in max-h-[94svh] w-full max-w-5xl overflow-y-auto rounded-md border border-border bg-surface" onClick={(event) => event.stopPropagation()}>
+          <div className="panel-in max-h-[94svh] w-full max-w-5xl overflow-y-auto overscroll-contain rounded-md border border-border bg-surface" onClick={(event) => event.stopPropagation()}>
             <PlaceholderImage src="/wish/pantheon.jpg" className="h-64 w-full sm:h-96">
               <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-bg/30" />
               <button
@@ -279,7 +306,7 @@ export function WishSystem() {
 
       {open ? (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-bg-deep/80 p-3 backdrop-blur-sm sm:items-center"
+          className="fixed inset-0 z-[70] flex items-end justify-center overscroll-contain bg-bg-deep/80 p-3 backdrop-blur-sm sm:items-center"
           role="dialog"
           aria-modal="true"
           aria-label={open.title}
@@ -384,6 +411,7 @@ export function WishSystem() {
           </div>
         </div>
       ) : null}
+      </Portal>
     </>
   );
 }
