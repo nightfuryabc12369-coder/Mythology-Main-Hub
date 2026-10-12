@@ -16,6 +16,7 @@ import { Route as CompareRouteImport } from './routes/compare'
 import { Route as EpicsRouteImport } from './routes/epics'
 import { Route as EpithetsRouteImport } from './routes/epithets'
 import { Route as GodsRouteImport } from './routes/gods'
+import { Route as IdentityRouteImport } from './routes/identity'
 import { Route as MythsRouteImport } from './routes/myths'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as TimelineRouteImport } from './routes/timeline'
@@ -57,6 +58,11 @@ const EpithetsRoute = EpithetsRouteImport.update({
 const GodsRoute = GodsRouteImport.update({
   id: '/gods',
   path: '/gods',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IdentityRoute = IdentityRouteImport.update({
+  id: '/identity',
+  path: '/identity',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MythsRoute = MythsRouteImport.update({
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/epics': typeof EpicsRoute
   '/epithets': typeof EpithetsRoute
   '/gods': typeof GodsRoute
+  '/identity': typeof IdentityRoute
   '/myths': typeof MythsRoute
   '/profile': typeof ProfileRoute
   '/timeline': typeof TimelineRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/epics': typeof EpicsRoute
   '/epithets': typeof EpithetsRoute
   '/gods': typeof GodsRoute
+  '/identity': typeof IdentityRoute
   '/myths': typeof MythsRoute
   '/profile': typeof ProfileRoute
   '/timeline': typeof TimelineRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/epics': typeof EpicsRoute
   '/epithets': typeof EpithetsRoute
   '/gods': typeof GodsRoute
+  '/identity': typeof IdentityRoute
   '/myths': typeof MythsRoute
   '/profile': typeof ProfileRoute
   '/timeline': typeof TimelineRoute
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/epics'
     | '/epithets'
     | '/gods'
+    | '/identity'
     | '/myths'
     | '/profile'
     | '/timeline'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/epics'
     | '/epithets'
     | '/gods'
+    | '/identity'
     | '/myths'
     | '/profile'
     | '/timeline'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/epics'
     | '/epithets'
     | '/gods'
+    | '/identity'
     | '/myths'
     | '/profile'
     | '/timeline'
@@ -204,6 +216,7 @@ export interface RootRouteChildren {
   EpicsRoute: typeof EpicsRoute
   EpithetsRoute: typeof EpithetsRoute
   GodsRoute: typeof GodsRoute
+  IdentityRoute: typeof IdentityRoute
   MythsRoute: typeof MythsRoute
   ProfileRoute: typeof ProfileRoute
   TimelineRoute: typeof TimelineRoute
@@ -262,6 +275,13 @@ declare module '@tanstack/react-router' {
       path: '/gods'
       fullPath: '/gods'
       preLoaderRoute: typeof GodsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/identity': {
+      id: '/identity'
+      path: '/identity'
+      fullPath: '/identity'
+      preLoaderRoute: typeof IdentityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/myths': {
@@ -324,6 +344,7 @@ const rootRouteChildren: RootRouteChildren = {
   EpicsRoute: EpicsRoute,
   EpithetsRoute: EpithetsRoute,
   GodsRoute: GodsRoute,
+  IdentityRoute: IdentityRoute,
   MythsRoute: MythsRoute,
   ProfileRoute: ProfileRoute,
   TimelineRoute: TimelineRoute,

@@ -1,8 +1,12 @@
 import type { FavoriteKind } from "@/data/types";
+import type { LevelId } from "@/data/identity";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type Favorites = Record<FavoriteKind, string[]>;
+
+/** Result of the "Choose who you are" quizzes. Saved on this device. */
+export type Identity = { godId: string; level: LevelId | null; at: number };
 
 export type Overlay =
   | { type: "god"; id: string }
@@ -28,6 +32,10 @@ type ArchiveState = {
   cards: Record<string, number>;
   pills: number;
   nextWishAt: number;
+  identity: Identity | null;
+  setIdentity: (godId: string) => void;
+  setIdentityLevel: (level: LevelId) => void;
+  clearIdentity: () => void;
   setHydrated: (value: boolean) => void;
   setSearchOpen: (open: boolean) => void;
   setSearchQuery: (query: string) => void;
@@ -68,6 +76,13 @@ export const useArchiveStore = create<ArchiveState>()(
       cards: {},
       pills: 0,
       nextWishAt: 0,
+      identity: null,
+      setIdentity: (godId) => set({ identity: { godId, level: null, at: Date.now() } }),
+      setIdentityLevel: (level) => {
+        const current = get().identity;
+        if (current) set({ identity: { ...current, level } });
+      },
+      clearIdentity: () => set({ identity: null }),
       setHydrated: (hydrated) => set({ hydrated }),
       setSearchOpen: (searchOpen) => set({ searchOpen, searchQuery: searchOpen ? get().searchQuery : "" }),
       setSearchQuery: (searchQuery) => set({ searchQuery }),
@@ -128,6 +143,7 @@ export const useArchiveStore = create<ArchiveState>()(
         cards: state.cards,
         pills: state.pills,
         nextWishAt: state.nextWishAt,
+        identity: state.identity,
       }),
     },
   ),

@@ -9,6 +9,7 @@ import { useEffect, useState, type ReactNode } from "react";
 export type AppTo =
   | "/"
   | "/gods"
+  | "/identity"
   | "/ages"
   | "/myths"
   | "/epithets"
