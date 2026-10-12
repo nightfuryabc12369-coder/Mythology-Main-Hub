@@ -78,7 +78,7 @@ export const realms: Realm[] = [
     blurb: "Eagles, oracles, and the road Hermes uses when a message cannot wait for a ship.",
     image: "/scenes/hero.jpg",
     focus: "center 30%",
-    gods: ["zeus", "apollo", "hermes", "uranus", "eros", "helios", "selene", "pegasus"],
+    gods: ["zeus", "apollo", "hermes", "uranus", "eros", "helios", "selene", "pegasus", "harpies", "chrysomallos", "phoenix", "glaux", "eagle-of-zeus"],
   },
   {
     id: "sea",
@@ -88,7 +88,7 @@ export const realms: Realm[] = [
     blurb: "Harbor, earthquake, and the foam that one poet says was Aphrodite's first shore.",
     image: "/scenes/sea.jpg",
     focus: "center",
-    gods: ["poseidon", "aphrodite", "odysseus", "ariadne"],
+    gods: ["poseidon", "aphrodite", "odysseus", "ariadne", "cretan-bull", "scylla", "charybdis", "sirens", "hippocampus", "ketos"],
   },
   {
     id: "earth",
@@ -98,7 +98,7 @@ export const realms: Realm[] = [
     blurb: "Wheat, shrines, and the months when the queen below is missing from the field.",
     image: "/scenes/earth.jpg",
     focus: "center 55%",
-    gods: ["demeter", "gaia", "rhea", "nemesis", "asclepius", "minotaur", "theseus", "perseus"],
+    gods: ["demeter", "gaia", "rhea", "nemesis", "asclepius", "minotaur", "theseus", "perseus", "hydra", "sphinx", "nemean-lion", "mares-of-diomedes", "python", "echidna", "arion", "laelaps", "teumessian-fox", "amalthea", "crommyonian-sow"],
   },
   {
     id: "underworld",
@@ -118,7 +118,7 @@ export const realms: Realm[] = [
     blurb: "Where the Titans were thrown, and where forethought was chained for taking fire downward.",
     image: "/scenes/tartarus.jpg",
     focus: "center",
-    gods: ["prometheus", "cronus"],
+    gods: ["prometheus", "cronus", "typhon"],
   },
   {
     id: "wild",
@@ -128,7 +128,7 @@ export const realms: Realm[] = [
     blurb: "Hunt, ivy, and every festival a city invents so this place can visit without staying.",
     image: "/scenes/oracle.jpg",
     focus: "left center",
-    gods: ["artemis", "dionysus", "leto", "pan", "medusa", "orion"],
+    gods: ["artemis", "dionysus", "leto", "pan", "medusa", "orion", "chimera", "erymanthian-boar", "ceryneian-hind", "stymphalian-birds", "ladon", "orthrus", "griffin", "centaurs", "calydonian-boar", "colchian-dragon"],
   },
 ];
 
