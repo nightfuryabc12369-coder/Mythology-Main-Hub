@@ -1,4 +1,6 @@
+import { Avatar } from "@/components/archive/avatar";
 import { CodexMark } from "@/components/archive/mark";
+import { useAccountStore, usePlayer } from "@/lib/account";
 import { playTone } from "@/lib/audio";
 import { useArchiveStore } from "@/lib/archive-store";
 import { cn } from "@/lib/utils";
@@ -23,6 +25,8 @@ export function Navbar() {
   const toggleSound = useArchiveStore((state) => state.toggleSound);
   const [compact, setCompact] = useState(false);
   const [open, setOpen] = useState(false);
+  const { player, accountsOn } = usePlayer();
+  const avatar = useAccountStore((state) => state.avatar);
 
   useEffect(() => {
     const onScroll = () => setCompact(window.scrollY > 24);
@@ -76,14 +80,22 @@ export function Navbar() {
             {sound ? <Volume2 className="size-5" /> : <VolumeX className="size-5" />}
           </button>
           <Link
-            to="/profile"
-            aria-label="My cards"
+            to={accountsOn && !player ? "/login" : "/profile"}
+            aria-label={player ? "My profile" : accountsOn ? "Sign in or create an account" : "My cards"}
             className={cn(
               "inline-flex size-11 items-center justify-center rounded-sm text-muted hover:text-fg",
-              pathname === "/profile" && "text-primary",
+              (pathname === "/profile" || pathname === "/login") && "text-primary",
             )}
           >
-            <UserRound className="size-5" />
+            {player ? (
+              <Avatar
+                name={player.name}
+                src={avatar}
+                className={cn("size-8 text-sm", pathname === "/profile" && "ring-2 ring-primary")}
+              />
+            ) : (
+              <UserRound className="size-5" />
+            )}
           </Link>
           <Link
             to="/votive"

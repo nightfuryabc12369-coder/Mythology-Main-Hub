@@ -1,3 +1,4 @@
+import { AccountSync } from "@/components/archive/account-sync";
 import { Footer } from "@/components/archive/footer";
 import { Navbar, ScrollProgress } from "@/components/archive/navbar";
 import { CouncilModal, DetailSheet, Dossier, SearchOverlay } from "@/components/archive/overlays";
@@ -53,6 +54,7 @@ export function AppShell() {
   return (
     <div className="ink-grid min-h-screen bg-bg text-fg">
       <ScrollProgress />
+      <AccountSync />
       <Navbar />
       <div key={pathname} className="page-enter pt-16">
         <Outlet />

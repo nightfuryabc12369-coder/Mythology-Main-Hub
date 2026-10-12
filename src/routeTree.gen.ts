@@ -20,6 +20,9 @@ import { Route as MythsRouteImport } from './routes/myths'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as TimelineRouteImport } from './routes/timeline'
 import { Route as VotiveRouteImport } from './routes/votive'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ApiProfileRouteImport } from './routes/api/profile'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -77,6 +80,22 @@ const VotiveRoute = VotiveRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProfileRoute = ApiProfileRouteImport.update({
+  id: '/api/profile',
+  path: '/api/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
@@ -89,6 +108,9 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
+  '/login': typeof LoginRoute
+  '/api/profile': typeof ApiProfileRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -102,6 +124,9 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
+  '/login': typeof LoginRoute
+  '/api/profile': typeof ApiProfileRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -116,6 +141,9 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
+  '/login': typeof LoginRoute
+  '/api/profile': typeof ApiProfileRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -131,6 +159,9 @@ export interface FileRouteTypes {
     | '/profile'
     | '/timeline'
     | '/votive'
+    | '/login'
+    | '/api/profile'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -144,6 +175,9 @@ export interface FileRouteTypes {
     | '/profile'
     | '/timeline'
     | '/votive'
+    | '/login'
+    | '/api/profile'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
@@ -157,6 +191,9 @@ export interface FileRouteTypes {
     | '/profile'
     | '/timeline'
     | '/votive'
+    | '/login'
+    | '/api/profile'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -171,6 +208,9 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   TimelineRoute: typeof TimelineRoute
   VotiveRoute: typeof VotiveRoute
+  LoginRoute: typeof LoginRoute
+  ApiProfileRoute: typeof ApiProfileRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +292,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VotiveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/profile': {
+      id: '/api/profile'
+      path: '/api/profile'
+      fullPath: '/api/profile'
+      preLoaderRoute: typeof ApiProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -267,6 +328,9 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   TimelineRoute: TimelineRoute,
   VotiveRoute: VotiveRoute,
+  LoginRoute: LoginRoute,
+  ApiProfileRoute: ApiProfileRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
