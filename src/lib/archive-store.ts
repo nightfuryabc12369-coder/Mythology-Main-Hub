@@ -1,12 +1,26 @@
 import type { FavoriteKind } from "@/data/types";
 import type { LevelId } from "@/data/identity";
+import type { AgeStage, Rarity } from "@/data/creatures";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type Favorites = Record<FavoriteKind, string[]>;
 
-/** Result of the "Choose who you are" quizzes. Saved on this device. */
+/** Result of the "Find who you are" quizzes. Saved on this device. */
 export type Identity = { godId: string; level: LevelId | null; at: number };
+
+/** Result of the "Find your Creature" quizzes. One shot only, saved on this device. */
+export type CreatureResult = {
+  creatureId: string;
+  rarity: Rarity;
+  at: number;
+  /** Set once the age quiz is done. */
+  age: { stage: AgeStage; label: string; text: string } | null;
+};
+
+/** One-time "change my result" wishes. 0 = not wished, 1 = granted (one retake available), 2 = used up. */
+export type ChangeState = 0 | 1 | 2;
+export type ChangeWishes = { identity: ChangeState; creature: ChangeState };
 
 export type Overlay =
   | { type: "god"; id: string }
@@ -33,6 +47,11 @@ type ArchiveState = {
   pills: number;
   nextWishAt: number;
   identity: Identity | null;
+  changes: ChangeWishes;
+  grantChange: (kind: keyof ChangeWishes) => void;
+  creature: CreatureResult | null;
+  setCreature: (creatureId: string, rarity: Rarity) => void;
+  setCreatureAge: (age: NonNullable<CreatureResult["age"]>) => void;
   setIdentity: (godId: string) => void;
   setIdentityLevel: (level: LevelId) => void;
   clearIdentity: () => void;
@@ -77,7 +96,34 @@ export const useArchiveStore = create<ArchiveState>()(
       pills: 0,
       nextWishAt: 0,
       identity: null,
-      setIdentity: (godId) => set({ identity: { godId, level: null, at: Date.now() } }),
+      creature: null,
+      changes: { identity: 0, creature: 0 },
+      grantChange: (kind) => {
+        const changes = get().changes;
+        if (changes[kind] !== 0) return;
+        set({ changes: { ...changes, [kind]: 1 } });
+      },
+      setCreature: (creatureId, rarity) => {
+        // One shot: a creature can only be replaced once, and only after the "change my creature" wish.
+        const { creature, changes } = get();
+        if (creature && changes.creature !== 1) return;
+        set({
+          creature: { creatureId, rarity, at: Date.now(), age: null },
+          changes: creature ? { ...changes, creature: 2 } : changes,
+        });
+      },
+      setCreatureAge: (age) => {
+        const current = get().creature;
+        if (current && !current.age) set({ creature: { ...current, age } });
+      },
+      setIdentity: (godId) => {
+        const { identity, changes } = get();
+        if (identity && changes.identity !== 1) return;
+        set({
+          identity: { godId, level: null, at: Date.now() },
+          changes: identity ? { ...changes, identity: 2 } : changes,
+        });
+      },
       setIdentityLevel: (level) => {
         const current = get().identity;
         if (current) set({ identity: { ...current, level } });
@@ -144,6 +190,8 @@ export const useArchiveStore = create<ArchiveState>()(
         pills: state.pills,
         nextWishAt: state.nextWishAt,
         identity: state.identity,
+        creature: state.creature,
+        changes: state.changes,
       }),
     },
   ),

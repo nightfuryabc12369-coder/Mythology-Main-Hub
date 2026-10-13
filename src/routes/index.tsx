@@ -12,7 +12,7 @@ import {
   ThroneRing,
   TimelineList,
 } from "@/components/archive/home-interactive";
-import { IdentityWindow } from "@/components/archive/identity";
+import { FindWindows } from "@/components/archive/find-windows";
 import { SectionHeader, TextLink } from "@/components/archive/widgets";
 import { WishSystem } from "@/components/archive/wish";
 import { featuredGods } from "@/data/gods";
@@ -81,7 +81,7 @@ function Home() {
       </section>
 
       <section className="mx-auto max-w-7xl scroll-mt-20 px-4 pt-20 sm:px-6" id="identity">
-        <IdentityWindow />
+        <FindWindows />
       </section>
 
       <section className="mx-auto max-w-7xl scroll-mt-20 px-4 py-20 sm:px-6" id="ages">

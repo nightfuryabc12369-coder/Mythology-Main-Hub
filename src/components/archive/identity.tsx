@@ -13,12 +13,14 @@ import { createPortal } from "react-dom";
  * Image slot. Drop a picture at /public/identity/<god id>.jpg (for example zeus.jpg) and it replaces the
  * placeholder. /public/identity/choose.jpg is used before a god has been chosen.
  */
-function IdentityImage({
+export function IdentityImage({
   src,
   emblem,
   className,
   children,
+  focus,
 }: {
+  focus?: string;
   src: string;
   emblem: Emblem;
   className?: string;
@@ -28,7 +30,7 @@ function IdentityImage({
   useEffect(() => setFailed(false), [src]);
   return (
     <div className={cn("relative overflow-hidden bg-bg-deep", className)}>
-      {!failed ? <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" onError={() => setFailed(true)} /> : null}
+      {!failed ? <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" style={focus ? { objectPosition: focus } : undefined} onError={() => setFailed(true)} /> : null}
       {failed ? (
         <>
           <div
@@ -36,7 +38,7 @@ function IdentityImage({
             style={{ background: "radial-gradient(ellipse at 50% 25%, color-mix(in oklab, var(--color-primary) 30%, #1c1712), #0b0907 78%)" }}
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <EmblemMark name={emblem} className="size-20 text-gold/35 sm:size-28" />
+            <EmblemMark name={emblem} className="size-16 text-gold/35 sm:size-20" />
           </div>
         </>
       ) : null}
@@ -45,7 +47,7 @@ function IdentityImage({
   );
 }
 
-function Portal({ children }: { children: ReactNode }) {
+export function Portal({ children }: { children: ReactNode }) {
   const [target, setTarget] = useState<HTMLElement | null>(null);
   useEffect(() => setTarget(document.body), []);
   return target ? createPortal(children, target) : null;
@@ -97,15 +99,15 @@ export function IdentityWindow() {
           if (sound) playTone(392, 0.2, 0.04);
         }}
         className="pressable group block w-full overflow-hidden rounded-md text-left shadow-border"
-        aria-label="Choose who you are: start the quiz"
+        aria-label="Find who you are: start the quiz"
       >
-        <IdentityImage src="/identity/choose.jpg" emblem="crown" className="h-60 w-full sm:h-80">
+        <IdentityImage src="/identity/choose.jpg" emblem="crown" className="h-52 w-full sm:h-64">
           <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg/30 to-transparent" />
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-            <h3 className="font-display text-4xl text-fg uppercase transition-transform duration-300 group-hover:scale-105 sm:text-6xl">
-              Choose who you are
+            <h3 className="font-display text-3xl text-fg uppercase transition-transform duration-300 group-hover:scale-105 sm:text-4xl">
+              Find who you are
             </h3>
-            <p className="mt-3 max-w-md text-sm text-fg/85">Ten questions. Different every time. The answers decide which god you would be.</p>
+            <p className="mt-3 max-w-xs text-sm text-fg/85">Ten questions. Different every time. The answers decide which god you would be.</p>
             <p className="mt-4 text-xs tracking-kicker text-primary uppercase">Start the quiz</p>
           </div>
           <span className="absolute top-3 left-3 rounded-full border border-border bg-bg/70 px-3 py-1 text-[10px] tracking-kicker text-muted uppercase">
@@ -130,11 +132,11 @@ export function IdentityWindow() {
         className="pressable group block w-full overflow-hidden rounded-md text-left shadow-border"
         aria-label={`Open your history: ${title}`}
       >
-        <IdentityImage src={`/identity/${god.id}.jpg`} emblem={god.emblem} className="h-60 w-full sm:h-80">
+        <IdentityImage src={`/identity/${god.id}.jpg`} emblem={god.emblem} className="h-52 w-full sm:h-64">
           <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg/30 to-transparent" />
           <div className="absolute inset-0 flex flex-col items-center justify-end px-4 pb-8 text-center">
             <p className="text-xs tracking-kicker text-gold uppercase">You are</p>
-            <h3 className="mt-2 font-display text-4xl text-fg uppercase transition-transform duration-300 group-hover:scale-105 sm:text-6xl">{archetypeTitle(archetype)}</h3>
+            <h3 className="mt-2 font-display text-3xl text-fg uppercase transition-transform duration-300 group-hover:scale-105 sm:text-4xl">{archetypeTitle(archetype)}</h3>
             <p className="mt-2 font-display text-lg text-fg/90 sm:text-2xl">{level ? `${level.label} level` : "Level not chosen yet"}</p>
             <p className="mt-4 text-xs tracking-kicker text-primary uppercase">Open your history</p>
           </div>
@@ -235,13 +237,6 @@ export function IdentityWindow() {
                   </dl>
 
                   <div className="flex flex-wrap gap-3">
-                    <Link
-                      to="/identity"
-                      onClick={() => setOpen(false)}
-                      className="pressable inline-flex min-h-11 items-center rounded-sm border border-border px-4 text-xs tracking-kicker text-muted uppercase"
-                    >
-                      Take the quiz again
-                    </Link>
                     <button
                       type="button"
                       onClick={() => setOpen(false)}

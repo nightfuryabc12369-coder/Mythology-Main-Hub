@@ -82,13 +82,19 @@ function formatRest(ms: number) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-const WISHES: Array<{ kind: WishKind; title: string; blurb: string }> = [
+type AnyKind = WishKind | "change-god" | "change-creature";
+
+const isChange = (kind: AnyKind): kind is "change-god" | "change-creature" => kind === "change-god" || kind === "change-creature";
+
+const WISHES: Array<{ kind: AnyKind; title: string; blurb: string }> = [
   { kind: "warrior", title: "Grant me a champion", blurb: "A random figure joins My Cards at Level 1, with 40% of their power. Strong figures are rare." },
   { kind: "power", title: "Grant me favor", blurb: `${PILLS_PER_WISH} drops of ambrosia for your inventory. Each drop raises one card by a level.` },
   { kind: "legend", title: "Grant me a legend", blurb: "One of the seven great powers joins My Cards. Only the legendary can answer this wish." },
+  { kind: "change-god", title: "Change who I am", blurb: "One chance to retake Find who you are and replace your god. This wish can be granted only once." },
+  { kind: "change-creature", title: "Change my creature", blurb: "One chance to retake Find your Creature and replace your creature. This wish can be granted only once." },
 ];
 
-type Result = { kind: "card"; god: God } | { kind: "pills" } | { kind: "none" };
+type Result = { kind: "card"; god: God } | { kind: "pills" } | { kind: "none" } | { kind: "change"; which: "god" | "creature" };
 
 /** Banner and lineup art. Drop /public/wish/banner.jpg and /public/wish/pantheon.jpg in later and they replace the placeholders. */
 function PlaceholderImage({ src, className, children }: { src: string; className?: string; children: ReactNode }) {
@@ -122,12 +128,17 @@ export function WishSystem() {
   const grantCard = useArchiveStore((state) => state.grantCard);
   const addPills = useArchiveStore((state) => state.addPills);
   const startRest = useArchiveStore((state) => state.startRest);
+  const identity = useArchiveStore((state) => state.identity);
+  const creatureResult = useArchiveStore((state) => state.creature);
+  const changes = useArchiveStore((state) => state.changes);
+  const grantChange = useArchiveStore((state) => state.grantChange);
 
   const cards = hydrated ? storedCards : {};
   const owned = useMemo(() => Object.keys(cards), [cards]);
 
   const [hall, setHall] = useState(false);
-  const [detail, setDetail] = useState<WishKind | null>(null);
+  const [detail, setDetail] = useState<AnyKind | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [now, setNow] = useState(0);
 
@@ -173,17 +184,38 @@ export function WishSystem() {
   const restMs = hydrated && nextWishAt > now ? nextWishAt - now : 0;
   const resting = restMs > 0;
 
-  function rowsFor(kind: WishKind) {
+  function changeState(kind: "change-god" | "change-creature") {
+    const state = kind === "change-god" ? changes.identity : changes.creature;
+    const has = kind === "change-god" ? Boolean(identity) : Boolean(creatureResult);
+    return { state: hydrated ? state : 0, has: hydrated && has };
+  }
+
+  function rowsFor(kind: AnyKind) {
     return kind === "warrior" ? pullTable(owned, "any") : kind === "legend" ? pullTable(owned, "legendary") : [];
   }
 
-  function lockReason(kind: WishKind) {
+  function lockReason(kind: AnyKind) {
+    if (isChange(kind)) {
+      const { state, has } = changeState(kind);
+      if (state === 2) return "Already used. This wish can only be granted once";
+      if (state === 1) return null;
+      if (!has) return kind === "change-god" ? "Locked: take Find who you are first" : "Locked: take Find your Creature first";
+      return null;
+    }
     if (kind === "legend" && owned.length < LEGENDARY_UNLOCK_CARDS) return `Locked: own ${LEGENDARY_UNLOCK_CARDS} cards (${owned.length}/${LEGENDARY_UNLOCK_CARDS})`;
     if (kind !== "power" && rowsFor(kind).length === 0) return kind === "legend" ? "You already own every legend" : "You already own every card";
     return null;
   }
 
-  function grant(kind: WishKind) {
+  function grant(kind: AnyKind) {
+    if (isChange(kind)) {
+      if (lockReason(kind) || changeState(kind).state !== 0) return;
+      grantChange(kind === "change-god" ? "identity" : "creature");
+      setConfirming(false);
+      setResult({ kind: "change", which: kind === "change-god" ? "god" : "creature" });
+      if (sound) playSeal();
+      return;
+    }
     if (resting || lockReason(kind)) return;
     if (kind === "power") {
       addPills(PILLS_PER_WISH);
@@ -202,8 +234,10 @@ export function WishSystem() {
     if (sound) playSeal();
   }
 
+  useEffect(() => setConfirming(false), [detail]);
+
   const open = detail ? WISHES.find((wish) => wish.kind === detail) : null;
-  const rows = detail ? rowsFor(detail) : [];
+  const rows = detail && !isChange(detail) ? rowsFor(detail) : [];
   const rates = rarityRates(rows);
   const lock = detail ? lockReason(detail) : null;
   const lineup = THRONES.map((id) => getGod(id)).filter((god): god is God => Boolean(god));
@@ -276,7 +310,7 @@ export function WishSystem() {
               <p className="text-xs tracking-kicker text-gold uppercase">The Pantheon stands ready</p>
               <h3 className="mt-2 font-display text-3xl text-fg sm:text-5xl">Speak your wish</h3>
               <p className="mt-2 max-w-2xl text-sm text-muted">
-                One wish at a time. After any wish the Pantheon rests for {REST_HOURS} hours. This is a game: the odds in the details are the real odds.
+                One wish at a time. After any wish the Pantheon rests for {REST_HOURS} hours. This is a game: the odds in the details are the real odds. Creatures can never be won by wishing: find yours with the quiz.
               </p>
               <div className="mt-6 grid gap-4 md:grid-cols-3">
                 {WISHES.map((wish) => {
@@ -338,6 +372,13 @@ export function WishSystem() {
                     </div>
                     <p className="mt-4 text-sm text-muted">Added to My Cards at Level 1.</p>
                   </>
+                ) : result.kind === "change" ? (
+                  <>
+                    <h4 className="mt-2 font-display text-3xl text-fg">{result.which === "god" ? "You may change who you are" : "You may change your creature"}</h4>
+                    <p className="mt-3 text-sm text-muted">
+                      You have exactly one retake. Whatever the quiz says this time is final, and this wish can never be granted again.
+                    </p>
+                  </>
                 ) : result.kind === "pills" ? (
                   <>
                     <h4 className="mt-2 font-display text-3xl text-fg">+{PILLS_PER_WISH} ambrosia</h4>
@@ -347,9 +388,24 @@ export function WishSystem() {
                   <p className="mt-3 text-sm text-muted">There was nothing left to give.</p>
                 )}
                 <div className="mt-6 flex flex-wrap justify-center gap-3">
-                  <Link to="/profile" className="pressable inline-flex min-h-11 items-center rounded-sm bg-primary px-5 text-xs tracking-kicker text-primary-fg uppercase">
-                    Open my cards
-                  </Link>
+                  {result.kind === "change" ? (
+                    <Link
+                      to="/identity"
+                      search={result.which === "creature" ? { mode: "creature" } : {}}
+                      onClick={() => {
+                        setDetail(null);
+                        setResult(null);
+                        setHall(false);
+                      }}
+                      className="pressable inline-flex min-h-11 items-center rounded-sm bg-primary px-5 text-xs tracking-kicker text-primary-fg uppercase"
+                    >
+                      {result.which === "god" ? "Retake Find who you are" : "Retake Find your Creature"}
+                    </Link>
+                  ) : (
+                    <Link to="/profile" className="pressable inline-flex min-h-11 items-center rounded-sm bg-primary px-5 text-xs tracking-kicker text-primary-fg uppercase">
+                      Open my cards
+                    </Link>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
@@ -367,7 +423,18 @@ export function WishSystem() {
                 <p className="text-xs tracking-kicker text-gold uppercase">Wish details</p>
                 <h4 className="mt-2 font-display text-3xl text-fg">{open.title}</h4>
                 <p className="mt-2 text-sm text-muted">{open.blurb}</p>
-                {open.kind === "power" ? (
+                {isChange(open.kind) ? (
+                  <div className="mt-5 rounded-md border border-gold/60 bg-gold/10 p-4">
+                    <p className="text-xs tracking-kicker text-gold uppercase">Warning</p>
+                    <p className="mt-2 text-sm text-fg">
+                      Once this is done it can&apos;t be changed. You get one retake only. Your new result replaces the old one for good, and you can never ask this wish again, even if you
+                      like the new result less.
+                    </p>
+                    {changeState(open.kind).state === 1 ? (
+                      <p className="mt-3 text-sm text-primary">Already granted. Your retake is waiting for you in the quiz.</p>
+                    ) : null}
+                  </div>
+                ) : open.kind === "power" ? (
                   <p className="mt-5 text-sm text-fg">You always get {PILLS_PER_WISH} drops of ambrosia. No luck involved.</p>
                 ) : (
                   <>
@@ -398,8 +465,10 @@ export function WishSystem() {
                     </ul>
                   </>
                 )}
-                <p className="mt-4 text-xs text-muted">After any wish the Pantheon rests for {REST_HOURS} hours.</p>
-                {resting ? (
+                <p className="mt-4 text-xs text-muted">
+                  {isChange(open.kind) ? "This wish does not use the Pantheon's rest." : `After any wish the Pantheon rests for ${REST_HOURS} hours.`}
+                </p>
+                {!isChange(open.kind) && resting ? (
                   <p className="mt-2 text-xs tracking-kicker text-gold uppercase">The Pantheon is resting. Next wish in {formatRest(restMs)}.</p>
                 ) : lock ? (
                   <p className="mt-2 text-xs tracking-kicker text-gold uppercase">{lock}</p>
@@ -408,14 +477,36 @@ export function WishSystem() {
                   <button type="button" onClick={() => setDetail(null)} className="pressable min-h-12 rounded-sm border border-border text-xs tracking-kicker text-fg uppercase">
                     See other wishes
                   </button>
-                  <button
-                    type="button"
-                    disabled={resting || Boolean(lock)}
-                    onClick={() => grant(open.kind)}
-                    className="pressable min-h-12 rounded-sm bg-primary text-xs tracking-kicker text-primary-fg uppercase disabled:opacity-40"
-                  >
-                    Grant
-                  </button>
+                  {isChange(open.kind) ? (
+                    changeState(open.kind).state === 1 ? (
+                      <Link
+                        to="/identity"
+                        search={open.kind === "change-creature" ? { mode: "creature" } : {}}
+                        onClick={() => setHall(false)}
+                        className="pressable inline-flex min-h-12 items-center justify-center rounded-sm bg-primary text-xs tracking-kicker text-primary-fg uppercase"
+                      >
+                        Go to the quiz
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={Boolean(lock)}
+                        onClick={() => (confirming ? grant(open.kind) : setConfirming(true))}
+                        className="pressable min-h-12 rounded-sm bg-primary text-xs tracking-kicker text-primary-fg uppercase disabled:opacity-40"
+                      >
+                        {confirming ? "Yes, grant it. It can't be undone" : "Grant"}
+                      </button>
+                    )
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={resting || Boolean(lock)}
+                      onClick={() => grant(open.kind)}
+                      className="pressable min-h-12 rounded-sm bg-primary text-xs tracking-kicker text-primary-fg uppercase disabled:opacity-40"
+                    >
+                      Grant
+                    </button>
+                  )}
                 </div>
               </>
             )}

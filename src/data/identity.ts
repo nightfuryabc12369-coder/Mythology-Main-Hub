@@ -1,5 +1,5 @@
 /**
- * "Choose who you are" — the two quizzes.
+ * "Find who you are" — the two quizzes.
  *
  * Quiz 1 (identity): 10 questions drawn at random from a pool, answers shuffled each time.
  * Every answer leans toward a few traits; the god whose profile fits those traits best is chosen.

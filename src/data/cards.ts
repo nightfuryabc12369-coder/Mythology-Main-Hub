@@ -51,7 +51,10 @@ export function cardPower(god: God, level: number) {
   return Math.round(godPower(god) * levelFactor(level));
 }
 
-const ranked = [...gods].sort((a, b) => godPower(b) - godPower(a));
+/** Creatures are never won by wishing: they only come from the Find your Creature quiz. */
+export const WISHABLE_GODS = gods.filter((god) => !god.tags.includes("creature"));
+
+const ranked = [...WISHABLE_GODS].sort((a, b) => godPower(b) - godPower(a));
 
 /** Top 7 legendary, next 10 epic, next 13 rare, everyone else common. */
 const rarityById: Record<string, Rarity> = Object.fromEntries(
@@ -69,7 +72,7 @@ export type WishKind = "warrior" | "power" | "legend";
 /** Every card a wish could still give you, with its exact chance. Owned cards are skipped. */
 export function pullTable(owned: string[], pool: "any" | "legendary"): PullRow[] {
   const have = new Set(owned);
-  const available = gods.filter((god) => !have.has(god.id) && (pool === "any" || rarityOf(god.id) === "legendary"));
+  const available = WISHABLE_GODS.filter((god) => !have.has(god.id) && (pool === "any" || rarityOf(god.id) === "legendary"));
   const tiers = RARITIES.filter((tier) => available.some((god) => rarityOf(god.id) === tier));
   const totalWeight = tiers.reduce((sum, tier) => sum + RARITY_WEIGHT[tier], 0);
   const rows: PullRow[] = [];
