@@ -13,8 +13,7 @@ import {
   rollCard,
   type WishKind,
 } from "@/data/cards";
-import { getGod } from "@/data/gods";
-import { THRONES, type God } from "@/data/types";
+import type { God } from "@/data/types";
 import { playSeal, playTone } from "@/lib/audio";
 import { useArchiveStore } from "@/lib/archive-store";
 import { cn } from "@/lib/utils";
@@ -97,11 +96,11 @@ const WISHES: Array<{ kind: AnyKind; title: string; blurb: string }> = [
 type Result = { kind: "card"; god: God } | { kind: "pills" } | { kind: "none" } | { kind: "change"; which: "god" | "creature" };
 
 /** Banner and lineup art. Drop /public/wish/banner.jpg and /public/wish/pantheon.jpg in later and they replace the placeholders. */
-function PlaceholderImage({ src, className, children }: { src: string; className?: string; children: ReactNode }) {
+function PlaceholderImage({ src, className, children, position }: { src: string; className?: string; children: ReactNode; position?: string }) {
   const [failed, setFailed] = useState(false);
   return (
     <div className={cn("relative overflow-hidden bg-bg-deep", className)}>
-      {!failed ? <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" onError={() => setFailed(true)} /> : null}
+      {!failed ? <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" style={position ? { objectPosition: position } : undefined} onError={() => setFailed(true)} /> : null}
       {failed ? (
         <div
           className="absolute inset-0"
@@ -240,7 +239,6 @@ export function WishSystem() {
   const rows = detail && !isChange(detail) ? rowsFor(detail) : [];
   const rates = rarityRates(rows);
   const lock = detail ? lockReason(detail) : null;
-  const lineup = THRONES.map((id) => getGod(id)).filter((god): god is God => Boolean(god));
 
   return (
     <>
@@ -253,7 +251,8 @@ export function WishSystem() {
         className="pressable group block w-full overflow-hidden rounded-md text-left shadow-border"
         aria-label="Ask a wish from the Pantheon"
       >
-        <PlaceholderImage src="/wish/banner.jpg" className="h-60 w-full sm:h-80">
+        <PlaceholderImage src="/wish/pantheon.jpg" position="center 35%" className="h-60 w-full sm:h-80">
+          <div className="absolute inset-0 bg-bg-deep/45" />
           <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg/30 to-transparent" />
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
             <p className="text-xs tracking-kicker text-gold uppercase">The Pantheon listens</p>
@@ -262,9 +261,6 @@ export function WishSystem() {
             </h3>
             <p className="mt-4 text-xs tracking-kicker text-primary uppercase">Open the hall →</p>
           </div>
-          <span className="absolute top-3 left-3 rounded-full border border-border bg-bg/70 px-3 py-1 text-[10px] tracking-kicker text-muted uppercase">
-            Placeholder banner
-          </span>
         </PlaceholderImage>
       </button>
 
@@ -278,7 +274,7 @@ export function WishSystem() {
           onClick={() => setHall(false)}
         >
           <div className="panel-in max-h-[94svh] w-full max-w-5xl overflow-y-auto overscroll-contain rounded-md border border-border bg-surface" onClick={(event) => event.stopPropagation()}>
-            <PlaceholderImage src="/wish/pantheon.jpg" className="h-64 w-full sm:h-96">
+            <PlaceholderImage src="/wish/pantheon.jpg" position="center 30%" className="h-64 w-full sm:h-[28rem]">
               <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-bg/30" />
               <button
                 type="button"
@@ -288,23 +284,6 @@ export function WishSystem() {
               >
                 ×
               </button>
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-center gap-1 px-2 pb-4 sm:gap-3 sm:px-6">
-                {lineup.map((god, index) => (
-                  <div
-                    key={god.id}
-                    className="flex min-w-0 flex-1 flex-col items-center"
-                    style={{ marginBottom: `${Math.abs(5.5 - index) * -3}px`, maxWidth: "5.5rem" }}
-                  >
-                    <div className="flex aspect-[1/2.4] w-full items-start justify-center rounded-t-full bg-gradient-to-b from-fg/20 to-fg/5 pt-2 sm:pt-3">
-                      <EmblemMark name={god.emblem} className="size-4 text-gold/80 sm:size-6" />
-                    </div>
-                    <span className="mt-1 hidden truncate text-[9px] tracking-kicker text-muted uppercase sm:block">{god.name}</span>
-                  </div>
-                ))}
-              </div>
-              <span className="absolute top-3 left-3 rounded-full border border-border bg-bg/70 px-3 py-1 text-[10px] tracking-kicker text-muted uppercase">
-                Placeholder lineup
-              </span>
             </PlaceholderImage>
             <div className="px-5 pt-4 pb-6 sm:px-8 sm:pb-8">
               <p className="text-xs tracking-kicker text-gold uppercase">The Pantheon stands ready</p>
