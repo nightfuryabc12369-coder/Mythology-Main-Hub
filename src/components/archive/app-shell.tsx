@@ -1,4 +1,5 @@
 import { AccountSync } from "@/components/archive/account-sync";
+import { ChatDock } from "@/components/archive/chat-dock";
 import { Footer } from "@/components/archive/footer";
 import { MusicPlayer } from "@/components/archive/sound-control";
 import { Navbar, ScrollProgress } from "@/components/archive/navbar";
@@ -57,6 +58,7 @@ export function AppShell() {
       <ScrollProgress />
       <AccountSync />
       <MusicPlayer />
+      <ChatDock />
       <Navbar />
       <div key={pathname} className="page-enter pt-16">
         <Outlet />

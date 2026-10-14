@@ -26,6 +26,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as TimelineRouteImport } from './routes/timeline'
 import { Route as VotiveRouteImport } from './routes/votive'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiProfileRouteImport } from './routes/api/profile'
 import { Route as LibrarySlugRouteImport } from './routes/library_.$slug'
 import { Route as QuizQuizIdRouteImport } from './routes/quiz.$quizId'
@@ -116,6 +117,11 @@ const VotiveRoute = VotiveRouteImport.update({
   path: '/votive',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProfileRoute = ApiProfileRouteImport.update({
   id: '/api/profile',
   path: '/api/profile',
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/shop': typeof ShopRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
+  '/api/chat': typeof ApiChatRoute
   '/api/profile': typeof ApiProfileRoute
   '/library/$slug': typeof LibrarySlugRoute
   '/quiz/$quizId': typeof QuizQuizIdRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/shop': typeof ShopRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
+  '/api/chat': typeof ApiChatRoute
   '/api/profile': typeof ApiProfileRoute
   '/library/$slug': typeof LibrarySlugRoute
   '/quiz/$quizId': typeof QuizQuizIdRoute
@@ -202,6 +210,7 @@ export interface FileRoutesById {
   '/shop': typeof ShopRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
+  '/api/chat': typeof ApiChatRoute
   '/api/profile': typeof ApiProfileRoute
   '/library_/$slug': typeof LibrarySlugRoute
   '/quiz/$quizId': typeof QuizQuizIdRoute
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/timeline'
     | '/votive'
+    | '/api/chat'
     | '/api/profile'
     | '/library/$slug'
     | '/quiz/$quizId'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/timeline'
     | '/votive'
+    | '/api/chat'
     | '/api/profile'
     | '/library/$slug'
     | '/quiz/$quizId'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/timeline'
     | '/votive'
+    | '/api/chat'
     | '/api/profile'
     | '/library_/$slug'
     | '/quiz/$quizId'
@@ -297,6 +309,7 @@ export interface RootRouteChildren {
   ShopRoute: typeof ShopRoute
   TimelineRoute: typeof TimelineRoute
   VotiveRoute: typeof VotiveRoute
+  ApiChatRoute: typeof ApiChatRoute
   ApiProfileRoute: typeof ApiProfileRoute
   LibrarySlugRoute: typeof LibrarySlugRoute
   QuizQuizIdRoute: typeof QuizQuizIdRoute
@@ -424,6 +437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VotiveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/profile': {
       id: '/api/profile'
       path: '/api/profile'
@@ -473,6 +493,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShopRoute: ShopRoute,
   TimelineRoute: TimelineRoute,
   VotiveRoute: VotiveRoute,
+  ApiChatRoute: ApiChatRoute,
   ApiProfileRoute: ApiProfileRoute,
   LibrarySlugRoute: LibrarySlugRoute,
   QuizQuizIdRoute: QuizQuizIdRoute,
