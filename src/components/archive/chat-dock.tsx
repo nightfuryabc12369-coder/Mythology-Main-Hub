@@ -1,9 +1,9 @@
 import { usePresence } from "@/components/archive/widgets";
 import { cn } from "@/lib/utils";
-import { MessageCircle, Send, X } from "lucide-react";
+import { Ban, Crown, MessageCircle, Send, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Msg = { id: number; name: string; body: string; verified: boolean; at: number };
+type Msg = { id: number; name: string; body: string; verified: boolean; admin: boolean; at: number };
 
 const OPEN_POLL_MS = 3000;
 const CLOSED_POLL_MS = 20000;
@@ -19,6 +19,7 @@ const ERRORS: Record<string, string> = {
   "no-links": "Links are not allowed in chat.",
   "name-needed": "Pick a nickname first.",
   empty: "Write something first.",
+  muted: "You are muted for a while.",
 };
 
 export function ChatDock() {
@@ -27,6 +28,8 @@ export function ChatDock() {
 
   const [ready, setReady] = useState<"loading" | "ok" | "offline">("loading");
   const [account, setAccount] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [unread, setUnread] = useState(0);
   const [nick, setNick] = useState("");
@@ -35,6 +38,7 @@ export function ChatDock() {
   const [sending, setSending] = useState(false);
 
   const cursor = useRef(0);
+  const base = useRef(0);
   const openRef = useRef(false);
   const listRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
@@ -48,10 +52,12 @@ export function ChatDock() {
     if (saved) setNick(saved);
     fetch("/api/chat")
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error("offline"))))
-      .then((data: { latest: number; user: { name: string } | null }) => {
+      .then((data: { latest: number; user: { name: string } | null; admin?: boolean }) => {
         if (cancelled) return;
         cursor.current = data.latest;
+        base.current = data.latest;
         setAccount(data.user?.name ?? null);
+        setIsAdmin(Boolean(data.admin));
         setReady("ok");
       })
       .catch(() => {
@@ -64,17 +70,18 @@ export function ChatDock() {
 
   const pull = useCallback(async () => {
     try {
-      const res = await fetch(`/api/chat?after=${cursor.current}`);
+      const res = await fetch(`/api/chat?after=${cursor.current}&base=${base.current}`);
       if (!res.ok) return;
-      const data = (await res.json()) as { latest: number; messages: Msg[] };
-      if (!data.messages?.length) return;
+      const data = (await res.json()) as { latest: number; messages: Msg[]; removed?: number[] };
       cursor.current = Math.max(cursor.current, data.latest);
+      const removed = new Set(data.removed ?? []);
       setMessages((prev) => {
         const seen = new Set(prev.map((m) => m.id));
-        const fresh = data.messages.filter((m) => !seen.has(m.id));
-        if (!fresh.length) return prev;
-        if (!openRef.current) setUnread((n) => n + fresh.length);
-        return [...prev, ...fresh].slice(-MAX_ON_SCREEN);
+        const fresh = (data.messages ?? []).filter((m) => !seen.has(m.id));
+        const kept = removed.size ? prev.filter((m) => !removed.has(m.id)) : prev;
+        if (!fresh.length && kept.length === prev.length) return prev;
+        if (fresh.length && !openRef.current) setUnread((n) => n + fresh.length);
+        return [...kept, ...fresh].slice(-MAX_ON_SCREEN);
       });
     } catch {
       /* try again on the next tick */
@@ -97,6 +104,43 @@ export function ChatDock() {
   useEffect(() => {
     if (open) setUnread(0);
   }, [open, messages.length]);
+
+  // Signing in or out in another tab (or after this page loaded) should still be picked up.
+  useEffect(() => {
+    if (!open || ready !== "ok") return;
+    fetch("/api/chat")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { user: { name: string } | null; admin?: boolean } | null) => {
+        if (!data) return;
+        setAccount(data.user?.name ?? null);
+        setIsAdmin(Boolean(data.admin));
+      })
+      .catch(() => {});
+  }, [open, ready]);
+
+  const adminAction = async (action: "delete" | "mute" | "clear", id?: number) => {
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action, id }),
+      });
+      if (!res.ok) {
+        setError("That did not work.");
+        return;
+      }
+      setError("");
+      if (action === "clear") setMessages([]);
+      else if (action === "delete") setMessages((prev) => prev.filter((m) => m.id !== id));
+      else if (action === "mute") {
+        const target = messages.find((m) => m.id === id);
+        void pull();
+        if (target) setMessages((prev) => prev.filter((m) => m.id !== id));
+      }
+    } catch {
+      setError("That did not work.");
+    }
+  };
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -181,14 +225,34 @@ export function ChatDock() {
                 <p className="text-[10px] tracking-kicker text-gold uppercase">Open hall</p>
                 <h2 className="font-display text-lg text-fg uppercase">Chat</h2>
               </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label="Close chat"
-                className="pressable inline-flex h-11 w-11 items-center justify-center rounded-sm text-muted"
-              >
-                <X className="h-5 w-5" aria-hidden />
-              </button>
+              <div className="flex items-center gap-1">
+                {isAdmin ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!confirmClear) {
+                        setConfirmClear(true);
+                        window.setTimeout(() => setConfirmClear(false), 3000);
+                        return;
+                      }
+                      setConfirmClear(false);
+                      void adminAction("clear");
+                    }}
+                    className="pressable inline-flex h-9 items-center gap-1 rounded-sm border border-wine/60 px-2 text-[10px] tracking-kicker text-wine uppercase"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                    {confirmClear ? "Sure?" : "Clear all"}
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  aria-label="Close chat"
+                  className="pressable inline-flex h-11 w-11 items-center justify-center rounded-sm text-muted"
+                >
+                  <X className="h-5 w-5" aria-hidden />
+                </button>
+              </div>
             </div>
 
             <div
@@ -209,10 +273,39 @@ export function ChatDock() {
                 </p>
               ) : null}
               {messages.map((m) => (
-                <div key={m.id}>
-                  <p className="text-xs text-subtle">
-                    <span className={cn("font-semibold", m.verified ? "text-gold" : "text-fg")}>{m.name}</span> · {timeLabel(m.at)}
-                  </p>
+                <div key={m.id} className={cn("group", m.admin && "rounded-sm border border-gold/30 bg-gold/5 p-2")}>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="flex min-w-0 items-center gap-1 text-xs text-subtle">
+                      {m.admin ? <Crown className="h-3.5 w-3.5 shrink-0 text-gold" aria-label="Admin" /> : null}
+                      <span className={cn("truncate font-semibold", m.admin || m.verified ? "text-gold" : "text-fg")}>{m.name}</span>
+                      {m.admin ? <span className="text-[9px] tracking-kicker text-gold uppercase">Admin</span> : null}
+                      <span>· {timeLabel(m.at)}</span>
+                    </p>
+                    {isAdmin ? (
+                      <span className="flex shrink-0 gap-1">
+                        <button
+                          type="button"
+                          onClick={() => void adminAction("delete", m.id)}
+                          aria-label="Delete message"
+                          title="Delete message"
+                          className="pressable inline-flex h-7 w-7 items-center justify-center rounded-sm text-subtle hover:text-wine"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                        </button>
+                        {!m.admin ? (
+                          <button
+                            type="button"
+                            onClick={() => void adminAction("mute", m.id)}
+                            aria-label="Mute this person for an hour and remove their messages"
+                            title="Mute for 1 hour + remove their messages"
+                            className="pressable inline-flex h-7 w-7 items-center justify-center rounded-sm text-subtle hover:text-wine"
+                          >
+                            <Ban className="h-3.5 w-3.5" aria-hidden />
+                          </button>
+                        ) : null}
+                      </span>
+                    ) : null}
+                  </div>
                   <p className="mt-0.5 text-sm break-words text-fg/90">{m.body}</p>
                 </div>
               ))}
@@ -231,6 +324,7 @@ export function ChatDock() {
                 ) : (
                   <p className="mb-2 text-xs text-subtle">
                     Chatting as <span className="text-gold">{account}</span>
+                    {isAdmin ? " · admin powers on" : ""}
                   </p>
                 )}
                 <div className="flex gap-2">
