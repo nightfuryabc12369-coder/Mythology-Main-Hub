@@ -42,6 +42,7 @@ type Row = {
   pills: number;
   next_wish_at: number;
   avatar: string | null;
+  admin_rev: number | null;
 };
 
 function parseCards(value: Row["cards"]): Record<string, number> {
@@ -64,14 +65,18 @@ export const Route = createFileRoute("/api/profile")({
           const user = await currentUser(request);
           if (!user) return json({ dbReady: true, error: "signed-out" }, 401);
           const { getSql } = await import("@/lib/db");
+          const { banOf, roleOf } = await import("@/lib/staff.server");
+          const ban = await banOf(user.id, user.email);
+          if (ban) return json({ dbReady: true, banned: true, reason: ban.reason }, 403);
           const sql = await getSql();
-          const rows = await sql<Row>`select cards, pills, next_wish_at, avatar from player_profiles where user_id = ${user.id}`;
+          const rows = await sql<Row>`select cards, pills, next_wish_at, avatar, admin_rev from player_profiles where user_id = ${user.id}`;
           const row = rows[0];
           return json({
             dbReady: true,
+            role: await roleOf(user),
             user: { name: user.name, email: user.email, createdAt: new Date(user.createdAt).toISOString() },
             profile: row
-              ? { cards: parseCards(row.cards), pills: Number(row.pills), nextWishAt: Number(row.next_wish_at), avatar: row.avatar }
+              ? { cards: parseCards(row.cards), pills: Number(row.pills), nextWishAt: Number(row.next_wish_at), avatar: row.avatar, rev: Number(row.admin_rev ?? 0) }
               : null,
           });
         } catch (error) {
@@ -86,8 +91,11 @@ export const Route = createFileRoute("/api/profile")({
         try {
           const user = await currentUser(request);
           if (!user) return json({ error: "signed-out" }, 401);
+          const { banOf } = await import("@/lib/staff.server");
+          const ban = await banOf(user.id, user.email);
+          if (ban) return json({ banned: true, reason: ban.reason }, 403);
 
-          let body: { state?: unknown; avatar?: unknown };
+          let body: { state?: unknown; avatar?: unknown; rev?: unknown };
           try {
             body = (await request.json()) as typeof body;
           } catch {
@@ -133,7 +141,24 @@ export const Route = createFileRoute("/api/profile")({
           const pills = Math.min(Math.max(Math.floor(Number(state.pills) || 0), 0), MAX_PILLS);
           const nextWishAt = Math.max(Math.floor(Number(state.nextWishAt) || 0), 0);
 
-          // Cards are never taken away: keep the higher level of what is saved and what arrives.
+          // Staff can change a profile (remove a card, gift ambrosia...). A device that has not seen the
+          // newest change must take the saved profile instead of pushing its old copy back over it.
+          const current = await sql<Row>`select cards, pills, next_wish_at, avatar, admin_rev from player_profiles where user_id = ${user.id}`;
+          const savedRev = Number(current[0]?.admin_rev ?? 0);
+          if (Math.floor(Number(body.rev)) !== savedRev) {
+            const row = current[0];
+            return json(
+              {
+                stale: true,
+                profile: row
+                  ? { cards: parseCards(row.cards), pills: Number(row.pills), nextWishAt: Number(row.next_wish_at), avatar: row.avatar, rev: savedRev }
+                  : { cards: {}, pills: 0, nextWishAt: 0, avatar: null, rev: savedRev },
+              },
+              409,
+            );
+          }
+
+          // Cards are never taken away by a device: keep the higher level of what is saved and what arrives.
           const existing = await sql<Row>`select cards from player_profiles where user_id = ${user.id}`;
           const saved = existing[0] ? parseCards(existing[0].cards) : {};
           const cards: Record<string, number> = { ...saved };
@@ -147,7 +172,7 @@ export const Route = createFileRoute("/api/profile")({
               pills = excluded.pills,
               next_wish_at = excluded.next_wish_at,
               updated_at = now()`;
-          return json({ ok: true, cards });
+          return json({ ok: true, cards, rev: savedRev });
         } catch (error) {
           console.error("[profile] PUT failed", error);
           return json({ error: "unavailable" }, 503);

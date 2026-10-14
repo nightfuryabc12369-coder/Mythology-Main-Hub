@@ -7,7 +7,7 @@ import { createFileRoute } from "@tanstack/react-router";
  *                        A visitor starts from this point, so they only see messages sent after they arrived.
  *   GET  ?after=<id>  -> { dbReady, latest, messages: [...] }   messages newer than <id>
  *   POST { name, body } -> { message }
- *   POST { action: "delete" | "clear" | "mute", id? }  -> admins only
+ *   POST { action: "delete" | "mute", id? }  -> admins and moderators;  "clear" -> admins only
  *
  * Storage stays small: only the newest KEEP_MESSAGES rows are kept, and anything older than MAX_AGE_HOURS is dropped.
  */
@@ -18,17 +18,6 @@ const MAX_BODY = 300;
 const MAX_NAME = 20;
 const FETCH_LIMIT = 100;
 const MUTE_MINUTES = 60;
-
-/** Admin accounts. Set ADMIN_EMAILS (comma separated) in Vercel to change this without touching code. */
-const DEFAULT_ADMINS = ["nightfuryabc12369@gmail.com"];
-function adminEmails() {
-  const fromEnv = process.env.ADMIN_EMAILS?.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
-  return fromEnv && fromEnv.length ? fromEnv : DEFAULT_ADMINS;
-}
-function isAdmin(user: { email?: string | null } | null) {
-  const email = user?.email?.trim().toLowerCase();
-  return Boolean(email && adminEmails().includes(email));
-}
 
 async function ipHash(request: Request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
@@ -85,10 +74,11 @@ function cleanText(value: unknown, max: number) {
   return value.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, max);
 }
 
-type Row = { id: number; name: string; body: string; verified: boolean; admin: boolean; created_at: string };
+type Row = { id: number; name: string; body: string; verified: boolean; admin: boolean; role: string | null; created_at: string };
 
 function shape(row: Row) {
-  return { id: Number(row.id), name: row.name, body: row.body, verified: Boolean(row.verified), admin: Boolean(row.admin), at: new Date(row.created_at).getTime() };
+  const role = row.role === "moderator" ? "moderator" : row.admin || row.role === "admin" ? "admin" : null;
+  return { id: Number(row.id), name: row.name, body: row.body, verified: Boolean(row.verified), admin: role === "admin", role, at: new Date(row.created_at).getTime() };
 }
 
 export const Route = createFileRoute("/api/chat")({
@@ -105,18 +95,21 @@ export const Route = createFileRoute("/api/chat")({
           if (afterRaw === null) {
             const rows = await sql<{ latest: number | null }>`select max(id) as latest from chat_messages`;
             const user = await currentUser(request);
+            const { roleOf } = await import("@/lib/staff.server");
+            const role = await roleOf(user);
             return json({
               dbReady: true,
               latest: Number(rows[0]?.latest ?? 0),
               user: user ? { name: user.name } : null,
-              admin: isAdmin(user),
+              admin: role === "admin",
+              role,
             });
           }
 
           const after = Math.max(0, Math.floor(Number(afterRaw)) || 0);
           const base = Math.max(0, Math.floor(Number(url.searchParams.get("base"))) || 0);
           const rows = await sql<Row>`
-            select id, name, body, verified, admin, created_at from chat_messages
+            select id, name, body, verified, admin, role, created_at from chat_messages
             where id > ${after} and not deleted order by id asc limit ${FETCH_LIMIT}`;
           const messages = rows.map(shape);
           const latest = messages.length ? messages[messages.length - 1].id : after;
@@ -141,15 +134,20 @@ export const Route = createFileRoute("/api/chat")({
           }
 
           const user = await currentUser(request);
-          const admin = isAdmin(user);
+          const { roleOf, banOf } = await import("@/lib/staff.server");
+          const role = await roleOf(user);
+          const admin = role === "admin";
+          const staff = role !== null;
+          if (user && !staff && (await banOf(user.id, user.email))) return json({ error: "banned" }, 403);
           const { getSql } = await import("@/lib/db");
           const sql = await getSql();
 
           // ---- Admin tools (the server checks the account every time) ----
           const action = typeof payload.action === "string" ? payload.action : "send";
           if (action !== "send") {
-            if (!admin) return json({ error: "forbidden" }, 403);
+            if (!staff) return json({ error: "forbidden" }, 403);
             if (action === "clear") {
+              if (!admin) return json({ error: "admins-only" }, 403);
               await sql`update chat_messages set deleted = true where not deleted`;
               return json({ ok: true });
             }
@@ -160,9 +158,9 @@ export const Route = createFileRoute("/api/chat")({
               return json({ ok: true });
             }
             if (action === "mute") {
-              const found = await sql<{ ip_hash: string | null; admin: boolean }>`select ip_hash, admin from chat_messages where id = ${id}`;
+              const found = await sql<{ ip_hash: string | null; admin: boolean; role: string | null }>`select ip_hash, admin, role from chat_messages where id = ${id}`;
               const target = found[0];
-              if (!target?.ip_hash || target.admin) return json({ error: "cannot-mute" }, 400);
+              if (!target?.ip_hash || target.admin || target.role) return json({ error: "cannot-mute" }, 400);
               await sql`
                 insert into chat_mutes (ip_hash, until) values (${target.ip_hash}, now() + make_interval(mins => ${MUTE_MINUTES}))
                 on conflict (ip_hash) do update set until = excluded.until`;
@@ -173,15 +171,15 @@ export const Route = createFileRoute("/api/chat")({
           }
 
           // ---- Sending a message ----
-          if (!admin && tooFast(request)) return json({ error: "slow-down" }, 429);
+          if (!staff && tooFast(request)) return json({ error: "slow-down" }, 429);
 
           const body = cleanText(payload.body, MAX_BODY);
           if (!body) return json({ error: "empty" }, 400);
           // Keep the room free of link spam (admins may post links).
-          if (!admin && /(https?:\/\/|www\.|\.(com|net|org|io|xyz|ru|cn)\b)/i.test(body)) return json({ error: "no-links" }, 400);
+          if (!staff && /(https?:\/\/|www\.|\.(com|net|org|io|xyz|ru|cn)\b)/i.test(body)) return json({ error: "no-links" }, 400);
 
           const hash = await ipHash(request);
-          if (!admin && hash) {
+          if (!staff && hash) {
             const muted = await sql`select 1 from chat_mutes where ip_hash = ${hash} and until > now()`;
             if (muted.length) return json({ error: "muted" }, 403);
           }
@@ -192,8 +190,8 @@ export const Route = createFileRoute("/api/chat")({
           if (!name) return json({ error: "name-needed" }, 400);
 
           const rows = await sql<Row>`
-            insert into chat_messages (name, body, verified, admin, ip_hash) values (${name}, ${body}, ${verified}, ${admin}, ${hash})
-            returning id, name, body, verified, admin, created_at`;
+            insert into chat_messages (name, body, verified, admin, role, ip_hash) values (${name}, ${body}, ${verified}, ${admin}, ${role}, ${hash})
+            returning id, name, body, verified, admin, role, created_at`;
 
           // Trim: keep the newest KEEP_MESSAGES and nothing older than MAX_AGE_HOURS.
           await sql`

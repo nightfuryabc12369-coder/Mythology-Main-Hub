@@ -23,11 +23,15 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as MythsRouteImport } from './routes/myths'
 import { Route as PlayRouteImport } from './routes/play'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PlayersRouteImport } from './routes/players'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as TimelineRouteImport } from './routes/timeline'
 import { Route as VotiveRouteImport } from './routes/votive'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiProfileRouteImport } from './routes/api/profile'
+import { Route as ApiStaffRouteImport } from './routes/api/staff'
+import { Route as ApiAvatarRouteImport } from './routes/api/avatar'
+import { Route as ApiPlayersRouteImport } from './routes/api/players'
 import { Route as LibrarySlugRouteImport } from './routes/library_.$slug'
 import { Route as QuizQuizIdRouteImport } from './routes/quiz.$quizId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -102,6 +106,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayersRoute = PlayersRouteImport.update({
+  id: '/players',
+  path: '/players',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
@@ -125,6 +134,21 @@ const ApiChatRoute = ApiChatRouteImport.update({
 const ApiProfileRoute = ApiProfileRouteImport.update({
   id: '/api/profile',
   path: '/api/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStaffRoute = ApiStaffRouteImport.update({
+  id: '/api/staff',
+  path: '/api/staff',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAvatarRoute = ApiAvatarRouteImport.update({
+  id: '/api/avatar',
+  path: '/api/avatar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPlayersRoute = ApiPlayersRouteImport.update({
+  id: '/api/players',
+  path: '/api/players',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LibrarySlugRoute = LibrarySlugRouteImport.update({
@@ -158,11 +182,15 @@ export interface FileRoutesByFullPath {
   '/myths': typeof MythsRoute
   '/play': typeof PlayRoute
   '/profile': typeof ProfileRoute
+  '/players': typeof PlayersRoute
   '/shop': typeof ShopRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
   '/api/chat': typeof ApiChatRoute
   '/api/profile': typeof ApiProfileRoute
+  '/api/staff': typeof ApiStaffRoute
+  '/api/avatar': typeof ApiAvatarRoute
+  '/api/players': typeof ApiPlayersRoute
   '/library/$slug': typeof LibrarySlugRoute
   '/quiz/$quizId': typeof QuizQuizIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -182,11 +210,15 @@ export interface FileRoutesByTo {
   '/myths': typeof MythsRoute
   '/play': typeof PlayRoute
   '/profile': typeof ProfileRoute
+  '/players': typeof PlayersRoute
   '/shop': typeof ShopRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
   '/api/chat': typeof ApiChatRoute
   '/api/profile': typeof ApiProfileRoute
+  '/api/staff': typeof ApiStaffRoute
+  '/api/avatar': typeof ApiAvatarRoute
+  '/api/players': typeof ApiPlayersRoute
   '/library/$slug': typeof LibrarySlugRoute
   '/quiz/$quizId': typeof QuizQuizIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -207,11 +239,15 @@ export interface FileRoutesById {
   '/myths': typeof MythsRoute
   '/play': typeof PlayRoute
   '/profile': typeof ProfileRoute
+  '/players': typeof PlayersRoute
   '/shop': typeof ShopRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
   '/api/chat': typeof ApiChatRoute
   '/api/profile': typeof ApiProfileRoute
+  '/api/staff': typeof ApiStaffRoute
+  '/api/avatar': typeof ApiAvatarRoute
+  '/api/players': typeof ApiPlayersRoute
   '/library_/$slug': typeof LibrarySlugRoute
   '/quiz/$quizId': typeof QuizQuizIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -233,11 +269,15 @@ export interface FileRouteTypes {
     | '/myths'
     | '/play'
     | '/profile'
+    | '/players'
     | '/shop'
     | '/timeline'
     | '/votive'
     | '/api/chat'
     | '/api/profile'
+    | '/api/staff'
+    | '/api/avatar'
+    | '/api/players'
     | '/library/$slug'
     | '/quiz/$quizId'
     | '/api/auth/$'
@@ -257,11 +297,15 @@ export interface FileRouteTypes {
     | '/myths'
     | '/play'
     | '/profile'
+    | '/players'
     | '/shop'
     | '/timeline'
     | '/votive'
     | '/api/chat'
     | '/api/profile'
+    | '/api/staff'
+    | '/api/avatar'
+    | '/api/players'
     | '/library/$slug'
     | '/quiz/$quizId'
     | '/api/auth/$'
@@ -281,11 +325,15 @@ export interface FileRouteTypes {
     | '/myths'
     | '/play'
     | '/profile'
+    | '/players'
     | '/shop'
     | '/timeline'
     | '/votive'
     | '/api/chat'
     | '/api/profile'
+    | '/api/staff'
+    | '/api/avatar'
+    | '/api/players'
     | '/library_/$slug'
     | '/quiz/$quizId'
     | '/api/auth/$'
@@ -306,11 +354,15 @@ export interface RootRouteChildren {
   MythsRoute: typeof MythsRoute
   PlayRoute: typeof PlayRoute
   ProfileRoute: typeof ProfileRoute
+  PlayersRoute: typeof PlayersRoute
   ShopRoute: typeof ShopRoute
   TimelineRoute: typeof TimelineRoute
   VotiveRoute: typeof VotiveRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiProfileRoute: typeof ApiProfileRoute
+  ApiStaffRoute: typeof ApiStaffRoute
+  ApiAvatarRoute: typeof ApiAvatarRoute
+  ApiPlayersRoute: typeof ApiPlayersRoute
   LibrarySlugRoute: typeof LibrarySlugRoute
   QuizQuizIdRoute: typeof QuizQuizIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -416,6 +468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/players': {
+      id: '/players'
+      path: '/players'
+      fullPath: '/players'
+      preLoaderRoute: typeof PlayersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shop': {
       id: '/shop'
       path: '/shop'
@@ -449,6 +508,27 @@ declare module '@tanstack/react-router' {
       path: '/api/profile'
       fullPath: '/api/profile'
       preLoaderRoute: typeof ApiProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/staff': {
+      id: '/api/staff'
+      path: '/api/staff'
+      fullPath: '/api/staff'
+      preLoaderRoute: typeof ApiStaffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/avatar': {
+      id: '/api/avatar'
+      path: '/api/avatar'
+      fullPath: '/api/avatar'
+      preLoaderRoute: typeof ApiAvatarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/players': {
+      id: '/api/players'
+      path: '/api/players'
+      fullPath: '/api/players'
+      preLoaderRoute: typeof ApiPlayersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/library_/$slug': {
@@ -490,11 +570,15 @@ const rootRouteChildren: RootRouteChildren = {
   MythsRoute: MythsRoute,
   PlayRoute: PlayRoute,
   ProfileRoute: ProfileRoute,
+  PlayersRoute: PlayersRoute,
   ShopRoute: ShopRoute,
   TimelineRoute: TimelineRoute,
   VotiveRoute: VotiveRoute,
   ApiChatRoute: ApiChatRoute,
   ApiProfileRoute: ApiProfileRoute,
+  ApiStaffRoute: ApiStaffRoute,
+  ApiAvatarRoute: ApiAvatarRoute,
+  ApiPlayersRoute: ApiPlayersRoute,
   LibrarySlugRoute: LibrarySlugRoute,
   QuizQuizIdRoute: QuizQuizIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

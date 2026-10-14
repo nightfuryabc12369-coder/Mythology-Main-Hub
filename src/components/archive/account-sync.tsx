@@ -1,4 +1,4 @@
-import { loadAccount, resetAccountMemory, schedulePush, pushNow, usePlayer } from "@/lib/account";
+import { loadAccount, refreshAccount, resetAccountMemory, schedulePush, pushNow, usePlayer } from "@/lib/account";
 import { useArchiveStore } from "@/lib/archive-store";
 import { useEffect, useRef } from "react";
 
@@ -34,13 +34,19 @@ export function AccountSync() {
         schedulePush();
       }
     });
-    const onHide = () => {
+    const onVisibility = () => {
       if (document.visibilityState === "hidden") void pushNow(true);
+      else void refreshAccount();
     };
-    document.addEventListener("visibilitychange", onHide);
+    document.addEventListener("visibilitychange", onVisibility);
+    // Pick up staff changes and bans without a reload.
+    const poll = window.setInterval(() => {
+      if (document.visibilityState === "visible") void refreshAccount();
+    }, 60_000);
     return () => {
       unsubscribe();
-      document.removeEventListener("visibilitychange", onHide);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.clearInterval(poll);
     };
   }, [playerId]);
 

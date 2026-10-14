@@ -18,6 +18,7 @@ export type AppTo =
   | "/compare"
   | "/votive"
   | "/profile"
+  | "/players"
   | "/about";
 
 export function SectionHeader({

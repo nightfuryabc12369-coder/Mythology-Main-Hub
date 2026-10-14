@@ -7,6 +7,7 @@ import { archetypeTitle, getArchetype, getLevel } from "@/data/identity";
 import { gods } from "@/data/gods";
 import { QUIZZES } from "@/data/quizzes";
 import { CURRENCY, feedForStar } from "@/data/shop";
+import { RoleBadge } from "@/components/archive/role-badge";
 import { imageFileToAvatar, saveAvatar, signOutAndClear, useAccountStore, usePlayer } from "@/lib/account";
 import { useArchiveStore } from "@/lib/archive-store";
 import { Link, createFileRoute } from "@tanstack/react-router";
@@ -42,6 +43,7 @@ function ProfilePage() {
   const upgradeCard = useArchiveStore((state) => state.upgradeCard);
   const openOverlay = useArchiveStore((state) => state.openOverlay);
   const { player, isPending, accountsOn } = usePlayer();
+  const role = useAccountStore((state) => state.role);
 
   const creature = hydrated && creatureResult ? getCreature(creatureResult.creatureId) : null;
   const second = hydrated && secondResult ? getCreature(secondResult.creatureId) : null;
@@ -64,6 +66,14 @@ function ProfilePage() {
         title={player ? player.name : "My cards"}
         subtitle="Every figure the Fates have given you, and the ambrosia to raise them."
       >
+        {player ? (
+          <div className="stagger-in mt-3 flex flex-wrap items-center gap-3">
+            <RoleBadge role={role} />
+            <Link to="/players" search={{ id: player.id }} className="text-xs tracking-kicker text-primary uppercase">
+              See how others see my profile
+            </Link>
+          </div>
+        ) : null}
         {archetype || titles.length > 0 ? (
           <div className="stagger-in mt-3 flex flex-wrap items-center gap-2" style={{ ["--d" as string]: "120ms" }}>
             {archetype ? (

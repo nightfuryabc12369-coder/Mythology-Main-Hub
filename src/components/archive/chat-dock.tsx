@@ -1,9 +1,9 @@
 import { usePresence } from "@/components/archive/widgets";
 import { cn } from "@/lib/utils";
-import { Ban, Crown, MessageCircle, Send, Trash2, X } from "lucide-react";
+import { Ban, Crown, MessageCircle, Send, ShieldCheck, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Msg = { id: number; name: string; body: string; verified: boolean; admin: boolean; at: number };
+type Msg = { id: number; name: string; body: string; verified: boolean; admin: boolean; role?: "admin" | "moderator" | null; at: number };
 
 const OPEN_POLL_MS = 3000;
 const CLOSED_POLL_MS = 20000;
@@ -29,6 +29,7 @@ export function ChatDock() {
   const [ready, setReady] = useState<"loading" | "ok" | "offline">("loading");
   const [account, setAccount] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [unread, setUnread] = useState(0);
@@ -52,12 +53,13 @@ export function ChatDock() {
     if (saved) setNick(saved);
     fetch("/api/chat")
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error("offline"))))
-      .then((data: { latest: number; user: { name: string } | null; admin?: boolean }) => {
+      .then((data: { latest: number; user: { name: string } | null; admin?: boolean; role?: string | null }) => {
         if (cancelled) return;
         cursor.current = data.latest;
         base.current = data.latest;
         setAccount(data.user?.name ?? null);
         setIsAdmin(Boolean(data.admin));
+        setIsStaff(Boolean(data.admin || data.role));
         setReady("ok");
       })
       .catch(() => {
@@ -110,10 +112,11 @@ export function ChatDock() {
     if (!open || ready !== "ok") return;
     fetch("/api/chat")
       .then((res) => (res.ok ? res.json() : null))
-      .then((data: { user: { name: string } | null; admin?: boolean } | null) => {
+      .then((data: { user: { name: string } | null; admin?: boolean; role?: string | null } | null) => {
         if (!data) return;
         setAccount(data.user?.name ?? null);
         setIsAdmin(Boolean(data.admin));
+        setIsStaff(Boolean(data.admin || data.role));
       })
       .catch(() => {});
   }, [open, ready]);
@@ -273,15 +276,17 @@ export function ChatDock() {
                 </p>
               ) : null}
               {messages.map((m) => (
-                <div key={m.id} className={cn("group", m.admin && "rounded-sm border border-gold/30 bg-gold/5 p-2")}>
+                <div key={m.id} className={cn("group", m.admin && "rounded-sm border border-gold/30 bg-gold/5 p-2", m.role === "moderator" && "rounded-sm border border-[#7fb4d9]/30 bg-[#7fb4d9]/5 p-2")}>
                   <div className="flex items-center justify-between gap-2">
                     <p className="flex min-w-0 items-center gap-1 text-xs text-subtle">
                       {m.admin ? <Crown className="h-3.5 w-3.5 shrink-0 text-gold" aria-label="Admin" /> : null}
-                      <span className={cn("truncate font-semibold", m.admin || m.verified ? "text-gold" : "text-fg")}>{m.name}</span>
+                      <span className={cn("truncate font-semibold", m.role === "moderator" ? "text-[#7fb4d9]" : m.admin || m.verified ? "text-gold" : "text-fg")}>{m.name}</span>
                       {m.admin ? <span className="text-[9px] tracking-kicker text-gold uppercase">Admin</span> : null}
+                      {m.role === "moderator" ? <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#7fb4d9]" aria-label="Moderator" /> : null}
+                      {m.role === "moderator" ? <span className="text-[9px] tracking-kicker text-[#7fb4d9] uppercase">Mod</span> : null}
                       <span>· {timeLabel(m.at)}</span>
                     </p>
-                    {isAdmin ? (
+                    {isStaff ? (
                       <span className="flex shrink-0 gap-1">
                         <button
                           type="button"
@@ -292,7 +297,7 @@ export function ChatDock() {
                         >
                           <Trash2 className="h-3.5 w-3.5" aria-hidden />
                         </button>
-                        {!m.admin ? (
+                        {!m.admin && !m.role ? (
                           <button
                             type="button"
                             onClick={() => void adminAction("mute", m.id)}
@@ -324,7 +329,7 @@ export function ChatDock() {
                 ) : (
                   <p className="mb-2 text-xs text-subtle">
                     Chatting as <span className="text-gold">{account}</span>
-                    {isAdmin ? " · admin powers on" : ""}
+                    {isAdmin ? " · admin powers on" : isStaff ? " · moderator powers on" : ""}
                   </p>
                 )}
                 <div className="flex gap-2">

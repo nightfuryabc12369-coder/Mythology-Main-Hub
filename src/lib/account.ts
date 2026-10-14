@@ -7,6 +7,7 @@ import { create } from "zustand";
 const MARKER_KEY = "aether-codex-account";
 
 export type SyncState = "idle" | "saving" | "saved" | "error";
+export type StaffRole = "admin" | "moderator" | null;
 
 type AccountState = {
   /** null until the first answer from the server. */
@@ -15,6 +16,13 @@ type AccountState = {
   avatar: string | null;
   joinedAt: string | null;
   sync: SyncState;
+  /** "admin" or "moderator" for staff accounts. */
+  role: StaffRole;
+  /** Set when staff banned this account. */
+  banned: boolean;
+  banReason: string;
+  /** The newest staff change this device has taken in (see /api/profile). */
+  rev: number;
   set: (patch: Partial<Omit<AccountState, "set">>) => void;
 };
 
@@ -24,12 +32,19 @@ export const useAccountStore = create<AccountState>()((set) => ({
   avatar: null,
   joinedAt: null,
   sync: "idle",
+  role: null,
+  banned: false,
+  banReason: "",
+  rev: 0,
   set: (patch) => set(patch),
 }));
 
-type ServerProfile = { cards: Record<string, number>; pills: number; nextWishAt: number; avatar: string | null };
+type ServerProfile = { cards: Record<string, number>; pills: number; nextWishAt: number; avatar: string | null; rev?: number };
 type ProfileResponse = {
   dbReady?: boolean;
+  role?: StaffRole;
+  banned?: boolean;
+  reason?: string;
   user?: { name: string; email: string; createdAt: string };
   profile?: ServerProfile | null;
 };
@@ -51,15 +66,14 @@ export async function fetchProfile(): Promise<{ status: number; data: ProfileRes
   return { status: response.status, data };
 }
 
-async function putProfile(body: unknown, keepalive = false) {
-  const response = await fetch("/api/profile", {
+async function putProfile(body: unknown, keepalive = false): Promise<Response> {
+  return fetch("/api/profile", {
     method: "PUT",
     credentials: "same-origin",
     headers: headers({ "content-type": "application/json" }),
     body: JSON.stringify(body),
     keepalive,
   });
-  if (!response.ok) throw new Error(`profile save failed (${response.status})`);
 }
 
 // ── Merging what is on this device with what is saved on the account ─────────────
@@ -86,6 +100,26 @@ function writeMarker(value: string | null) {
   }
 }
 
+const REV_KEY = "aether-codex-rev";
+function readRev(userId: string): number | null {
+  try {
+    const raw = window.localStorage.getItem(REV_KEY);
+    if (!raw) return null;
+    const [id, rev] = raw.split(":");
+    return id === userId && Number.isFinite(Number(rev)) ? Number(rev) : null;
+  } catch {
+    return null;
+  }
+}
+function writeRev(userId: string | null, rev: number | null) {
+  try {
+    if (userId && rev !== null) window.localStorage.setItem(REV_KEY, `${userId}:${rev}`);
+    else window.localStorage.removeItem(REV_KEY);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 let mergedFor: string | null = null;
 let pushSuspended = false;
 let pushTimer: number | undefined;
@@ -95,15 +129,61 @@ function currentState() {
   return { cards, pills, nextWishAt };
 }
 
+/** Staff changed this profile (or the account was banned): take what the server has. */
+function applyServerProfile(profile: ServerProfile) {
+  useArchiveStore.setState({ cards: profile.cards ?? {}, pills: profile.pills ?? 0, nextWishAt: profile.nextWishAt ?? 0 });
+  const rev = Number(profile.rev ?? 0);
+  useAccountStore.getState().set({ rev, avatar: profile.avatar ?? useAccountStore.getState().avatar });
+  writeRev(mergedFor, rev);
+}
+
+function markBanned(reason: string) {
+  pushSuspended = true;
+  window.clearTimeout(pushTimer);
+  useAccountStore.getState().set({ banned: true, banReason: reason, loaded: true, role: null });
+}
+
 export async function pushNow(keepalive = false) {
   if (!mergedFor || pushSuspended) return;
   window.clearTimeout(pushTimer);
   useAccountStore.getState().set({ sync: "saving" });
   try {
-    await putProfile({ state: currentState() }, keepalive);
+    const response = await putProfile({ state: currentState(), rev: useAccountStore.getState().rev }, keepalive);
+    if (response.status === 409) {
+      const data = (await response.json().catch(() => ({}))) as { profile?: ServerProfile };
+      if (data.profile) applyServerProfile(data.profile);
+      useAccountStore.getState().set({ sync: "saved" });
+      return;
+    }
+    if (response.status === 403) {
+      const data = (await response.json().catch(() => ({}))) as { banned?: boolean; reason?: string };
+      if (data.banned) {
+        markBanned(data.reason ?? "");
+        return;
+      }
+    }
+    if (!response.ok) throw new Error(`profile save failed (${response.status})`);
     useAccountStore.getState().set({ sync: "saved" });
   } catch {
     useAccountStore.getState().set({ sync: "error" });
+  }
+}
+
+/** Re-check the account now and then, so a staff change or a ban shows up without a reload. */
+export async function refreshAccount() {
+  if (!mergedFor || pushSuspended) return;
+  if (useAccountStore.getState().sync === "saving") return;
+  try {
+    const { status, data } = await fetchProfile();
+    if (status === 403 && data.banned) {
+      markBanned(data.reason ?? "");
+      return;
+    }
+    if (status !== 200 || !data.profile) return;
+    useAccountStore.getState().set({ role: data.role ?? null });
+    if (Number(data.profile.rev ?? 0) !== useAccountStore.getState().rev) applyServerProfile(data.profile);
+  } catch {
+    /* try again next time */
   }
 }
 
@@ -120,6 +200,10 @@ export async function loadAccount(userId: string): Promise<void> {
   try {
     const { status, data } = await fetchProfile();
     if (status === 401) return; // not signed in on the server — nothing to load
+    if (status === 403 && data.banned) {
+      markBanned(data.reason ?? "");
+      return;
+    }
     if (status >= 500 || data.dbReady === false) {
       account.set({ dbReady: false, loaded: true, sync: "error" });
       return;
@@ -129,17 +213,28 @@ export async function loadAccount(userId: string): Promise<void> {
     const local = useArchiveStore.getState();
     const sameDeviceOwner = readMarker() === userId;
 
-    const cards = unionMax(server?.cards ?? {}, local.cards);
+    // If staff changed this profile since this device last looked, the saved profile wins outright,
+    // so a removed card cannot come back from an old copy on this device.
+    const serverRev = Number(server?.rev ?? 0);
+    const seenRev = readRev(userId);
+    const serverWins = serverRev > 0 && seenRev !== null && seenRev !== serverRev;
+
+    const cards = serverWins ? (server?.cards ?? {}) : unionMax(server?.cards ?? {}, local.cards);
     // Ambrosia earned as a guest joins the account once; after that the account's number is the truth.
-    const pills = server ? server.pills + (sameDeviceOwner ? 0 : local.pills) : local.pills;
-    const nextWishAt = Math.max(server?.nextWishAt ?? 0, local.nextWishAt);
+    const pills = serverWins ? (server?.pills ?? 0) : server ? server.pills + (sameDeviceOwner ? 0 : local.pills) : local.pills;
+    const nextWishAt = serverWins ? (server?.nextWishAt ?? 0) : Math.max(server?.nextWishAt ?? 0, local.nextWishAt);
 
     useArchiveStore.setState({ cards, pills, nextWishAt });
     writeMarker(userId);
+    writeRev(userId, serverRev);
     mergedFor = userId;
     account.set({
       dbReady: true,
       loaded: true,
+      rev: serverRev,
+      role: data.role ?? null,
+      banned: false,
+      banReason: "",
       avatar: server?.avatar ?? useAccountStore.getState().avatar,
       joinedAt: data.user?.createdAt ?? null,
     });
@@ -152,8 +247,9 @@ export async function loadAccount(userId: string): Promise<void> {
 /** Forget the signed-in account in memory (the saved profile on the server is untouched). */
 export function resetAccountMemory() {
   mergedFor = null;
+  pushSuspended = false;
   window.clearTimeout(pushTimer);
-  useAccountStore.getState().set({ loaded: false, avatar: null, joinedAt: null, sync: "idle" });
+  useAccountStore.getState().set({ loaded: false, avatar: null, joinedAt: null, sync: "idle", role: null, banned: false, banReason: "", rev: 0 });
 }
 
 /**
@@ -166,6 +262,7 @@ export async function signOutAndClear(userId: string) {
   window.clearTimeout(pushTimer);
   useArchiveStore.setState({ cards: {}, pills: 0 });
   writeMarker(null);
+  writeRev(null, null);
   try {
     await signOut("/");
   } catch (error) {
@@ -208,7 +305,8 @@ export async function imageFileToAvatar(file: File, size = 256): Promise<string>
 }
 
 export async function saveAvatar(avatar: string | null) {
-  await putProfile({ avatar });
+  const response = await putProfile({ avatar });
+  if (!response.ok) throw new Error(`profile save failed (${response.status})`);
   useAccountStore.getState().set({ avatar });
 }
 
