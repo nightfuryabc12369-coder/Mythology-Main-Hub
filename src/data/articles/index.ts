@@ -1,10 +1,14 @@
+import { apollo } from "./apollo";
+import { ares } from "./ares";
 import { athena } from "./athena";
 import { dionysus } from "./dionysus";
 import { hades } from "./hades";
 import { hecate } from "./hecate";
 import { hephaestus } from "./hephaestus";
+import { hera } from "./hera";
 import { hermes } from "./hermes";
 import { medusa } from "./medusa";
+import { persephone } from "./persephone";
 import { poseidon } from "./poseidon";
 import { prometheus } from "./prometheus";
 import { zeus } from "./zeus";
@@ -25,6 +29,10 @@ export const ARTICLES: Article[] = [
   hephaestus,
   dionysus,
   medusa,
+  hera,
+  apollo,
+  persephone,
+  ares,
 ];
 
 export function getArticle(slug: string): Article | undefined {
