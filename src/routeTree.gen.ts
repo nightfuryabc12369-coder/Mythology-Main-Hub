@@ -21,6 +21,8 @@ import { Route as MythsRouteImport } from './routes/myths'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as TimelineRouteImport } from './routes/timeline'
 import { Route as VotiveRouteImport } from './routes/votive'
+import { Route as PlayRouteImport } from './routes/play'
+import { Route as QuizQuizIdRouteImport } from './routes/quiz.$quizId'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ApiProfileRouteImport } from './routes/api/profile'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -85,6 +87,16 @@ const VotiveRoute = VotiveRouteImport.update({
   path: '/votive',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayRoute = PlayRouteImport.update({
+  id: '/play',
+  path: '/play',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuizQuizIdRoute = QuizQuizIdRouteImport.update({
+  id: '/quiz/$quizId',
+  path: '/quiz/$quizId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -115,6 +127,8 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
+  '/play': typeof PlayRoute
+  '/quiz/$quizId': typeof QuizQuizIdRoute
   '/login': typeof LoginRoute
   '/api/profile': typeof ApiProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -132,6 +146,8 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
+  '/play': typeof PlayRoute
+  '/quiz/$quizId': typeof QuizQuizIdRoute
   '/login': typeof LoginRoute
   '/api/profile': typeof ApiProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -150,6 +166,8 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
+  '/play': typeof PlayRoute
+  '/quiz/$quizId': typeof QuizQuizIdRoute
   '/login': typeof LoginRoute
   '/api/profile': typeof ApiProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -169,6 +187,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/timeline'
     | '/votive'
+    | '/play'
+    | '/quiz/$quizId'
     | '/login'
     | '/api/profile'
     | '/api/auth/$'
@@ -186,6 +206,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/timeline'
     | '/votive'
+    | '/play'
+    | '/quiz/$quizId'
     | '/login'
     | '/api/profile'
     | '/api/auth/$'
@@ -203,6 +225,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/timeline'
     | '/votive'
+    | '/play'
+    | '/quiz/$quizId'
     | '/login'
     | '/api/profile'
     | '/api/auth/$'
@@ -221,6 +245,8 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   TimelineRoute: typeof TimelineRoute
   VotiveRoute: typeof VotiveRoute
+  PlayRoute: typeof PlayRoute
+  QuizQuizIdRoute: typeof QuizQuizIdRoute
   LoginRoute: typeof LoginRoute
   ApiProfileRoute: typeof ApiProfileRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -312,6 +338,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VotiveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/play': {
+      id: '/play'
+      path: '/play'
+      fullPath: '/play'
+      preLoaderRoute: typeof PlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quiz/$quizId': {
+      id: '/quiz/$quizId'
+      path: '/quiz/$quizId'
+      fullPath: '/quiz/$quizId'
+      preLoaderRoute: typeof QuizQuizIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -349,6 +389,8 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   TimelineRoute: TimelineRoute,
   VotiveRoute: VotiveRoute,
+  PlayRoute: PlayRoute,
+  QuizQuizIdRoute: QuizQuizIdRoute,
   LoginRoute: LoginRoute,
   ApiProfileRoute: ApiProfileRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

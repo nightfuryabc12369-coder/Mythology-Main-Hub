@@ -1,19 +1,9 @@
-import { Portal } from "@/components/archive/identity";
 import { gods } from "@/data/gods";
 import type { God } from "@/data/types";
 import { useArchiveStore } from "@/lib/archive-store";
 import { playSeal, playTone } from "@/lib/audio";
 import { cn } from "@/lib/utils";
-import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-type Tab = "quizzes" | "worldle" | "scramble";
-
-const TABS: Array<{ id: Tab; label: string }> = [
-  { id: "quizzes", label: "Quizzes" },
-  { id: "worldle", label: "Worldle" },
-  { id: "scramble", label: "Word scramble" },
-];
 
 function shuffled<T>(list: T[]): T[] {
   const copy = [...list];
@@ -47,251 +37,6 @@ function entriesBetween(min: number, max: number): Entry[] {
   return out;
 }
 
-export function GamesWindow({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [tab, setTab] = useState<Tab>("quizzes");
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
-    };
-  }, [open, onClose]);
-
-  return (
-    <Portal>
-      {open ? (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center overscroll-contain bg-bg-deep/85 p-3 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Quizzes and games"
-          onClick={onClose}
-        >
-          <div
-            className="panel-in flex max-h-[94svh] w-full max-w-3xl flex-col overflow-hidden rounded-md border border-border bg-surface"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-border px-5 pt-5 pb-4 sm:px-8">
-              <div>
-                <p className="text-xs tracking-kicker text-gold uppercase">The play hall</p>
-                <h2 className="mt-1 font-display text-3xl text-fg sm:text-4xl">Quizzes &amp; games</h2>
-              </div>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={onClose}
-                className="pressable inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-bg/70 text-lg text-fg"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="flex gap-2 overflow-x-auto border-b border-border px-5 py-3 sm:px-8" role="tablist">
-              {TABS.map((entry) => (
-                <button
-                  key={entry.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === entry.id}
-                  onClick={() => setTab(entry.id)}
-                  className={cn(
-                    "pressable min-h-10 shrink-0 rounded-full px-4 text-xs tracking-kicker uppercase",
-                    tab === entry.id ? "bg-primary text-primary-fg" : "border border-border text-muted",
-                  )}
-                >
-                  {entry.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="overflow-y-auto overscroll-contain px-5 py-6 sm:px-8">
-              {tab === "quizzes" ? <Quizzes onNavigate={onClose} /> : null}
-              {tab === "worldle" ? <Worldle /> : null}
-              {tab === "scramble" ? <Scramble /> : null}
-            </div>
-          </div>
-        </div>
-      ) : null}
-    </Portal>
-  );
-}
-
-// ── Quizzes ──────────────────────────────────────────────────────────────────────
-
-function Quizzes({ onNavigate }: { onNavigate: () => void }) {
-  const creature = useArchiveStore((state) => state.creature);
-  const identity = useArchiveStore((state) => state.identity);
-  const [trivia, setTrivia] = useState(false);
-
-  if (trivia) return <Trivia onBack={() => setTrivia(false)} />;
-
-  return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <Link
-        to="/identity"
-        onClick={onNavigate}
-        className="pressable block rounded-md border border-border bg-bg/60 p-5"
-      >
-        <p className="text-xs tracking-kicker text-gold uppercase">Quiz</p>
-        <h3 className="mt-2 font-display text-2xl text-fg">Find who you are</h3>
-        <p className="mt-2 text-sm text-muted">Ten questions. The answers decide which god you would be.{identity ? " You already have a result." : ""}</p>
-      </Link>
-
-      <Link
-        to="/identity"
-        search={{ mode: "creature" }}
-        onClick={onNavigate}
-        className="pressable block rounded-md border border-border bg-bg/60 p-5"
-      >
-        <p className="text-xs tracking-kicker text-gold uppercase">Quiz</p>
-        <h3 className="mt-2 font-display text-2xl text-fg">Find your Creature</h3>
-        <p className="mt-2 text-sm text-muted">
-          Longer the rarer you get. One try only.{creature ? " Your creature is already found." : ""}
-        </p>
-      </Link>
-
-      <button
-        type="button"
-        onClick={() => setTrivia(true)}
-        className="pressable block rounded-md border border-border bg-bg/60 p-5 text-left sm:col-span-2"
-      >
-        <p className="text-xs tracking-kicker text-gold uppercase">Quick quiz</p>
-        <h3 className="mt-2 font-display text-2xl text-fg">Myth trivia</h3>
-        <p className="mt-2 text-sm text-muted">Eight questions about the gods and creatures in this archive. Play it as many times as you like.</p>
-      </button>
-    </div>
-  );
-}
-
-type TriviaQuestion = { prompt: string; options: string[]; answer: string };
-
-function buildTrivia(): TriviaQuestion[] {
-  const count = (pick: (god: God) => string) => {
-    const map = new Map<string, number>();
-    for (const god of gods) map.set(pick(god), (map.get(pick(god)) ?? 0) + 1);
-    return map;
-  };
-  const offices = count((god) => god.office);
-  const domains = count((god) => god.domain);
-  const lines = count((god) => god.line);
-
-  const makers: Array<(god: God) => string | null> = [
-    (god) => (god.office && offices.get(god.office) === 1 ? `Who is known as "${god.office}"?` : null),
-    (god) => (god.domain && domains.get(god.domain) === 1 ? `Whose domain is: ${god.domain}?` : null),
-    (god) => (god.line && lines.get(god.line) === 1 ? `Whose line is this? "${god.line}"` : null),
-  ];
-
-  const out: TriviaQuestion[] = [];
-  for (const god of shuffled(gods)) {
-    if (out.length >= 8) break;
-    const prompts = makers.map((make) => make(god)).filter((value): value is string => Boolean(value));
-    if (!prompts.length) continue;
-    const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-    const others = shuffled(gods.filter((other) => other.id !== god.id))
-      .slice(0, 3)
-      .map((other) => other.name);
-    out.push({ prompt, answer: god.name, options: shuffled([god.name, ...others]) });
-  }
-  return out;
-}
-
-function Trivia({ onBack }: { onBack: () => void }) {
-  const sound = useArchiveStore((state) => state.sound);
-  const [questions, setQuestions] = useState<TriviaQuestion[]>(() => buildTrivia());
-  const [index, setIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [picked, setPicked] = useState<string | null>(null);
-  const timer = useRef<number>(0);
-
-  useEffect(() => () => window.clearTimeout(timer.current), []);
-
-  const done = index >= questions.length;
-
-  function restart() {
-    setQuestions(buildTrivia());
-    setIndex(0);
-    setScore(0);
-    setPicked(null);
-  }
-
-  if (done) {
-    return (
-      <div className="text-center">
-        <p className="text-xs tracking-kicker text-gold uppercase">Finished</p>
-        <h3 className="mt-3 font-display text-5xl text-fg">
-          {score} / {questions.length}
-        </h3>
-        <p className="mt-3 text-sm text-muted">
-          {score >= questions.length - 1 ? "The Muses would hire you." : score >= questions.length / 2 ? "Not bad. The fates are watching." : "Back to the archive with you."}
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <button type="button" onClick={restart} className="pressable min-h-11 rounded-sm bg-primary px-5 text-sm text-primary-fg">
-            Play again
-          </button>
-          <button type="button" onClick={onBack} className="pressable min-h-11 rounded-sm border border-border px-5 text-sm text-fg">
-            Back to quizzes
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const question = questions[index];
-
-  function choose(option: string) {
-    if (picked !== null) return;
-    setPicked(option);
-    const correct = option === question.answer;
-    if (correct) setScore((value) => value + 1);
-    if (sound) playTone(correct ? 520 : 180, 0.14, 0.04);
-    timer.current = window.setTimeout(() => {
-      setPicked(null);
-      setIndex((value) => value + 1);
-    }, 900);
-  }
-
-  return (
-    <div>
-      <div className="flex items-center justify-between text-xs tracking-kicker text-muted uppercase">
-        <button type="button" onClick={onBack} className="pressable min-h-9 text-muted">
-          ← Quizzes
-        </button>
-        <span>
-          Question {index + 1} of {questions.length} · {score} right
-        </span>
-      </div>
-      <h3 className="mt-5 font-display text-2xl text-fg sm:text-3xl">{question.prompt}</h3>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        {question.options.map((option) => {
-          const isAnswer = option === question.answer;
-          const state = picked === null ? "idle" : isAnswer ? "right" : picked === option ? "wrong" : "idle";
-          return (
-            <button
-              key={option}
-              type="button"
-              disabled={picked !== null}
-              onClick={() => choose(option)}
-              className={cn(
-                "pressable min-h-12 rounded-sm border px-4 text-left text-sm",
-                state === "right" ? "border-gold bg-gold/20 text-fg" : state === "wrong" ? "border-red-400/70 bg-red-400/10 text-fg" : "border-border bg-bg/60 text-fg",
-              )}
-            >
-              {option}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 // ── Worldle ──────────────────────────────────────────────────────────────────────
 
 type Mark = "hit" | "near" | "miss";
@@ -323,7 +68,7 @@ const MARK_STYLE: Record<Mark | "empty", string> = {
 
 const ROWS = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
 
-function Worldle() {
+export function Worldle() {
   const sound = useArchiveStore((state) => state.sound);
   const pool = useMemo(() => entriesBetween(4, 8), []);
   const [target, setTarget] = useState<Entry>(() => pool[Math.floor(Math.random() * pool.length)]);
@@ -478,7 +223,7 @@ function scrambleOf(word: string): string {
   return out;
 }
 
-function Scramble() {
+export function Scramble() {
   const sound = useArchiveStore((state) => state.sound);
   const pool = useMemo(() => entriesBetween(4, 10), []);
   const queue = useRef<Entry[]>([]);

@@ -2,7 +2,9 @@ import { Avatar } from "@/components/archive/avatar";
 import { CardTile } from "@/components/archive/wish";
 import { PageHero } from "@/components/archive/widgets";
 import { MAX_LEVEL, godPower, rarityOf } from "@/data/cards";
+import { getCreature, getRarity } from "@/data/creatures";
 import { gods } from "@/data/gods";
+import { QUIZZES } from "@/data/quizzes";
 import { imageFileToAvatar, saveAvatar, signOutAndClear, useAccountStore, usePlayer } from "@/lib/account";
 import { useArchiveStore } from "@/lib/archive-store";
 import { Link, createFileRoute } from "@tanstack/react-router";
@@ -24,9 +26,16 @@ function ProfilePage() {
   const hydrated = useArchiveStore((state) => state.hydrated);
   const cards = useArchiveStore((state) => state.cards);
   const pills = useArchiveStore((state) => state.pills);
+  const creatureResult = useArchiveStore((state) => state.creature);
+  const quizResults = useArchiveStore((state) => state.quizResults);
   const upgradeCard = useArchiveStore((state) => state.upgradeCard);
   const openOverlay = useArchiveStore((state) => state.openOverlay);
   const { player, isPending, accountsOn } = usePlayer();
+
+  const creature = hydrated && creatureResult ? getCreature(creatureResult.creatureId) : null;
+  const titles = hydrated
+    ? QUIZZES.filter((quiz) => quizResults[quiz.id]).map((quiz) => ({ quiz, result: quizResults[quiz.id] }))
+    : [];
 
   const owned = hydrated
     ? gods
@@ -93,6 +102,90 @@ function ProfilePage() {
               );
             })}
           </div>
+        </section>
+
+        <section>
+          <h2 className="font-display text-3xl text-fg">My creature</h2>
+          <p className="mt-1 text-sm text-muted">The creature the Find your Creature quiz gave you.</p>
+          {creature && creatureResult ? (
+            <button
+              type="button"
+              onClick={() => openOverlay({ type: "god", id: creature.id })}
+              className="pressable group mt-6 block w-full max-w-xs overflow-hidden rounded-md bg-surface text-left shadow-border"
+              aria-label={`Open ${creature.name}`}
+            >
+              <div className="relative aspect-[4/5] w-full overflow-hidden bg-bg-deep">
+                <img
+                  src={creature.god.image}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  style={{ objectPosition: creature.god.focus }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-transparent to-transparent" />
+                <p className="absolute top-3 left-3 rounded-full border border-border bg-bg/70 px-3 py-1 text-[10px] tracking-kicker text-gold uppercase">
+                  {getRarity(creatureResult.rarity).label}
+                </p>
+              </div>
+              <div className="p-4">
+                <h3 className="font-display text-2xl text-fg">{creature.name}</h3>
+                <p className="mt-1 text-sm text-muted">{creature.god.line}</p>
+                <p className="mt-3 text-xs tracking-kicker text-primary uppercase">
+                  {creatureResult.age ? `${creatureResult.age.label} · ${creatureResult.age.text}` : "Age not found yet"}
+                </p>
+              </div>
+            </button>
+          ) : (
+            <p className="mt-6 text-sm text-muted">
+              {hydrated ? (
+                <>
+                  No creature yet.{" "}
+                  <Link to="/identity" search={{ mode: "creature" }} className="text-primary underline">
+                    Take the Find your Creature quiz
+                  </Link>
+                  .
+                </>
+              ) : (
+                "Looking for your creature…"
+              )}
+            </p>
+          )}
+        </section>
+
+        <section>
+          <h2 className="font-display text-3xl text-fg">My titles</h2>
+          <p className="mt-1 text-sm text-muted">Labels earned from the quizzes in the play hall. Your best one for each quiz is kept.</p>
+          {titles.length === 0 ? (
+            <p className="mt-6 text-sm text-muted">
+              {hydrated ? (
+                <>
+                  No titles yet.{" "}
+                  <Link to="/play" className="text-primary underline">
+                    Play a quiz
+                  </Link>
+                  .
+                </>
+              ) : (
+                "Reading your titles…"
+              )}
+            </p>
+          ) : (
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {titles.map(({ quiz, result }) => (
+                <Link
+                  key={quiz.id}
+                  to="/quiz/$quizId"
+                  params={{ quizId: quiz.id }}
+                  className="pressable rounded-md bg-surface p-4 shadow-border"
+                >
+                  <p className="text-xs tracking-kicker text-gold uppercase">{quiz.title}</p>
+                  <p className="mt-2 font-display text-2xl text-fg">{result.label}</p>
+                  <p className="mt-1 text-xs text-muted">
+                    Best score {result.score} of {result.total}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
 
         <section>

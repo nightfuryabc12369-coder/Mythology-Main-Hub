@@ -16,6 +16,7 @@ const links = [
   { to: "/epics", label: "Epics" },
   { to: "/timeline", label: "Time" },
   { to: "/compare", label: "Measure" },
+  { to: "/play", label: "Play" },
 ] as const;
 
 export function Navbar() {

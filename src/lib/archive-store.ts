@@ -22,6 +22,9 @@ export type CreatureResult = {
 export type ChangeState = 0 | 1 | 2;
 export type ChangeWishes = { identity: ChangeState; creature: ChangeState };
 
+/** Best result for a play-hall quiz. The label is the title earned. */
+export type QuizResult = { score: number; total: number; tier: 0 | 1 | 2; label: string; at: number };
+
 export type Overlay =
   | { type: "god"; id: string }
   | { type: "myth"; id: string }
@@ -48,6 +51,8 @@ type ArchiveState = {
   nextWishAt: number;
   identity: Identity | null;
   changes: ChangeWishes;
+  quizResults: Record<string, QuizResult>;
+  recordQuiz: (id: string, result: QuizResult) => void;
   grantChange: (kind: keyof ChangeWishes) => void;
   creature: CreatureResult | null;
   setCreature: (creatureId: string, rarity: Rarity) => void;
@@ -96,6 +101,12 @@ export const useArchiveStore = create<ArchiveState>()(
       pills: 0,
       nextWishAt: 0,
       identity: null,
+      quizResults: {},
+      recordQuiz: (id, result) => {
+        const best = get().quizResults[id];
+        if (best && (best.tier > result.tier || (best.tier === result.tier && best.score >= result.score))) return;
+        set({ quizResults: { ...get().quizResults, [id]: result } });
+      },
       creature: null,
       changes: { identity: 0, creature: 0 },
       grantChange: (kind) => {
@@ -192,6 +203,7 @@ export const useArchiveStore = create<ArchiveState>()(
         identity: state.identity,
         creature: state.creature,
         changes: state.changes,
+        quizResults: state.quizResults,
       }),
     },
   ),

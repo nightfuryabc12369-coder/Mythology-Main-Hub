@@ -12,7 +12,6 @@ import {
   ThroneRing,
   TimelineList,
 } from "@/components/archive/home-interactive";
-import { GamesWindow } from "@/components/archive/games";
 import { FindWindows } from "@/components/archive/find-windows";
 import { SectionHeader, TextLink } from "@/components/archive/widgets";
 import { WishSystem } from "@/components/archive/wish";
@@ -20,7 +19,7 @@ import { featuredGods } from "@/data/gods";
 import { ages, epics, myths, timeline } from "@/data/world";
 import { playTone } from "@/lib/audio";
 import { useArchiveStore } from "@/lib/archive-store";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 export const Route = createFileRoute("/")({ component: Home });
@@ -29,11 +28,9 @@ function Home() {
   const sound = useArchiveStore((state) => state.sound);
   const [shift, setShift] = useState({ x: 0, y: 0 });
   const [flash, setFlash] = useState(0);
-  const [gamesOpen, setGamesOpen] = useState(false);
 
   return (
     <main>
-      <GamesWindow open={gamesOpen} onClose={() => setGamesOpen(false)} />
       <section
         className="relative min-h-[calc(100svh-4rem)] overflow-hidden"
         onPointerMove={(event) => {
@@ -69,16 +66,15 @@ function Home() {
             <a href="#thrones" className="pressable inline-flex min-h-12 items-center rounded-sm bg-primary px-5 text-sm text-primary-fg">
               Seat the twelve
             </a>
-            <button
-              type="button"
+            <Link
+              to="/play"
               onClick={() => {
-                setGamesOpen(true);
                 if (sound) playTone(330, 0.12, 0.04);
               }}
               className="pressable inline-flex min-h-12 items-center rounded-sm border border-gold/60 bg-bg/40 px-5 text-sm text-gold backdrop-blur-sm"
             >
               Quizzes &amp; games
-            </button>
+            </Link>
             <button
               type="button"
               onClick={() => {
