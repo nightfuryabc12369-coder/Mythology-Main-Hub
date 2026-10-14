@@ -16,6 +16,7 @@ import { Route as CompareRouteImport } from './routes/compare'
 import { Route as EpicsRouteImport } from './routes/epics'
 import { Route as EpithetsRouteImport } from './routes/epithets'
 import { Route as GodsRouteImport } from './routes/gods'
+import { Route as HallRouteImport } from './routes/hall'
 import { Route as IdentityRouteImport } from './routes/identity'
 import { Route as MythsRouteImport } from './routes/myths'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -61,6 +62,11 @@ const EpithetsRoute = EpithetsRouteImport.update({
 const GodsRoute = GodsRouteImport.update({
   id: '/gods',
   path: '/gods',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HallRoute = HallRouteImport.update({
+  id: '/hall',
+  path: '/hall',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IdentityRoute = IdentityRouteImport.update({
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/epics': typeof EpicsRoute
   '/epithets': typeof EpithetsRoute
   '/gods': typeof GodsRoute
+  '/hall': typeof HallRoute
   '/identity': typeof IdentityRoute
   '/myths': typeof MythsRoute
   '/profile': typeof ProfileRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/epics': typeof EpicsRoute
   '/epithets': typeof EpithetsRoute
   '/gods': typeof GodsRoute
+  '/hall': typeof HallRoute
   '/identity': typeof IdentityRoute
   '/myths': typeof MythsRoute
   '/profile': typeof ProfileRoute
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/epics': typeof EpicsRoute
   '/epithets': typeof EpithetsRoute
   '/gods': typeof GodsRoute
+  '/hall': typeof HallRoute
   '/identity': typeof IdentityRoute
   '/myths': typeof MythsRoute
   '/profile': typeof ProfileRoute
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/epics'
     | '/epithets'
     | '/gods'
+    | '/hall'
     | '/identity'
     | '/myths'
     | '/profile'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/epics'
     | '/epithets'
     | '/gods'
+    | '/hall'
     | '/identity'
     | '/myths'
     | '/profile'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/epics'
     | '/epithets'
     | '/gods'
+    | '/hall'
     | '/identity'
     | '/myths'
     | '/profile'
@@ -252,6 +264,7 @@ export interface RootRouteChildren {
   EpicsRoute: typeof EpicsRoute
   EpithetsRoute: typeof EpithetsRoute
   GodsRoute: typeof GodsRoute
+  HallRoute: typeof HallRoute
   IdentityRoute: typeof IdentityRoute
   MythsRoute: typeof MythsRoute
   ProfileRoute: typeof ProfileRoute
@@ -314,6 +327,13 @@ declare module '@tanstack/react-router' {
       path: '/gods'
       fullPath: '/gods'
       preLoaderRoute: typeof GodsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hall': {
+      id: '/hall'
+      path: '/hall'
+      fullPath: '/hall'
+      preLoaderRoute: typeof HallRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/identity': {
@@ -404,6 +424,7 @@ const rootRouteChildren: RootRouteChildren = {
   EpicsRoute: EpicsRoute,
   EpithetsRoute: EpithetsRoute,
   GodsRoute: GodsRoute,
+  HallRoute: HallRoute,
   IdentityRoute: IdentityRoute,
   MythsRoute: MythsRoute,
   ProfileRoute: ProfileRoute,

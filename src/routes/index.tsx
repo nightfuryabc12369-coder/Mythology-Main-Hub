@@ -1,22 +1,9 @@
-import { AgeCard, EpicCard, GodCard, MythCard } from "@/components/archive/cards";
-import {
-  CompareLab,
-  ConstellationMap,
-  DrawLot,
-  EpithetLadder,
-  FateLoom,
-  Libation,
-  MoteField,
-  OracleDrill,
-  RealmDial,
-  ThroneRing,
-  TimelineList,
-} from "@/components/archive/home-interactive";
+import { GodCard } from "@/components/archive/cards";
+import { MoteField } from "@/components/archive/home-interactive";
 import { FindWindows } from "@/components/archive/find-windows";
 import { SectionHeader, TextLink } from "@/components/archive/widgets";
 import { WishSystem } from "@/components/archive/wish";
 import { featuredGods } from "@/data/gods";
-import { ages, epics, myths, timeline } from "@/data/world";
 import { playTone } from "@/lib/audio";
 import { useArchiveStore } from "@/lib/archive-store";
 import { Link, createFileRoute } from "@tanstack/react-router";
@@ -63,9 +50,9 @@ function Home() {
             Gods, wars, and the stories that still move — told as a hall you can walk. Seat the twelve, pour a libation, and put two powers on the same measure.
           </p>
           <div className="stagger-in mt-8 flex flex-wrap gap-3" style={{ ["--d" as string]: "250ms" }}>
-            <a href="#thrones" className="pressable inline-flex min-h-12 items-center rounded-sm bg-primary px-5 text-sm text-primary-fg">
+            <Link to="/hall" hash="thrones" className="pressable inline-flex min-h-12 items-center rounded-sm bg-primary px-5 text-sm text-primary-fg">
               Seat the twelve
-            </a>
+            </Link>
             <Link
               to="/play"
               onClick={() => {
@@ -83,6 +70,15 @@ function Home() {
               className="pressable inline-flex min-h-12 items-center rounded-sm border border-gold/60 bg-bg/40 px-5 text-sm text-gold backdrop-blur-sm"
             >
               Shop
+            </Link>
+            <Link
+              to="/hall"
+              onClick={() => {
+                if (sound) playTone(294, 0.12, 0.04);
+              }}
+              className="pressable inline-flex min-h-12 items-center rounded-sm border border-gold/60 bg-bg/40 px-5 text-sm text-gold backdrop-blur-sm"
+            >
+              Hall of wonders
             </Link>
             <button
               type="button"
@@ -102,20 +98,6 @@ function Home() {
         <FindWindows />
       </section>
 
-      <section className="mx-auto max-w-7xl scroll-mt-20 px-4 py-20 sm:px-6" id="ages">
-        <SectionHeader
-          kicker="001 / Ages"
-          title="Four weathers of the same sky"
-          subtitle="From a gap with no name to the last generation that dined with gods."
-          action={<TextLink to="/ages">All ages</TextLink>}
-        />
-        <div className="grid gap-4 md:grid-cols-2">
-          {ages.map((age) => (
-            <AgeCard key={age.id} age={age} />
-          ))}
-        </div>
-      </section>
-
       <section className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6" id="wish">
         <SectionHeader
           kicker="Wish / The Pantheon"
@@ -126,14 +108,9 @@ function Home() {
         <WishSystem />
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <SectionHeader kicker="002 / Realms" title="Pick a country of the gods" subtitle="The dial changes the room without leaving the page." />
-        <RealmDial />
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6" id="gods">
+      <section className="mx-auto max-w-7xl px-4 py-20 pb-24 sm:px-6" id="gods">
         <SectionHeader
-          kicker="003 / Dossiers"
+          kicker="001 / Dossiers"
           title="Figures of the court"
           subtitle="Open a file for the story, the kin, and the temple measures."
           action={<TextLink to="/gods">Full pantheon</TextLink>}
@@ -143,78 +120,6 @@ function Home() {
             <GodCard key={god.id} god={god} index={index} />
           ))}
         </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6" id="thrones">
-        <SectionHeader
-          kicker="004 / Council"
-          title="Seat the twelve"
-          subtitle="Hestia keeps the hearth. Dionysus takes the public chair. Fill the ring."
-        />
-        <ThroneRing />
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <SectionHeader kicker="005 / Fate" title="Walk a myth one beat at a time" action={<TextLink to="/myths">All myths</TextLink>} />
-        <FateLoom />
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-        <SectionHeader kicker="006 / Myths" title="Stories worth naming" />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {myths.slice(0, 6).map((myth) => (
-            <MythCard key={myth.id} myth={myth} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6" id="epithets">
-        <SectionHeader
-          kicker="007 / Epithets"
-          title="Climb a name"
-          subtitle="The same god, addressed differently, is a different power."
-          action={<TextLink to="/epithets">Every epithet</TextLink>}
-        />
-        <EpithetLadder />
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <SectionHeader kicker="008 / Sky" title="Name a constellation" subtitle="Tap a figure. The lines draw themselves." />
-        <ConstellationMap />
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <div className="grid items-start gap-6 xl:grid-cols-2">
-          <OracleDrill />
-          <div className="grid gap-6">
-            <Libation />
-            <DrawLot />
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <SectionHeader kicker="009 / Epics" title="The poems that kept them" action={<TextLink to="/epics">Epic shelf</TextLink>} />
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {epics.slice(0, 4).map((epic) => (
-            <EpicCard key={epic.id} epic={epic} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <SectionHeader kicker="010 / Time" title="The long order" action={<TextLink to="/timeline">Full timeline</TextLink>} />
-        <TimelineList items={timeline.slice(0, 6)} />
-      </section>
-
-      <section className="mx-auto max-w-7xl scroll-mt-20 px-4 py-20 pb-24 sm:px-6" id="measure">
-        <SectionHeader
-          kicker="011 / Measure"
-          title="Set two gods on one bar"
-          subtitle="Unofficial temple measures. Choosing the same name swaps them."
-          action={<TextLink to="/compare">Full measure</TextLink>}
-        />
-        <CompareLab />
       </section>
     </main>
   );
