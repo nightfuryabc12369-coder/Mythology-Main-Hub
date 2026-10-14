@@ -80,6 +80,15 @@ function Home() {
             >
               Hall of wonders
             </Link>
+            <Link
+              to="/library"
+              onClick={() => {
+                if (sound) playTone(262, 0.12, 0.04);
+              }}
+              className="pressable inline-flex min-h-12 items-center rounded-sm border border-gold/60 bg-bg/40 px-5 text-sm text-gold backdrop-blur-sm"
+            >
+              Library
+            </Link>
             <button
               type="button"
               onClick={() => {

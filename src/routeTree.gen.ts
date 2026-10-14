@@ -18,6 +18,7 @@ import { Route as EpithetsRouteImport } from './routes/epithets'
 import { Route as GodsRouteImport } from './routes/gods'
 import { Route as HallRouteImport } from './routes/hall'
 import { Route as IdentityRouteImport } from './routes/identity'
+import { Route as LibraryRouteImport } from './routes/library'
 import { Route as MythsRouteImport } from './routes/myths'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ShopRouteImport } from './routes/shop'
@@ -72,6 +73,11 @@ const HallRoute = HallRouteImport.update({
 const IdentityRoute = IdentityRouteImport.update({
   id: '/identity',
   path: '/identity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MythsRoute = MythsRouteImport.update({
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/gods': typeof GodsRoute
   '/hall': typeof HallRoute
   '/identity': typeof IdentityRoute
+  '/library': typeof LibraryRoute
   '/myths': typeof MythsRoute
   '/profile': typeof ProfileRoute
   '/shop': typeof ShopRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/gods': typeof GodsRoute
   '/hall': typeof HallRoute
   '/identity': typeof IdentityRoute
+  '/library': typeof LibraryRoute
   '/myths': typeof MythsRoute
   '/profile': typeof ProfileRoute
   '/shop': typeof ShopRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/gods': typeof GodsRoute
   '/hall': typeof HallRoute
   '/identity': typeof IdentityRoute
+  '/library': typeof LibraryRoute
   '/myths': typeof MythsRoute
   '/profile': typeof ProfileRoute
   '/shop': typeof ShopRoute
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | '/gods'
     | '/hall'
     | '/identity'
+    | '/library'
     | '/myths'
     | '/profile'
     | '/shop'
@@ -223,6 +233,7 @@ export interface FileRouteTypes {
     | '/gods'
     | '/hall'
     | '/identity'
+    | '/library'
     | '/myths'
     | '/profile'
     | '/shop'
@@ -244,6 +255,7 @@ export interface FileRouteTypes {
     | '/gods'
     | '/hall'
     | '/identity'
+    | '/library'
     | '/myths'
     | '/profile'
     | '/shop'
@@ -266,6 +278,7 @@ export interface RootRouteChildren {
   GodsRoute: typeof GodsRoute
   HallRoute: typeof HallRoute
   IdentityRoute: typeof IdentityRoute
+  LibraryRoute: typeof LibraryRoute
   MythsRoute: typeof MythsRoute
   ProfileRoute: typeof ProfileRoute
   ShopRoute: typeof ShopRoute
@@ -341,6 +354,13 @@ declare module '@tanstack/react-router' {
       path: '/identity'
       fullPath: '/identity'
       preLoaderRoute: typeof IdentityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/myths': {
@@ -426,6 +446,7 @@ const rootRouteChildren: RootRouteChildren = {
   GodsRoute: GodsRoute,
   HallRoute: HallRoute,
   IdentityRoute: IdentityRoute,
+  LibraryRoute: LibraryRoute,
   MythsRoute: MythsRoute,
   ProfileRoute: ProfileRoute,
   ShopRoute: ShopRoute,
