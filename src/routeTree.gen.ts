@@ -19,15 +19,16 @@ import { Route as GodsRouteImport } from './routes/gods'
 import { Route as HallRouteImport } from './routes/hall'
 import { Route as IdentityRouteImport } from './routes/identity'
 import { Route as LibraryRouteImport } from './routes/library'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MythsRouteImport } from './routes/myths'
+import { Route as PlayRouteImport } from './routes/play'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as TimelineRouteImport } from './routes/timeline'
 import { Route as VotiveRouteImport } from './routes/votive'
-import { Route as PlayRouteImport } from './routes/play'
-import { Route as QuizQuizIdRouteImport } from './routes/quiz.$quizId'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as ApiProfileRouteImport } from './routes/api/profile'
+import { Route as LibrarySlugRouteImport } from './routes/library_.$slug'
+import { Route as QuizQuizIdRouteImport } from './routes/quiz.$quizId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -80,9 +81,19 @@ const LibraryRoute = LibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MythsRoute = MythsRouteImport.update({
   id: '/myths',
   path: '/myths',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlayRoute = PlayRouteImport.update({
+  id: '/play',
+  path: '/play',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -105,25 +116,19 @@ const VotiveRoute = VotiveRouteImport.update({
   path: '/votive',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlayRoute = PlayRouteImport.update({
-  id: '/play',
-  path: '/play',
+const ApiProfileRoute = ApiProfileRouteImport.update({
+  id: '/api/profile',
+  path: '/api/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibrarySlugRoute = LibrarySlugRouteImport.update({
+  id: '/library_/$slug',
+  path: '/library/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuizQuizIdRoute = QuizQuizIdRouteImport.update({
   id: '/quiz/$quizId',
   path: '/quiz/$quizId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiProfileRoute = ApiProfileRouteImport.update({
-  id: '/api/profile',
-  path: '/api/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -143,15 +148,16 @@ export interface FileRoutesByFullPath {
   '/hall': typeof HallRoute
   '/identity': typeof IdentityRoute
   '/library': typeof LibraryRoute
+  '/login': typeof LoginRoute
   '/myths': typeof MythsRoute
+  '/play': typeof PlayRoute
   '/profile': typeof ProfileRoute
   '/shop': typeof ShopRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
-  '/play': typeof PlayRoute
-  '/quiz/$quizId': typeof QuizQuizIdRoute
-  '/login': typeof LoginRoute
   '/api/profile': typeof ApiProfileRoute
+  '/library/$slug': typeof LibrarySlugRoute
+  '/quiz/$quizId': typeof QuizQuizIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -165,15 +171,16 @@ export interface FileRoutesByTo {
   '/hall': typeof HallRoute
   '/identity': typeof IdentityRoute
   '/library': typeof LibraryRoute
+  '/login': typeof LoginRoute
   '/myths': typeof MythsRoute
+  '/play': typeof PlayRoute
   '/profile': typeof ProfileRoute
   '/shop': typeof ShopRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
-  '/play': typeof PlayRoute
-  '/quiz/$quizId': typeof QuizQuizIdRoute
-  '/login': typeof LoginRoute
   '/api/profile': typeof ApiProfileRoute
+  '/library/$slug': typeof LibrarySlugRoute
+  '/quiz/$quizId': typeof QuizQuizIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -188,15 +195,16 @@ export interface FileRoutesById {
   '/hall': typeof HallRoute
   '/identity': typeof IdentityRoute
   '/library': typeof LibraryRoute
+  '/login': typeof LoginRoute
   '/myths': typeof MythsRoute
+  '/play': typeof PlayRoute
   '/profile': typeof ProfileRoute
   '/shop': typeof ShopRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
-  '/play': typeof PlayRoute
-  '/quiz/$quizId': typeof QuizQuizIdRoute
-  '/login': typeof LoginRoute
   '/api/profile': typeof ApiProfileRoute
+  '/library_/$slug': typeof LibrarySlugRoute
+  '/quiz/$quizId': typeof QuizQuizIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -212,15 +220,16 @@ export interface FileRouteTypes {
     | '/hall'
     | '/identity'
     | '/library'
+    | '/login'
     | '/myths'
+    | '/play'
     | '/profile'
     | '/shop'
     | '/timeline'
     | '/votive'
-    | '/play'
-    | '/quiz/$quizId'
-    | '/login'
     | '/api/profile'
+    | '/library/$slug'
+    | '/quiz/$quizId'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -234,15 +243,16 @@ export interface FileRouteTypes {
     | '/hall'
     | '/identity'
     | '/library'
+    | '/login'
     | '/myths'
+    | '/play'
     | '/profile'
     | '/shop'
     | '/timeline'
     | '/votive'
-    | '/play'
-    | '/quiz/$quizId'
-    | '/login'
     | '/api/profile'
+    | '/library/$slug'
+    | '/quiz/$quizId'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -256,15 +266,16 @@ export interface FileRouteTypes {
     | '/hall'
     | '/identity'
     | '/library'
+    | '/login'
     | '/myths'
+    | '/play'
     | '/profile'
     | '/shop'
     | '/timeline'
     | '/votive'
-    | '/play'
-    | '/quiz/$quizId'
-    | '/login'
     | '/api/profile'
+    | '/library_/$slug'
+    | '/quiz/$quizId'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -279,15 +290,16 @@ export interface RootRouteChildren {
   HallRoute: typeof HallRoute
   IdentityRoute: typeof IdentityRoute
   LibraryRoute: typeof LibraryRoute
+  LoginRoute: typeof LoginRoute
   MythsRoute: typeof MythsRoute
+  PlayRoute: typeof PlayRoute
   ProfileRoute: typeof ProfileRoute
   ShopRoute: typeof ShopRoute
   TimelineRoute: typeof TimelineRoute
   VotiveRoute: typeof VotiveRoute
-  PlayRoute: typeof PlayRoute
-  QuizQuizIdRoute: typeof QuizQuizIdRoute
-  LoginRoute: typeof LoginRoute
   ApiProfileRoute: typeof ApiProfileRoute
+  LibrarySlugRoute: typeof LibrarySlugRoute
+  QuizQuizIdRoute: typeof QuizQuizIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -363,11 +375,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/myths': {
       id: '/myths'
       path: '/myths'
       fullPath: '/myths'
       preLoaderRoute: typeof MythsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/play': {
+      id: '/play'
+      path: '/play'
+      fullPath: '/play'
+      preLoaderRoute: typeof PlayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -398,11 +424,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VotiveRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/play': {
-      id: '/play'
-      path: '/play'
-      fullPath: '/play'
-      preLoaderRoute: typeof PlayRouteImport
+    '/api/profile': {
+      id: '/api/profile'
+      path: '/api/profile'
+      fullPath: '/api/profile'
+      preLoaderRoute: typeof ApiProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library_/$slug': {
+      id: '/library_/$slug'
+      path: '/library/$slug'
+      fullPath: '/library/$slug'
+      preLoaderRoute: typeof LibrarySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/quiz/$quizId': {
@@ -410,20 +443,6 @@ declare module '@tanstack/react-router' {
       path: '/quiz/$quizId'
       fullPath: '/quiz/$quizId'
       preLoaderRoute: typeof QuizQuizIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/profile': {
-      id: '/api/profile'
-      path: '/api/profile'
-      fullPath: '/api/profile'
-      preLoaderRoute: typeof ApiProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -447,15 +466,16 @@ const rootRouteChildren: RootRouteChildren = {
   HallRoute: HallRoute,
   IdentityRoute: IdentityRoute,
   LibraryRoute: LibraryRoute,
+  LoginRoute: LoginRoute,
   MythsRoute: MythsRoute,
+  PlayRoute: PlayRoute,
   ProfileRoute: ProfileRoute,
   ShopRoute: ShopRoute,
   TimelineRoute: TimelineRoute,
   VotiveRoute: VotiveRoute,
-  PlayRoute: PlayRoute,
-  QuizQuizIdRoute: QuizQuizIdRoute,
-  LoginRoute: LoginRoute,
   ApiProfileRoute: ApiProfileRoute,
+  LibrarySlugRoute: LibrarySlugRoute,
+  QuizQuizIdRoute: QuizQuizIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

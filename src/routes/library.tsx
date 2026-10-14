@@ -1,5 +1,6 @@
 import { PageHero, SectionHeader } from "@/components/archive/widgets";
-import { createFileRoute } from "@tanstack/react-router";
+import { ARTICLES } from "@/data/articles";
+import { Link, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/library")({
   head: () => ({
@@ -14,24 +15,6 @@ export const Route = createFileRoute("/library")({
   component: LibraryPage,
 });
 
-type Article = {
-  title: string;
-  character: string;
-  summary: string;
-  tag: string; // e.g. "Greek", "Norse"
-};
-
-// ADD YOUR ARTICLES HERE.
-// Copy one block, paste it inside the brackets, and edit the text.
-// Example:
-//   {
-//     title: "Zeus: King of the Sky",
-//     character: "Zeus",
-//     tag: "Greek",
-//     summary: "How Zeus overthrew the Titans and took the throne of Olympus.",
-//   },
-const ARTICLES: Article[] = [];
-
 function LibraryPage() {
   return (
     <main>
@@ -45,30 +28,38 @@ function LibraryPage() {
         <SectionHeader
           kicker="Articles"
           title="Character articles"
-          subtitle="Deep dives into the figures behind the myths."
+          subtitle="Pick a card to read the full article."
         />
 
         {ARTICLES.length === 0 ? (
           <div className="rounded-sm border border-border bg-bg/40 p-8 text-center">
             <p className="text-xs tracking-kicker text-gold uppercase">Coming soon</p>
             <h3 className="mt-3 font-display text-2xl text-fg uppercase">The shelves are being filled</h3>
-            <p className="mx-auto mt-3 max-w-md text-sm text-muted">
-              The first articles on our characters are being written. Check back soon.
-            </p>
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
             {ARTICLES.map((article) => (
-              <article
-                key={article.title}
-                className="rounded-sm border border-border bg-bg/40 p-6 transition-colors hover:border-gold/60"
+              <Link
+                key={article.slug}
+                to="/library/$slug"
+                params={{ slug: article.slug }}
+                className="pressable group block overflow-hidden rounded-sm border border-border bg-surface transition-colors hover:border-gold/60"
               >
-                <p className="text-xs tracking-kicker text-gold uppercase">
-                  {article.tag} · {article.character}
-                </p>
-                <h3 className="mt-3 font-display text-xl text-fg uppercase">{article.title}</h3>
-                <p className="mt-3 text-sm text-muted">{article.summary}</p>
-              </article>
+                <div className="aspect-[5/6] overflow-hidden bg-bg-deep">
+                  <img
+                    src={`/cards/${article.godId}.jpg`}
+                    alt={article.godName}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className="p-3 sm:p-4">
+                  <p className="text-[10px] tracking-kicker text-gold uppercase">
+                    {article.tag} · {article.godName}
+                  </p>
+                  <h3 className="mt-2 font-display text-sm leading-snug text-fg sm:text-base">{article.title}</h3>
+                </div>
+              </Link>
             ))}
           </div>
         )}
