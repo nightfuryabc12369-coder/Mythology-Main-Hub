@@ -9,7 +9,7 @@ import { ageMap, epicMap, epithetMap, mythMap } from "@/data/world";
 import { playSummon } from "@/lib/audio";
 import { useArchiveStore, type Overlay } from "@/lib/archive-store";
 import { cn } from "@/lib/utils";
-import { Search, X } from "lucide-react";
+import { Maximize2, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function SearchOverlay() {
@@ -75,10 +75,25 @@ export function Dossier() {
   const pills = useArchiveStore((state) => state.pills);
   const upgradeCard = useArchiveStore((state) => state.upgradeCard);
 
+  const [fullImage, setFullImage] = useState(false);
+
   useEffect(() => {
     setEpithetId(null);
     setTab("file");
+    setFullImage(false);
   }, [god?.id]);
+
+  // While the big picture is open, Escape closes only the picture, not the dossier behind it.
+  useEffect(() => {
+    if (!fullImage) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.stopPropagation();
+      setFullImage(false);
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [fullImage]);
 
   if (!render || !god) return null;
 
@@ -111,11 +126,22 @@ export function Dossier() {
         </div>
         <div className="grid min-h-0 flex-1 gap-0 overflow-y-auto md:grid-cols-[240px_1fr]">
           <div className="px-4 md:px-6">
-            <div className="relative h-72 overflow-hidden rounded-md md:h-[420px]">
-              <GodPhoto god={god} className="h-full w-full object-cover" />
+            <button
+              type="button"
+              onClick={() => setFullImage(true)}
+              aria-label={`See full image of ${god.name}`}
+              className="group relative block h-72 w-full cursor-zoom-in overflow-hidden rounded-md md:h-[420px]"
+            >
+              <GodPhoto god={god} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-bg/10" />
               <EmblemMark name={god.emblem} className="absolute bottom-4 left-4 size-8 text-gold" />
-            </div>
+              <span className="absolute inset-0 flex items-center justify-center bg-bg/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 [@media(hover:none)]:bg-transparent [@media(hover:none)]:opacity-100 [@media(hover:none)]:items-end [@media(hover:none)]:pb-3">
+                <span className="inline-flex items-center gap-2 rounded-full bg-bg/85 px-4 py-2 text-xs tracking-kicker text-gold uppercase shadow-glass">
+                  <Maximize2 className="size-4" />
+                  See full image
+                </span>
+              </span>
+            </button>
             {god.epithetIds.length > 0 ? (
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
@@ -250,6 +276,24 @@ export function Dossier() {
           </div>
         </div>
       </aside>
+      {fullImage ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-8" role="dialog" aria-modal="true" aria-label={`${god.name}, full image`}>
+          <button type="button" aria-label="Close full image" className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={() => setFullImage(false)} />
+          <button
+            type="button"
+            aria-label="Close full image"
+            onClick={() => setFullImage(false)}
+            className="absolute top-4 right-4 z-10 inline-flex size-11 items-center justify-center rounded-full bg-bg/80 text-fg shadow-glass"
+          >
+            <X className="size-5" />
+          </button>
+          <GodPhoto
+            god={god}
+            className="relative h-auto max-h-[88vh] w-auto max-w-[94vw] rounded-md object-contain shadow-glass"
+            style={{ objectPosition: "center" }}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }
