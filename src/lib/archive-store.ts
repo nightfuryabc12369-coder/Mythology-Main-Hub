@@ -3,6 +3,8 @@ import type { LevelId } from "@/data/identity";
 import type { AgeStage, Rarity } from "@/data/creatures";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { MAX_STARS, STAR_COPIES } from "@/data/cards";
+import { feedForStar } from "@/data/shop";
 
 export type Favorites = Record<FavoriteKind, string[]>;
 
@@ -24,6 +26,8 @@ export type ChangeWishes = { identity: ChangeState; creature: ChangeState };
 
 /** Best result for a play-hall quiz. The label is the title earned. */
 export type QuizResult = { score: number; total: number; tier: 0 | 1 | 2; label: string; at: number };
+
+export type SecondCreature = { creatureId: string; rarity: Rarity; at: number };
 
 export type Overlay =
   | { type: "god"; id: string }
@@ -51,6 +55,24 @@ type ArchiveState = {
   nextWishAt: number;
   identity: Identity | null;
   changes: ChangeWishes;
+  /** The play-hall coin, earned from correct quiz answers. */
+  drachmas: number;
+  /** Creature feed in the inventory. */
+  feed: number;
+  /** How many of each card you hold (a card from a wish counts as 1). */
+  copies: Record<string, number>;
+  /** Golden stars on each card. */
+  stars: Record<string, number>;
+  /** The second creature, bought in the shop. One only, for good. */
+  secondCreature: SecondCreature | null;
+  creatureStars: { main: number; second: number };
+  earn: (amount: number) => void;
+  buyCard: (id: string, price: number) => boolean;
+  buyPills: (count: number, price: number) => boolean;
+  buyFeed: (count: number, price: number) => boolean;
+  buySecondCreature: (creatureId: string, rarity: Rarity, price: number) => boolean;
+  starUpCard: (id: string) => void;
+  feedCreature: (slot: "main" | "second") => void;
   quizResults: Record<string, QuizResult>;
   recordQuiz: (id: string, result: QuizResult) => void;
   grantChange: (kind: keyof ChangeWishes) => void;
@@ -101,6 +123,58 @@ export const useArchiveStore = create<ArchiveState>()(
       pills: 0,
       nextWishAt: 0,
       identity: null,
+      drachmas: 0,
+      feed: 0,
+      copies: {},
+      stars: {},
+      secondCreature: null,
+      creatureStars: { main: 0, second: 0 },
+      earn: (amount) => set({ drachmas: get().drachmas + Math.max(0, Math.floor(amount)) }),
+      buyCard: (id, price) => {
+        const { drachmas, cards, copies } = get();
+        if (drachmas < price) return false;
+        if (!cards[id]) {
+          set({ drachmas: drachmas - price, cards: { ...cards, [id]: 1 }, copies: { ...copies, [id]: 1 } });
+        } else {
+          set({ drachmas: drachmas - price, copies: { ...copies, [id]: (copies[id] ?? 1) + 1 } });
+        }
+        return true;
+      },
+      buyPills: (count, price) => {
+        const { drachmas, pills } = get();
+        if (drachmas < price) return false;
+        set({ drachmas: drachmas - price, pills: pills + count });
+        return true;
+      },
+      buyFeed: (count, price) => {
+        const { drachmas, feed } = get();
+        if (drachmas < price) return false;
+        set({ drachmas: drachmas - price, feed: feed + count });
+        return true;
+      },
+      buySecondCreature: (creatureId, rarity, price) => {
+        const { drachmas, secondCreature, creature } = get();
+        // One only, and it cannot be the same as the main creature.
+        if (secondCreature || drachmas < price || creature?.creatureId === creatureId) return false;
+        set({ drachmas: drachmas - price, secondCreature: { creatureId, rarity, at: Date.now() } });
+        return true;
+      },
+      starUpCard: (id) => {
+        const { cards, copies, stars } = get();
+        if (!cards[id]) return;
+        const have = copies[id] ?? 1;
+        const level = stars[id] ?? 0;
+        if (have < STAR_COPIES || level >= MAX_STARS) return;
+        set({ copies: { ...copies, [id]: have - (STAR_COPIES - 1) }, stars: { ...stars, [id]: level + 1 } });
+      },
+      feedCreature: (slot) => {
+        const { feed, creatureStars, creature, secondCreature } = get();
+        if (slot === "main" ? !creature : !secondCreature) return;
+        const level = creatureStars[slot];
+        const cost = feedForStar(level);
+        if (level >= MAX_STARS || feed < cost) return;
+        set({ feed: feed - cost, creatureStars: { ...creatureStars, [slot]: level + 1 } });
+      },
       quizResults: {},
       recordQuiz: (id, result) => {
         const best = get().quizResults[id];
@@ -120,6 +194,7 @@ export const useArchiveStore = create<ArchiveState>()(
         if (creature && changes.creature !== 1) return;
         set({
           creature: { creatureId, rarity, at: Date.now(), age: null },
+          creatureStars: { ...get().creatureStars, main: 0 },
           changes: creature ? { ...changes, creature: 2 } : changes,
         });
       },
@@ -204,6 +279,12 @@ export const useArchiveStore = create<ArchiveState>()(
         creature: state.creature,
         changes: state.changes,
         quizResults: state.quizResults,
+        drachmas: state.drachmas,
+        feed: state.feed,
+        copies: state.copies,
+        stars: state.stars,
+        secondCreature: state.secondCreature,
+        creatureStars: state.creatureStars,
       }),
     },
   ),

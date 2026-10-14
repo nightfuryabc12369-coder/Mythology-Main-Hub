@@ -47,14 +47,27 @@ export function levelFactor(level: number) {
   return 0.4 + (0.6 * (clamped - 1)) / (MAX_LEVEL - 1);
 }
 
-export function cardPower(god: God, level: number) {
-  return Math.round(godPower(god) * levelFactor(level));
+export function cardPower(god: God, level: number, stars = 0) {
+  return Math.round(godPower(god) * levelFactor(level) * (1 + STAR_BONUS * Math.min(MAX_STARS, Math.max(0, stars))));
 }
 
-/** Creatures are never won by wishing: they only come from the Find your Creature quiz. */
-export const WISHABLE_GODS = gods.filter((god) => !god.tags.includes("creature"));
+export const MAX_STARS = 5;
+/** Copies of one card needed to raise a golden star. Two are spent, one stays as the card itself. */
+export const STAR_COPIES = 3;
+/** Each golden star adds this much to a card's power. */
+export const STAR_BONUS = 0.1;
 
-const ranked = [...WISHABLE_GODS].sort((a, b) => godPower(b) - godPower(a));
+/** Ultra-powerful figures: taken out of wishing, they can only be bought in the shop. */
+export const ULTRA_IDS = ["zeus", "gaia", "poseidon"];
+export const isUltra = (id: string) => ULTRA_IDS.includes(id);
+
+/** Every card figure (creatures are not cards). */
+export const CARD_GODS = gods.filter((god) => !god.tags.includes("creature"));
+
+/** Creatures are never won by wishing, and neither are the ultra cards. */
+export const WISHABLE_GODS = CARD_GODS.filter((god) => !isUltra(god.id));
+
+const ranked = [...CARD_GODS].sort((a, b) => godPower(b) - godPower(a));
 
 /** Top 7 legendary, next 10 epic, next 13 rare, everyone else common. */
 const rarityById: Record<string, Rarity> = Object.fromEntries(

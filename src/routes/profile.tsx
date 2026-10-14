@@ -1,10 +1,11 @@
 import { Avatar } from "@/components/archive/avatar";
-import { CardTile } from "@/components/archive/wish";
+import { CardTile, Stars } from "@/components/archive/wish";
 import { PageHero } from "@/components/archive/widgets";
-import { MAX_LEVEL, godPower, rarityOf } from "@/data/cards";
+import { MAX_LEVEL, MAX_STARS, STAR_COPIES, godPower, rarityOf } from "@/data/cards";
 import { getCreature, getRarity } from "@/data/creatures";
 import { gods } from "@/data/gods";
 import { QUIZZES } from "@/data/quizzes";
+import { CURRENCY, feedForStar } from "@/data/shop";
 import { imageFileToAvatar, saveAvatar, signOutAndClear, useAccountStore, usePlayer } from "@/lib/account";
 import { useArchiveStore } from "@/lib/archive-store";
 import { Link, createFileRoute } from "@tanstack/react-router";
@@ -28,11 +29,20 @@ function ProfilePage() {
   const pills = useArchiveStore((state) => state.pills);
   const creatureResult = useArchiveStore((state) => state.creature);
   const quizResults = useArchiveStore((state) => state.quizResults);
+  const copies = useArchiveStore((state) => state.copies);
+  const stars = useArchiveStore((state) => state.stars);
+  const starUpCard = useArchiveStore((state) => state.starUpCard);
+  const drachmas = useArchiveStore((state) => state.drachmas);
+  const feed = useArchiveStore((state) => state.feed);
+  const secondResult = useArchiveStore((state) => state.secondCreature);
+  const creatureStars = useArchiveStore((state) => state.creatureStars);
+  const feedCreature = useArchiveStore((state) => state.feedCreature);
   const upgradeCard = useArchiveStore((state) => state.upgradeCard);
   const openOverlay = useArchiveStore((state) => state.openOverlay);
   const { player, isPending, accountsOn } = usePlayer();
 
   const creature = hydrated && creatureResult ? getCreature(creatureResult.creatureId) : null;
+  const second = hydrated && secondResult ? getCreature(secondResult.creatureId) : null;
   const titles = hydrated
     ? QUIZZES.filter((quiz) => quizResults[quiz.id]).map((quiz) => ({ quiz, result: quizResults[quiz.id] }))
     : [];
@@ -88,8 +98,17 @@ function ProfilePage() {
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {owned.map((god) => {
               const level = cards[god.id];
+              const count = copies[god.id] ?? 1;
+              const starCount = stars[god.id] ?? 0;
               return (
-                <CardTile key={god.id} god={god} level={level} onOpen={() => openOverlay({ type: "god", id: god.id })}>
+                <CardTile
+                  key={god.id}
+                  god={god}
+                  level={level}
+                  copies={count}
+                  stars={starCount}
+                  onOpen={() => openOverlay({ type: "god", id: god.id })}
+                >
                   <button
                     type="button"
                     disabled={pills < 1 || level >= MAX_LEVEL}
@@ -98,6 +117,16 @@ function ProfilePage() {
                   >
                     {level >= MAX_LEVEL ? "Max level" : "Use ambrosia"}
                   </button>
+                  {count >= STAR_COPIES || starCount > 0 ? (
+                    <button
+                      type="button"
+                      disabled={count < STAR_COPIES || starCount >= MAX_STARS}
+                      onClick={() => starUpCard(god.id)}
+                      className="pressable mt-2 min-h-10 w-full rounded-sm border border-[#f2c94c]/60 text-[11px] tracking-kicker text-[#f2c94c] uppercase disabled:opacity-40"
+                    >
+                      {starCount >= MAX_STARS ? "Max stars" : `Raise a star (${count}/${STAR_COPIES})`}
+                    </button>
+                  ) : null}
                 </CardTile>
               );
             })}
@@ -105,50 +134,55 @@ function ProfilePage() {
         </section>
 
         <section>
-          <h2 className="font-display text-3xl text-fg">My creature</h2>
-          <p className="mt-1 text-sm text-muted">The creature the Find your Creature quiz gave you.</p>
-          {creature && creatureResult ? (
-            <button
-              type="button"
-              onClick={() => openOverlay({ type: "god", id: creature.id })}
-              className="pressable group mt-6 block w-full max-w-xs overflow-hidden rounded-md bg-surface text-left shadow-border"
-              aria-label={`Open ${creature.name}`}
-            >
-              <div className="relative aspect-[4/5] w-full overflow-hidden bg-bg-deep">
-                <img
-                  src={creature.god.image}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  style={{ objectPosition: creature.god.focus }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-transparent to-transparent" />
-                <p className="absolute top-3 left-3 rounded-full border border-border bg-bg/70 px-3 py-1 text-[10px] tracking-kicker text-gold uppercase">
-                  {getRarity(creatureResult.rarity).label}
-                </p>
-              </div>
-              <div className="p-4">
-                <h3 className="font-display text-2xl text-fg">{creature.name}</h3>
-                <p className="mt-1 text-sm text-muted">{creature.god.line}</p>
-                <p className="mt-3 text-xs tracking-kicker text-primary uppercase">
-                  {creatureResult.age ? `${creatureResult.age.label} · ${creatureResult.age.text}` : "Age not found yet"}
-                </p>
-              </div>
-            </button>
-          ) : (
-            <p className="mt-6 text-sm text-muted">
-              {hydrated ? (
-                <>
-                  No creature yet.{" "}
+          <h2 className="font-display text-3xl text-fg">My creatures</h2>
+          <p className="mt-1 text-sm text-muted">
+            A main creature from the quiz and one second creature from the shop. Feed on hand: x{hydrated ? feed : 0}. Feed a creature to raise a golden star.
+          </p>
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {creature && creatureResult ? (
+              <CreatureCardView
+                label="Main creature"
+                creature={creature}
+                rarity={getRarity(creatureResult.rarity).label}
+                detail={creatureResult.age ? `${creatureResult.age.label} · ${creatureResult.age.text}` : "Age not found yet"}
+                stars={creatureStars.main}
+                feed={feed}
+                onOpen={() => openOverlay({ type: "god", id: creature.id })}
+                onFeed={() => feedCreature("main")}
+              />
+            ) : (
+              <div className="flex min-h-64 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border p-5 text-center text-sm text-muted">
+                <p className="text-xs tracking-kicker text-subtle uppercase">Main creature</p>
+                {hydrated ? (
                   <Link to="/identity" search={{ mode: "creature" }} className="text-primary underline">
                     Take the Find your Creature quiz
                   </Link>
-                  .
-                </>
-              ) : (
-                "Looking for your creature…"
-              )}
-            </p>
-          )}
+                ) : (
+                  "Looking for your creature…"
+                )}
+              </div>
+            )}
+            {second && secondResult ? (
+              <CreatureCardView
+                label="Second creature"
+                creature={second}
+                rarity={getRarity(secondResult.rarity).label}
+                detail="Bought in the shop"
+                stars={creatureStars.second}
+                feed={feed}
+                onOpen={() => openOverlay({ type: "god", id: second.id })}
+                onFeed={() => feedCreature("second")}
+              />
+            ) : (
+              <div className="flex min-h-64 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border p-5 text-center text-sm text-muted">
+                <p className="text-xs tracking-kicker text-subtle uppercase">Second creature</p>
+                <Lock className="size-5 text-subtle" />
+                <Link to="/shop" search={{ tab: "creatures" }} className="text-primary underline">
+                  Buy one in the shop
+                </Link>
+              </div>
+            )}
+          </div>
         </section>
 
         <section>
@@ -193,11 +227,26 @@ function ProfilePage() {
           <p className="mt-1 text-sm text-muted">Upgrade materials and other treasures are kept here.</p>
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             <div className="rounded-md bg-surface p-5 shadow-border">
+              <h3 className="font-display text-xl text-fg">{CURRENCY}</h3>
+              <p className="mt-2 font-display text-5xl text-gold">{hydrated ? drachmas : 0}</p>
+              <p className="mt-3 text-sm text-muted">
+                10 for every correct quiz answer.{" "}
+                <Link to="/shop" className="text-primary underline">
+                  Spend them
+                </Link>
+              </p>
+            </div>
+            <div className="rounded-md bg-surface p-5 shadow-border">
+              <h3 className="font-display text-xl text-fg">Creature feed</h3>
+              <p className="mt-2 font-display text-5xl text-primary">x{hydrated ? feed : 0}</p>
+              <p className="mt-3 text-sm text-muted">Raises golden stars on your creatures.</p>
+            </div>
+            <div className="rounded-md bg-surface p-5 shadow-border">
               <h3 className="font-display text-xl text-fg">Ambrosia</h3>
               <p className="mt-2 font-display text-5xl text-primary">x{hydrated ? pills : 0}</p>
               <p className="mt-3 text-sm text-muted">Raises one card by a level (up to Level {MAX_LEVEL}).</p>
             </div>
-            {[0, 1, 2].map((slot) => (
+            {[0].map((slot) => (
               <div
                 key={slot}
                 className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border p-5 text-center"
@@ -340,5 +389,66 @@ function AccountPanel({ name, email, id }: { name: string; email: string; id: st
         </button>
       </div>
     </section>
+  );
+}
+
+function CreatureCardView({
+  label,
+  creature,
+  rarity,
+  detail,
+  stars,
+  feed,
+  onOpen,
+  onFeed,
+}: {
+  label: string;
+  creature: NonNullable<ReturnType<typeof getCreature>>;
+  rarity: string;
+  detail: string;
+  stars: number;
+  feed: number;
+  onOpen: () => void;
+  onFeed: () => void;
+}) {
+  const cost = feedForStar(stars);
+  const maxed = stars >= MAX_STARS;
+  return (
+    <div className="overflow-hidden rounded-md bg-surface shadow-border">
+      <button type="button" onClick={onOpen} className="pressable group block w-full text-left" aria-label={`Open ${creature.name}`}>
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-bg-deep">
+          <img
+            src={creature.god.image}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            style={{ objectPosition: creature.god.focus }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-transparent to-transparent" />
+          <p className="absolute top-3 left-3 rounded-full border border-border bg-bg/70 px-3 py-1 text-[10px] tracking-kicker text-gold uppercase">
+            {label} · {rarity}
+          </p>
+          {stars > 0 ? (
+            <div className="absolute right-3 bottom-3 rounded-full bg-bg-deep/75 px-2 py-0.5 text-base">
+              <Stars count={stars} />
+            </div>
+          ) : null}
+        </div>
+        <div className="p-4 pb-2">
+          <h3 className="font-display text-2xl text-fg">{creature.name}</h3>
+          <p className="mt-1 text-sm text-muted">{creature.god.line}</p>
+          <p className="mt-3 text-xs tracking-kicker text-primary uppercase">{detail}</p>
+        </div>
+      </button>
+      <div className="px-4 pb-4">
+        <button
+          type="button"
+          disabled={maxed || feed < cost}
+          onClick={onFeed}
+          className="pressable mt-2 min-h-10 w-full rounded-sm border border-[#f2c94c]/60 text-[11px] tracking-kicker text-[#f2c94c] uppercase disabled:opacity-40"
+        >
+          {maxed ? "Max stars" : `Feed for a star (${cost} feed)`}
+        </button>
+      </div>
+    </div>
   );
 }

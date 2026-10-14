@@ -8,6 +8,7 @@ import {
   REST_HOURS,
   cardPower,
   pullTable,
+  isUltra,
   rarityOf,
   rarityRates,
   rollCard,
@@ -42,19 +43,54 @@ export function CardArt({ god, className }: { god: God; className?: string }) {
   );
 }
 
-export function CardTile({ god, level, onOpen, children }: { god: God; level: number; onOpen?: () => void; children?: ReactNode }) {
+export function Stars({ count, className }: { count: number; className?: string }) {
+  if (count <= 0) return null;
+  return (
+    <span className={cn("inline-flex gap-0.5 text-[#f2c94c] drop-shadow", className)} role="img" aria-label={`${count} golden ${count === 1 ? "star" : "stars"}`}>
+      {Array.from({ length: count }, (_, i) => (
+        <span key={i}>★</span>
+      ))}
+    </span>
+  );
+}
+
+export function CardTile({
+  god,
+  level,
+  onOpen,
+  children,
+  copies = 1,
+  stars = 0,
+}: {
+  god: God;
+  level: number;
+  onOpen?: () => void;
+  children?: ReactNode;
+  copies?: number;
+  stars?: number;
+}) {
   const rarity = rarityOf(god.id);
   const color = RARITY_COLOR[rarity];
   const face = (
     <>
-      <CardArt god={god} className="aspect-[3/4] w-full" />
+      <div className="relative">
+        <CardArt god={god} className="aspect-[3/4] w-full" />
+        {stars > 0 ? (
+          <div className="absolute top-2 left-2 rounded-full bg-bg-deep/75 px-2 py-0.5 text-sm">
+            <Stars count={stars} />
+          </div>
+        ) : null}
+        {copies > 1 ? (
+          <span className="absolute top-2 right-2 rounded-full bg-bg-deep/80 px-2 py-0.5 text-xs text-fg">x{copies}</span>
+        ) : null}
+      </div>
       <div className={cn("space-y-1 px-3 pt-3", children ? "pb-0" : "pb-3")}>
         <p className="text-[10px] tracking-kicker uppercase" style={{ color }}>
-          {RARITY_LABEL[rarity]}
+          {isUltra(god.id) ? "Ultra · Legendary" : RARITY_LABEL[rarity]}
         </p>
         <h3 className="font-display text-xl leading-none text-fg">{god.name}</h3>
         <p className="text-xs text-muted">
-          Level {level}/{MAX_LEVEL} · Power {cardPower(god, level)}
+          Level {level}/{MAX_LEVEL} · Power {cardPower(god, level, stars)}
         </p>
       </div>
     </>
@@ -88,7 +124,7 @@ const isChange = (kind: AnyKind): kind is "change-god" | "change-creature" => ki
 const WISHES: Array<{ kind: AnyKind; title: string; blurb: string }> = [
   { kind: "warrior", title: "Grant me a champion", blurb: "A random figure joins My Cards at Level 1, with 40% of their power. Strong figures are rare." },
   { kind: "power", title: "Grant me favor", blurb: `${PILLS_PER_WISH} drops of ambrosia for your inventory. Each drop raises one card by a level.` },
-  { kind: "legend", title: "Grant me a legend", blurb: "One of the seven great powers joins My Cards. Only the legendary can answer this wish." },
+  { kind: "legend", title: "Grant me a legend", blurb: "One of the great legendary powers joins My Cards. Only the legendary can answer this wish. The ultra cards are sold only in the shop." },
   { kind: "change-god", title: "Change who I am", blurb: "One chance to retake Find who you are and replace your god. This wish can be granted only once." },
   { kind: "change-creature", title: "Change my creature", blurb: "One chance to retake Find your Creature and replace your creature. This wish can be granted only once." },
 ];

@@ -19,6 +19,7 @@ import { Route as GodsRouteImport } from './routes/gods'
 import { Route as IdentityRouteImport } from './routes/identity'
 import { Route as MythsRouteImport } from './routes/myths'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ShopRouteImport } from './routes/shop'
 import { Route as TimelineRouteImport } from './routes/timeline'
 import { Route as VotiveRouteImport } from './routes/votive'
 import { Route as PlayRouteImport } from './routes/play'
@@ -77,6 +78,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TimelineRoute = TimelineRouteImport.update({
   id: '/timeline',
   path: '/timeline',
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/identity': typeof IdentityRoute
   '/myths': typeof MythsRoute
   '/profile': typeof ProfileRoute
+  '/shop': typeof ShopRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
   '/play': typeof PlayRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/identity': typeof IdentityRoute
   '/myths': typeof MythsRoute
   '/profile': typeof ProfileRoute
+  '/shop': typeof ShopRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
   '/play': typeof PlayRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/identity': typeof IdentityRoute
   '/myths': typeof MythsRoute
   '/profile': typeof ProfileRoute
+  '/shop': typeof ShopRoute
   '/timeline': typeof TimelineRoute
   '/votive': typeof VotiveRoute
   '/play': typeof PlayRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
     | '/identity'
     | '/myths'
     | '/profile'
+    | '/shop'
     | '/timeline'
     | '/votive'
     | '/play'
@@ -204,6 +214,7 @@ export interface FileRouteTypes {
     | '/identity'
     | '/myths'
     | '/profile'
+    | '/shop'
     | '/timeline'
     | '/votive'
     | '/play'
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
     | '/identity'
     | '/myths'
     | '/profile'
+    | '/shop'
     | '/timeline'
     | '/votive'
     | '/play'
@@ -243,6 +255,7 @@ export interface RootRouteChildren {
   IdentityRoute: typeof IdentityRoute
   MythsRoute: typeof MythsRoute
   ProfileRoute: typeof ProfileRoute
+  ShopRoute: typeof ShopRoute
   TimelineRoute: typeof TimelineRoute
   VotiveRoute: typeof VotiveRoute
   PlayRoute: typeof PlayRoute
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/timeline': {
       id: '/timeline'
       path: '/timeline'
@@ -387,6 +407,7 @@ const rootRouteChildren: RootRouteChildren = {
   IdentityRoute: IdentityRoute,
   MythsRoute: MythsRoute,
   ProfileRoute: ProfileRoute,
+  ShopRoute: ShopRoute,
   TimelineRoute: TimelineRoute,
   VotiveRoute: VotiveRoute,
   PlayRoute: PlayRoute,

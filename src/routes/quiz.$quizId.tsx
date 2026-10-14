@@ -1,4 +1,5 @@
 import { getQuiz, tierFor, type QuizQuestion } from "@/data/quizzes";
+import { DRACHMAS_PER_CORRECT, CURRENCY } from "@/data/shop";
 import { useArchiveStore } from "@/lib/archive-store";
 import { playSeal, playTone } from "@/lib/audio";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ function QuizPage() {
   const quiz = getQuiz(quizId);
   const sound = useArchiveStore((state) => state.sound);
   const recordQuiz = useArchiveStore((state) => state.recordQuiz);
+  const earn = useArchiveStore((state) => state.earn);
   const [run, setRun] = useState(0);
   const [started, setStarted] = useState(false);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -66,6 +68,7 @@ function QuizPage() {
         const tier = tierFor(nextScore, questions.length);
         const label = quiz.titles[tier];
         recordQuiz(quiz.id, { score: nextScore, total: questions.length, tier, label, at: Date.now() });
+        earn(nextScore * DRACHMAS_PER_CORRECT);
         setEarned(label);
         if (sound) playSeal();
       }
@@ -78,7 +81,7 @@ function QuizPage() {
       <Shell>
         <p className="text-xs tracking-kicker text-gold uppercase">{quiz.section}</p>
         <h1 className="mt-3 font-display text-5xl text-fg uppercase sm:text-6xl">{quiz.title}</h1>
-        <p className="mt-4 max-w-xl text-muted">{quiz.blurb}</p>
+        <p className="mt-4 max-w-xl text-muted">{quiz.blurb} Every correct answer earns {DRACHMAS_PER_CORRECT} {CURRENCY}.</p>
         <div className="mt-8 rounded-md bg-surface p-5 shadow-border">
           <p className="text-xs tracking-kicker text-subtle uppercase">Titles you can earn</p>
           <ul className="mt-3 grid gap-2 text-sm">
@@ -110,6 +113,9 @@ function QuizPage() {
             {quiz.title} · {score} of {questions.length}
           </p>
           <h1 className="mt-4 font-display text-4xl text-fg uppercase sm:text-6xl">{earned}</h1>
+          <p className="mt-5 font-display text-2xl text-gold">
+            +{score * DRACHMAS_PER_CORRECT} {CURRENCY}
+          </p>
           <p className="mx-auto mt-6 max-w-xl text-sm text-muted">
             This title is saved to your profile as a label. If you replay and earn a higher one, it replaces it. A lower one never does.
           </p>
@@ -117,6 +123,9 @@ function QuizPage() {
             <button type="button" onClick={start} className="pressable min-h-12 rounded-sm bg-primary px-6 text-sm text-primary-fg">
               Play again
             </button>
+            <Link to="/shop" className="pressable inline-flex min-h-12 items-center rounded-sm border border-border px-6 text-sm text-fg">
+              Spend in the shop
+            </Link>
             <Link to="/profile" className="pressable inline-flex min-h-12 items-center rounded-sm border border-border px-6 text-sm text-fg">
               See my titles
             </Link>

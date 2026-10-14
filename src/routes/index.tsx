@@ -75,6 +75,15 @@ function Home() {
             >
               Quizzes &amp; games
             </Link>
+            <Link
+              to="/shop"
+              onClick={() => {
+                if (sound) playTone(392, 0.12, 0.04);
+              }}
+              className="pressable inline-flex min-h-12 items-center rounded-sm border border-gold/60 bg-bg/40 px-5 text-sm text-gold backdrop-blur-sm"
+            >
+              Shop
+            </Link>
             <button
               type="button"
               onClick={() => {
