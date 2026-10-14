@@ -123,7 +123,7 @@ export function StatRow({
   );
 }
 
-export function PageHero({ kicker, title, subtitle }: { kicker: string; title: string; subtitle: string }) {
+export function PageHero({ kicker, title, subtitle, children }: { kicker: string; title: string; subtitle: string; children?: ReactNode }) {
   return (
     <header className="relative overflow-hidden border-b border-border">
       <img src="/scenes/oracle.jpg" alt="" className="absolute inset-0 h-full w-full object-cover opacity-45" />
@@ -133,6 +133,7 @@ export function PageHero({ kicker, title, subtitle }: { kicker: string; title: s
         <h1 className="stagger-in mt-3 font-display text-display text-fg uppercase" style={{ ["--d" as string]: "80ms" }}>
           {title}
         </h1>
+        {children}
         <p className="stagger-in mt-4 max-w-xl text-base text-muted" style={{ ["--d" as string]: "160ms" }}>
           {subtitle}
         </p>

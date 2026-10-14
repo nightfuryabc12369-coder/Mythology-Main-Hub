@@ -3,6 +3,7 @@ import { CardTile, Stars } from "@/components/archive/wish";
 import { PageHero } from "@/components/archive/widgets";
 import { MAX_LEVEL, MAX_STARS, STAR_COPIES, godPower, rarityOf } from "@/data/cards";
 import { getCreature, getRarity } from "@/data/creatures";
+import { archetypeTitle, getArchetype, getLevel } from "@/data/identity";
 import { gods } from "@/data/gods";
 import { QUIZZES } from "@/data/quizzes";
 import { CURRENCY, feedForStar } from "@/data/shop";
@@ -27,6 +28,7 @@ function ProfilePage() {
   const hydrated = useArchiveStore((state) => state.hydrated);
   const cards = useArchiveStore((state) => state.cards);
   const pills = useArchiveStore((state) => state.pills);
+  const identity = useArchiveStore((state) => state.identity);
   const creatureResult = useArchiveStore((state) => state.creature);
   const quizResults = useArchiveStore((state) => state.quizResults);
   const copies = useArchiveStore((state) => state.copies);
@@ -43,6 +45,8 @@ function ProfilePage() {
 
   const creature = hydrated && creatureResult ? getCreature(creatureResult.creatureId) : null;
   const second = hydrated && secondResult ? getCreature(secondResult.creatureId) : null;
+  const archetype = hydrated && identity ? getArchetype(identity.godId) : null;
+  const level = archetype && identity ? getLevel(identity.level) : null;
   const titles = hydrated
     ? QUIZZES.filter((quiz) => quizResults[quiz.id]).map((quiz) => ({ quiz, result: quizResults[quiz.id] }))
     : [];
@@ -59,7 +63,27 @@ function ProfilePage() {
         kicker="Profile"
         title={player ? player.name : "My cards"}
         subtitle="Every figure the Fates have given you, and the ambrosia to raise them."
-      />
+      >
+        {archetype || titles.length > 0 ? (
+          <div className="stagger-in mt-3 flex flex-wrap items-center gap-2" style={{ ["--d" as string]: "120ms" }}>
+            {archetype ? (
+              <span className="rounded-full border border-gold/60 bg-bg/50 px-4 py-1.5 font-display text-lg text-gold sm:text-xl">
+                {archetypeTitle(archetype)}
+                {level ? ` · ${level.label} level` : ""}
+              </span>
+            ) : null}
+            {titles.map(({ quiz, result }) => (
+              <span
+                key={quiz.id}
+                title={`${quiz.title}: ${result.score} of ${result.total}`}
+                className="rounded-full border border-border bg-bg/50 px-3 py-1 text-xs tracking-kicker text-fg uppercase"
+              >
+                {result.label}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </PageHero>
       <div className="mx-auto max-w-7xl space-y-14 px-4 py-10 sm:px-6">
         {player ? <AccountPanel name={player.name} email={player.email} id={player.id} /> : null}
 
@@ -183,43 +207,6 @@ function ProfilePage() {
               </div>
             )}
           </div>
-        </section>
-
-        <section>
-          <h2 className="font-display text-3xl text-fg">My titles</h2>
-          <p className="mt-1 text-sm text-muted">Labels earned from the quizzes in the play hall. Your best one for each quiz is kept.</p>
-          {titles.length === 0 ? (
-            <p className="mt-6 text-sm text-muted">
-              {hydrated ? (
-                <>
-                  No titles yet.{" "}
-                  <Link to="/play" className="text-primary underline">
-                    Play a quiz
-                  </Link>
-                  .
-                </>
-              ) : (
-                "Reading your titles…"
-              )}
-            </p>
-          ) : (
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {titles.map(({ quiz, result }) => (
-                <Link
-                  key={quiz.id}
-                  to="/quiz/$quizId"
-                  params={{ quizId: quiz.id }}
-                  className="pressable rounded-md bg-surface p-4 shadow-border"
-                >
-                  <p className="text-xs tracking-kicker text-gold uppercase">{quiz.title}</p>
-                  <p className="mt-2 font-display text-2xl text-fg">{result.label}</p>
-                  <p className="mt-1 text-xs text-muted">
-                    Best score {result.score} of {result.total}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          )}
         </section>
 
         <section>
