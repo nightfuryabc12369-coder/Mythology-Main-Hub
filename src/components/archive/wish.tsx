@@ -37,7 +37,7 @@ export function CardArt({ god, className }: { god: God; className?: string }) {
           <span className="text-[10px] tracking-kicker text-muted uppercase">Placeholder</span>
         </div>
       ) : (
-        <img src={`/cards/${god.id}.webp`} alt={god.name} className="h-full w-full object-cover" onError={() => setFailed(true)} />
+        <img src={`/cards/thumb/${god.id}.webp`} alt={god.name} loading="lazy" decoding="async" className="h-full w-full object-cover" onError={() => setFailed(true)} />
       )}
     </div>
   );

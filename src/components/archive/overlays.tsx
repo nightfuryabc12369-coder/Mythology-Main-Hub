@@ -132,7 +132,7 @@ export function Dossier() {
               aria-label={`See full image of ${god.name}`}
               className="group relative block h-72 w-full cursor-zoom-in overflow-hidden rounded-md md:h-[420px]"
             >
-              <GodPhoto god={god} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <GodPhoto god={god} full className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-bg/10" />
               <EmblemMark name={god.emblem} className="absolute bottom-4 left-4 size-8 text-gold" />
               <span className="absolute inset-0 flex items-center justify-center bg-bg/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 [@media(hover:none)]:bg-transparent [@media(hover:none)]:opacity-100 [@media(hover:none)]:items-end [@media(hover:none)]:pb-3">
@@ -289,6 +289,7 @@ export function Dossier() {
           </button>
           <GodPhoto
             god={god}
+            full
             className="relative h-auto max-h-[88vh] w-auto max-w-[94vw] rounded-md object-contain shadow-glass"
             style={{ objectPosition: "center" }}
           />

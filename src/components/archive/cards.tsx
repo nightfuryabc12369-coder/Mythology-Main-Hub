@@ -7,18 +7,20 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 /**
- * A god's picture. Uses the card art at /cards/<id>.webp when it exists,
+ * A god's picture. Uses a small copy at /cards/thumb/<id>.webp (or the full /cards/<id>.webp with `full`) when it exists,
  * and falls back to the older scene picture for figures without card art yet.
  */
-export function GodPhoto({ god, className, style }: { god: God; className?: string; style?: React.CSSProperties }) {
+export function GodPhoto({ god, className, style, full = false }: { god: God; className?: string; style?: React.CSSProperties; full?: boolean }) {
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [god.id]);
   return failed ? (
-    <img src={god.image} alt="" className={className} style={{ objectPosition: god.focus, ...style }} />
+    <img src={god.image} alt="" loading="lazy" decoding="async" className={className} style={{ objectPosition: god.focus, ...style }} />
   ) : (
     <img
-      src={`/cards/${god.id}.webp`}
+      src={full ? `/cards/${god.id}.webp` : `/cards/thumb/${god.id}.webp`}
       alt={god.name}
+      loading={full ? undefined : "lazy"}
+      decoding="async"
       className={className}
       style={{ objectPosition: "center 22%", ...style }}
       onError={() => setFailed(true)}
