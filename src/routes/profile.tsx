@@ -255,7 +255,7 @@ function ProfilePage() {
             ))}
           </div>
           <p className="mt-6 text-xs text-muted">
-            Figures without art yet show a placeholder. Add an image named after the figure, like <code>public/cards/nike.jpg</code>, and it appears here.
+            Figures without art yet show a placeholder. Add an image named after the figure, like <code>public/cards/nike.webp</code>, and it appears here.
           </p>
         </section>
       </div>

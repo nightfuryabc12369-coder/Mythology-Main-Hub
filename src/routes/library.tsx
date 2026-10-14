@@ -47,7 +47,7 @@ function LibraryPage() {
               >
                 <div className="aspect-[5/6] overflow-hidden bg-bg-deep">
                   <img
-                    src={`/cards/${article.godId}.jpg`}
+                    src={`/cards/${article.godId}.webp`}
                     alt={article.godName}
                     loading="lazy"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

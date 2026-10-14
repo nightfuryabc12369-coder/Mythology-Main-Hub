@@ -22,7 +22,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-/** Card art. Drop /public/cards/<god-id>.jpg in later and it replaces the placeholder on its own. */
+/** Card art. Drop /public/cards/<god-id>.webp in later and it replaces the placeholder on its own. */
 export function CardArt({ god, className }: { god: God; className?: string }) {
   const [failed, setFailed] = useState(false);
   return (
@@ -37,7 +37,7 @@ export function CardArt({ god, className }: { god: God; className?: string }) {
           <span className="text-[10px] tracking-kicker text-muted uppercase">Placeholder</span>
         </div>
       ) : (
-        <img src={`/cards/${god.id}.jpg`} alt={god.name} className="h-full w-full object-cover" onError={() => setFailed(true)} />
+        <img src={`/cards/${god.id}.webp`} alt={god.name} className="h-full w-full object-cover" onError={() => setFailed(true)} />
       )}
     </div>
   );

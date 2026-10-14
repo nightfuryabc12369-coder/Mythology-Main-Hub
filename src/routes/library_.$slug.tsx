@@ -48,7 +48,7 @@ function ArticlePage() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[260px_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="mx-auto w-48 overflow-hidden rounded-sm border border-border lg:w-full">
-            <img src={`/cards/${article.godId}.jpg`} alt={article.godName} className="aspect-[5/6] w-full object-cover" />
+            <img src={`/cards/${article.godId}.webp`} alt={article.godName} className="aspect-[5/6] w-full object-cover" />
           </div>
         </aside>
 

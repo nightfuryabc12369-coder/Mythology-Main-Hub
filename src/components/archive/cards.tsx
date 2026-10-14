@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 /**
- * A god's picture. Uses the card art at /cards/<id>.jpg when it exists,
+ * A god's picture. Uses the card art at /cards/<id>.webp when it exists,
  * and falls back to the older scene picture for figures without card art yet.
  */
 export function GodPhoto({ god, className, style }: { god: God; className?: string; style?: React.CSSProperties }) {
@@ -17,7 +17,7 @@ export function GodPhoto({ god, className, style }: { god: God; className?: stri
     <img src={god.image} alt="" className={className} style={{ objectPosition: god.focus, ...style }} />
   ) : (
     <img
-      src={`/cards/${god.id}.jpg`}
+      src={`/cards/${god.id}.webp`}
       alt={god.name}
       className={className}
       style={{ objectPosition: "center 22%", ...style }}
