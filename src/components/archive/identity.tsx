@@ -20,10 +20,13 @@ export function IdentityImage({
   children,
   focus,
   fallbackSrc,
+  fallbackFocus,
 }: {
   focus?: string;
   /** Tried when `src` fails to load, before the emblem placeholder is shown. */
   fallbackSrc?: string;
+  /** Object position used only while the fallback image is showing. */
+  fallbackFocus?: string;
   src: string;
   emblem: Emblem;
   className?: string;
@@ -42,7 +45,7 @@ export function IdentityImage({
           src={shown}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
-          style={focus && shown !== src ? { objectPosition: focus } : undefined}
+          style={(shown === src ? focus : fallbackFocus) ? { objectPosition: shown === src ? focus : fallbackFocus } : undefined}
           onError={() => (!useFallback && fallbackSrc ? setUseFallback(true) : setFailed(true))}
         /> : null}
       {failed ? (
