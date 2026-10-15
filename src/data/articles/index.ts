@@ -37,6 +37,10 @@ export const ARTICLES: Article[] = [
   apollo,
   persephone,
   ares,
+  heracles,
+  aphrodite,
+  demeter,
+  artemis,
 ];
 
 export function getArticle(slug: string): Article | undefined {
