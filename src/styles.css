@@ -359,3 +359,29 @@
     transform: none !important;
   }
 }
+
+/* Battle Arena button: red, with a slow glow. */
+.arena-btn {
+  background: #b3202a;
+  color: #fff4ee;
+  border: 1px solid #ff5a5f;
+  box-shadow: 0 0 14px rgba(255, 60, 70, 0.55), 0 0 34px rgba(220, 30, 40, 0.35);
+  animation: arena-glow 2.2s ease-in-out infinite;
+}
+.arena-btn:hover {
+  background: #cc2631;
+}
+@keyframes arena-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(255, 60, 70, 0.45), 0 0 24px rgba(220, 30, 40, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(255, 80, 90, 0.85), 0 0 52px rgba(230, 30, 45, 0.5);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-btn {
+    animation: none;
+  }
+}

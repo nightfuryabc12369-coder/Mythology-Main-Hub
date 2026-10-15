@@ -1,4 +1,4 @@
-import type { Age, Constellation, Epic, Epithet, Myth, Realm, TimelineEvent } from "./types";
+import type { Age, Epic, Epithet, Myth, TimelineEvent } from "./types";
 
 export const ages: Age[] = [
   {
@@ -56,79 +56,6 @@ export const ages: Age[] = [
     aura: "wine",
     gods: ["athena", "poseidon", "aphrodite", "apollo", "hermes", "heracles", "odysseus", "theseus", "perseus", "ariadne", "orpheus", "medusa", "minotaur"],
     myths: ["labyrinth", "argonauts", "troy", "odyssey", "orpheus"],
-  },
-];
-
-export const realms: Realm[] = [
-  {
-    id: "olympus",
-    name: "Olympus",
-    epithet: "The bright court",
-    keeper: "Held by Zeus, endured by Hera",
-    blurb: "A mountain that is also a government. Thrones, grudges, and the forge under the floor.",
-    image: "/scenes/olympus.jpg",
-    focus: "center",
-    gods: ["hera", "athena", "ares", "hephaestus", "hestia", "nike", "hebe", "heracles"],
-  },
-  {
-    id: "sky",
-    name: "The open sky",
-    epithet: "Oaths and weather",
-    keeper: "Zeus, with Apollo's light beside him",
-    blurb: "Eagles, oracles, and the road Hermes uses when a message cannot wait for a ship.",
-    image: "/scenes/hero.jpg",
-    focus: "center 30%",
-    gods: ["zeus", "apollo", "hermes", "uranus", "eros", "helios", "selene", "pegasus", "harpies", "chrysomallos", "phoenix", "glaux", "eagle-of-zeus"],
-  },
-  {
-    id: "sea",
-    name: "The wine-dark sea",
-    epithet: "Unstill",
-    keeper: "Poseidon",
-    blurb: "Harbor, earthquake, and the foam that one poet says was Aphrodite's first shore.",
-    image: "/scenes/sea.jpg",
-    focus: "center",
-    gods: ["poseidon", "aphrodite", "odysseus", "ariadne", "cretan-bull", "scylla", "charybdis", "sirens", "hippocampus", "ketos"],
-  },
-  {
-    id: "earth",
-    name: "The furrowed earth",
-    epithet: "Bread and law",
-    keeper: "Demeter",
-    blurb: "Wheat, shrines, and the months when the queen below is missing from the field.",
-    image: "/scenes/earth.jpg",
-    focus: "center 55%",
-    gods: ["demeter", "gaia", "rhea", "nemesis", "asclepius", "minotaur", "theseus", "perseus", "hydra", "sphinx", "nemean-lion", "mares-of-diomedes", "python", "echidna", "arion", "laelaps", "teumessian-fox", "amalthea", "crommyonian-sow"],
-  },
-  {
-    id: "underworld",
-    name: "The house of Hades",
-    epithet: "One way",
-    keeper: "Hades and Persephone",
-    blurb: "Rivers, a gate, a dog, and a queenship Demeter forced the sky to recognize.",
-    image: "/scenes/underworld.jpg",
-    focus: "center",
-    gods: ["hades", "persephone", "hecate", "hypnos", "thanatos", "cerberus", "orpheus"],
-  },
-  {
-    id: "tartarus",
-    name: "Tartarus",
-    epithet: "The depth under the dead",
-    keeper: "A prison, not a court",
-    blurb: "Where the Titans were thrown, and where forethought was chained for taking fire downward.",
-    image: "/scenes/tartarus.jpg",
-    focus: "center",
-    gods: ["prometheus", "cronus", "typhon"],
-  },
-  {
-    id: "wild",
-    name: "The unbuilt wild",
-    epithet: "Outside the wall",
-    keeper: "Artemis by day, Dionysus by night",
-    blurb: "Hunt, ivy, and every festival a city invents so this place can visit without staying.",
-    image: "/scenes/oracle.jpg",
-    focus: "left center",
-    gods: ["artemis", "dionysus", "leto", "pan", "medusa", "orion", "chimera", "erymanthian-boar", "ceryneian-hind", "stymphalian-birds", "ladon", "orthrus", "griffin", "centaurs", "calydonian-boar", "colchian-dragon"],
   },
 ];
 
@@ -666,86 +593,6 @@ export const timeline: TimelineEvent[] = [
   { id: "thread", age: "Heroic age", title: "A thread in the maze", when: "Crete", description: "Ariadne solves the labyrinth. The hero's exit is not the end of her story.", aura: "gold" },
   { id: "apple", age: "Heroic age", title: "The apple and the ships", when: "Ten years", description: "A judgment among goddesses becomes a war among cities.", aura: "wine" },
   { id: "glance", age: "Heroic age", title: "The backward glance", when: "The threshold", description: "Orpheus is given an exception with one rule. He breaks it in sight of day.", aura: "ember" },
-];
-
-export const constellations: Constellation[] = [
-  {
-    id: "lyra",
-    name: "Lyra",
-    patron: "apollo",
-    myth: "Hermes built a lyre from a tortoise shell before his first day ended, then gave it to Apollo to settle the theft of the cattle. The sky kept the instrument.",
-    stars: [
-      [18, 68],
-      [36, 40],
-      [58, 24],
-      [78, 46],
-      [52, 74],
-    ],
-  },
-  {
-    id: "corona",
-    name: "Corona",
-    patron: "dionysus",
-    myth: "Ariadne woke on Naxos without the hero. Dionysus set her wedding crown in the sky so the exit from the maze would have a witness.",
-    stars: [
-      [22, 48],
-      [38, 30],
-      [58, 26],
-      [76, 42],
-      [64, 66],
-      [40, 70],
-    ],
-  },
-  {
-    id: "delphinus",
-    name: "Delphinus",
-    patron: "poseidon",
-    myth: "A dolphin carried a singer through Poseidon's water, or — in the other telling — persuaded the sea-nymph Amphitrite to take the throne. The shape is the favor, small and fast.",
-    stars: [
-      [24, 58],
-      [42, 36],
-      [62, 42],
-      [74, 64],
-      [48, 72],
-    ],
-  },
-  {
-    id: "scorpius",
-    name: "Scorpius",
-    patron: "artemis",
-    myth: "Orion boasted through the hunt until a scorpion was set against him. Artemis's boundary, in this star-myth, has a stinger and a season.",
-    stars: [
-      [20, 28],
-      [36, 40],
-      [52, 52],
-      [66, 66],
-      [80, 50],
-    ],
-  },
-  {
-    id: "aquila",
-    name: "Aquila",
-    patron: "zeus",
-    myth: "The eagle is Zeus's sudden will — the bird that carries what the sky has decided. Later poets give it errands. The shape in the dark is still a dive.",
-    stars: [
-      [50, 22],
-      [32, 44],
-      [68, 44],
-      [50, 62],
-      [36, 80],
-    ],
-  },
-];
-
-export const oracles = [
-  "The guest is a god until the table is cleared.",
-  "What you bury in spring answers you when the queen returns.",
-  "A promise sworn by a river is heavier than bronze.",
-  "The bright answer has two doors. You will pick the loud one.",
-  "Fire remembers the hand that stole it.",
-  "Do not look back until both of you are in the light.",
-  "The hearth is the first altar, even when no one bows.",
-  "A thread is a strategy. A sword is only a hope.",
 ];
 
 export const ageMap = Object.fromEntries(ages.map((age) => [age.id, age]));

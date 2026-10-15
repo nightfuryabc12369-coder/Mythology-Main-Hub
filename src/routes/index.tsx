@@ -47,12 +47,9 @@ function Home() {
             Aether Codex
           </h1>
           <p className="stagger-in mt-4 max-w-xl text-base text-fg/85 sm:text-lg" style={{ ["--d" as string]: "170ms" }}>
-            Gods, wars, and the stories that still move — told as a hall you can walk. Seat the twelve, pour a libation, and put two powers on the same measure.
+            Gods, wars, and the stories that still move — told as a hall you can walk. Step into the arena and put two powers on the same measure.
           </p>
           <div className="stagger-in mt-8 flex flex-wrap gap-3" style={{ ["--d" as string]: "250ms" }}>
-            <Link to="/hall" hash="thrones" className="pressable inline-flex min-h-12 items-center rounded-sm bg-primary px-5 text-sm text-primary-fg">
-              Seat the twelve
-            </Link>
             <Link
               to="/play"
               onClick={() => {
@@ -76,9 +73,9 @@ function Home() {
               onClick={() => {
                 if (sound) playTone(294, 0.12, 0.04);
               }}
-              className="pressable inline-flex min-h-12 items-center rounded-sm border border-gold/60 bg-bg/40 px-5 text-sm text-gold backdrop-blur-sm"
+              className="arena-btn pressable inline-flex min-h-12 items-center rounded-sm px-5 text-sm font-medium tracking-kicker uppercase"
             >
-              Hall of wonders
+              Battle Arena
             </Link>
             <Link
               to="/library"
