@@ -39,7 +39,7 @@ function WallpaperCard({ item, index }: { item: Wallpaper; index: number }) {
           href={item.page}
           target="_blank"
           rel="noopener noreferrer"
-          className="wallpaper-btn pressable inline-flex min-h-12 items-center rounded-sm px-6 text-sm font-medium tracking-kicker uppercase"
+          className="pressable inline-flex min-h-12 items-center rounded-sm bg-primary px-6 text-sm tracking-kicker text-primary-fg uppercase"
         >
           Download
         </a>
