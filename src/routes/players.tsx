@@ -2,8 +2,11 @@ import { Avatar } from "@/components/archive/avatar";
 import { RoleBadge, type BadgeRole } from "@/components/archive/role-badge";
 import { PageHero } from "@/components/archive/widgets";
 import { CardTile } from "@/components/archive/wish";
-import { godPower, rarityOf } from "@/data/cards";
+import { CARD_GODS, MAX_STARS, godPower, rarityOf } from "@/data/cards";
+import { CREATURES, getCreature, getRarity } from "@/data/creatures";
 import { gods } from "@/data/gods";
+import { archetypeTitle, getArchetype, getLevel } from "@/data/identity";
+import type { Extras } from "@/lib/extras";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 
@@ -28,7 +31,7 @@ type Detail = {
   pills?: number;
   nextWishAt?: number;
   banReason?: string | null;
-};
+} & Partial<Extras>;
 type LogEntry = { id: number; actorName: string; actorRole: string; targetId: string | null; targetName: string | null; action: string; detail: string; at: number };
 
 const rarityRank = { legendary: 0, epic: 1, rare: 2, common: 3 } as const;
@@ -115,6 +118,8 @@ function Directory() {
 const ACTION_TEXT: Record<string, string> = {
   "remove-card": "removed a card from",
   "give-card": "gave a card to",
+  "give-creature": "gave a creature to",
+  "remove-creature": "removed a creature from",
   "give-pills": "gave ambrosia to",
   "reset-wish": "reset the wish timer of",
   ban: "banned",
@@ -161,6 +166,9 @@ const ERROR_TEXT: Record<string, string> = {
   "already-owned": "They already own that card.",
   "bad-amount": "Pick an amount from 1 to 50.",
   banned: "Unban them first.",
+  "unknown-creature": "That creature does not exist.",
+  "slots-full": "Both creature slots are taken. Remove one first.",
+  "slot-taken": "That creature slot is already taken.",
 };
 
 function PlayerView({ id }: { id: string }) {
@@ -169,6 +177,8 @@ function PlayerView({ id }: { id: string }) {
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const [giveCard, setGiveCard] = useState("");
+  const [giveCreature, setGiveCreature] = useState("");
+  const [creatureSlot, setCreatureSlot] = useState<"" | "main" | "second">("");
   const [amount, setAmount] = useState("5");
   const [reason, setReason] = useState("");
 
@@ -246,7 +256,13 @@ function PlayerView({ id }: { id: string }) {
   const targetRole = player.role ?? null;
   const canAct = !isSelf && (viewer.role === "admin" ? targetRole !== "admin" : viewer.role === "moderator" ? targetRole === null : false);
   const isAdmin = viewer.role === "admin";
-  const unowned = gods.filter((god) => !cards[god.id]);
+  // Creatures are not cards, so they get their own list and their own slot.
+  const unowned = CARD_GODS.filter((god) => !cards[god.id]);
+  const mainCreature = player.creature ? getCreature(player.creature.creatureId) : null;
+  const secondCreature = player.secondCreature ? getCreature(player.secondCreature.creatureId) : null;
+  const archetype = player.identity ? getArchetype(player.identity.godId) : null;
+  const identityLevel = archetype ? getLevel(player.identity?.level) : null;
+  const freeCreatures = CREATURES.filter((entry) => entry.id !== player.creature?.creatureId && entry.id !== player.secondCreature?.creatureId);
   const wishWait = player.nextWishAt && player.nextWishAt > Date.now() ? Math.ceil((player.nextWishAt - Date.now()) / 3_600_000) : 0;
 
   return (
@@ -257,6 +273,14 @@ function PlayerView({ id }: { id: string }) {
           {player.banned ? <span className="rounded-full border border-wine/60 px-2.5 py-0.5 text-[10px] tracking-kicker text-wine uppercase">Banned</span> : null}
           <span className="text-xs text-muted">Joined {dateLabel(player.joinedAt)}</span>
         </div>
+        {archetype ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-gold/60 bg-bg/50 px-4 py-1.5 font-display text-lg text-gold sm:text-xl">
+              {archetypeTitle(archetype)}
+              {identityLevel ? ` · ${identityLevel.label} level` : ""}
+            </span>
+          </div>
+        ) : null}
       </PageHero>
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-10 sm:px-6">
         <section className="flex flex-wrap items-center gap-5">
@@ -305,6 +329,52 @@ function PlayerView({ id }: { id: string }) {
           </div>
         </section>
 
+        <section>
+          <h2 className="font-display text-3xl text-fg">Creatures</h2>
+          <p className="mt-1 text-sm text-muted">A main creature and one second creature.</p>
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { slot: "main" as const, label: "Main creature", entry: mainCreature, rarity: player.creature?.rarity, stars: player.creatureStars?.main ?? 0, detail: player.creature?.age ? `${player.creature.age.label} · ${player.creature.age.text}` : "Age not found yet" },
+              { slot: "second" as const, label: "Second creature", entry: secondCreature, rarity: player.secondCreature?.rarity, stars: player.creatureStars?.second ?? 0, detail: "Second creature" },
+            ].map(({ slot, label, entry, rarity, stars, detail }) =>
+              entry && rarity ? (
+                <div key={slot} className="overflow-hidden rounded-md bg-surface shadow-border">
+                  <div className="relative aspect-[4/5] w-full overflow-hidden bg-bg-deep">
+                    <img src={entry.god.image} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: entry.god.focus }} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-transparent to-transparent" />
+                    <p className="absolute top-3 left-3 rounded-full border border-border bg-bg/70 px-3 py-1 text-[10px] tracking-kicker text-gold uppercase">
+                      {label} · {getRarity(rarity).label}
+                    </p>
+                    {stars > 0 ? <p className="absolute right-3 bottom-3 rounded-full bg-bg-deep/75 px-2 py-0.5 text-sm text-[#f2c94c]">{"★".repeat(Math.min(stars, MAX_STARS))}</p> : null}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-display text-2xl text-fg">{entry.name}</h3>
+                    <p className="mt-1 text-sm text-muted">{entry.god.line}</p>
+                    {slot === "main" ? <p className="mt-3 text-xs tracking-kicker text-primary uppercase">{detail}</p> : null}
+                    {canAct ? (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => {
+                          if (window.confirm(`Remove ${entry.name} from ${player.name}?`)) void act({ action: "remove-creature", slot }, `${entry.name} was removed.`);
+                        }}
+                        className="pressable mt-3 min-h-10 w-full rounded-sm border border-wine/60 text-[11px] tracking-kicker text-wine uppercase disabled:opacity-40"
+                      >
+                        Remove creature
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              ) : (
+                <div key={slot} className="flex min-h-48 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border p-5 text-center text-sm text-muted">
+                  <p className="text-xs tracking-kicker text-subtle uppercase">{label}</p>
+                  <p>None yet.</p>
+                </div>
+              ),
+            )}
+          </div>
+        </section>
+
         {canAct && isAdmin ? (
           <section className="rounded-md bg-surface p-5 shadow-border sm:p-6">
             <h2 className="font-display text-3xl text-fg">Admin powers</h2>
@@ -328,6 +398,45 @@ function PlayerView({ id }: { id: string }) {
                     type="button"
                     disabled={busy || !giveCard}
                     onClick={() => void act({ action: "give-card", godId: giveCard }, "Card given.").then(() => setGiveCard(""))}
+                    className="pressable min-h-11 rounded-sm bg-primary px-4 text-xs tracking-kicker text-primary-fg uppercase disabled:opacity-40"
+                  >
+                    Give
+                  </button>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs tracking-kicker text-muted uppercase">Give a creature</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <select
+                    value={giveCreature}
+                    onChange={(event) => setGiveCreature(event.target.value)}
+                    className="h-11 min-w-0 flex-1 rounded-sm border border-border bg-bg px-2 text-sm text-fg"
+                  >
+                    <option value="">Pick a creature…</option>
+                    {freeCreatures.map((entry) => (
+                      <option key={entry.id} value={entry.id}>
+                        {entry.name}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={creatureSlot}
+                    onChange={(event) => setCreatureSlot(event.target.value as "" | "main" | "second")}
+                    aria-label="Creature slot"
+                    className="h-11 rounded-sm border border-border bg-bg px-2 text-sm text-fg"
+                  >
+                    <option value="">First free slot</option>
+                    <option value="main" disabled={Boolean(player.creature)}>
+                      Main slot
+                    </option>
+                    <option value="second" disabled={Boolean(player.secondCreature)}>
+                      Second slot
+                    </option>
+                  </select>
+                  <button
+                    type="button"
+                    disabled={busy || !giveCreature}
+                    onClick={() => void act({ action: "give-creature", creatureId: giveCreature, slot: creatureSlot || undefined }, "Creature given.").then(() => setGiveCreature(""))}
                     className="pressable min-h-11 rounded-sm bg-primary px-4 text-xs tracking-kicker text-primary-fg uppercase disabled:opacity-40"
                   >
                     Give

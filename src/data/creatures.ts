@@ -34,7 +34,7 @@ export const RARITIES: Array<{ id: Rarity; label: string; blurb: string }> = [
 const LEGENDARY = ["typhon", "phoenix", "cerberus", "hydra", "chimera", "pegasus", "python", "echidna", "eagle-of-zeus", "ladon", "colchian-dragon", "chrysomallos"];
 const RARE = ["medusa", "minotaur", "sphinx", "griffin", "centaurs", "sirens", "scylla", "charybdis", "ketos", "nemean-lion", "arion", "hippocampus"];
 
-function rarityOf(id: string): Rarity {
+export function creatureRarity(id: string): Rarity {
   if (LEGENDARY.includes(id)) return "legendary";
   if (RARE.includes(id)) return "rare";
   return "common";
@@ -42,7 +42,7 @@ function rarityOf(id: string): Rarity {
 
 export const CREATURES: Creature[] = gods
   .filter((god) => god.tags.includes("creature"))
-  .map((god) => ({ id: god.id, name: god.name, rarity: rarityOf(god.id), god }));
+  .map((god) => ({ id: god.id, name: god.name, rarity: creatureRarity(god.id), god }));
 
 export function getCreature(id: string | null | undefined) {
   return CREATURES.find((entry) => entry.id === id) ?? null;

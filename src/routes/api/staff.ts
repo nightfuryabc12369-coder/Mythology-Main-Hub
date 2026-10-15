@@ -1,3 +1,4 @@
+import { sanitizeExtras, type Extras } from "@/lib/extras";
 import { createFileRoute } from "@tanstack/react-router";
 
 /**
@@ -6,8 +7,8 @@ import { createFileRoute } from "@tanstack/react-router";
  *   GET   -> { role, log: [...] }                            staff only
  *   POST  { action, userId, ... }
  *
- *   Moderator + admin:  remove-card { godId }
- *   Admin only:         give-card { godId }, give-pills { amount }, reset-wish,
+ *   Moderator + admin:  remove-card { godId }, remove-creature { slot: "main" | "second" }
+ *   Admin only:         give-card { godId }, give-creature { creatureId, slot? }, give-pills { amount }, reset-wish,
  *                       ban { reason }, unban, set-role { role: "moderator" | null }
  *
  * Moderators can only act on ordinary players. Nobody can act on themselves or on another admin.
@@ -52,8 +53,8 @@ function parseCards(value: unknown): Record<string, number> {
   return (value as Record<string, number> | null) ?? {};
 }
 
-const ADMIN_ONLY = new Set(["give-card", "give-pills", "reset-wish", "ban", "unban", "set-role"]);
-const ALL_ACTIONS = new Set(["remove-card", ...ADMIN_ONLY]);
+const ADMIN_ONLY = new Set(["give-card", "give-creature", "give-pills", "reset-wish", "ban", "unban", "set-role"]);
+const ALL_ACTIONS = new Set(["remove-card", "remove-creature", ...ADMIN_ONLY]);
 
 export const Route = createFileRoute("/api/staff")({
   server: {
@@ -100,7 +101,7 @@ export const Route = createFileRoute("/api/staff")({
         if (!sameSite(request)) return json({ error: "forbidden" }, 403);
         if (!databaseReady()) return json({ dbReady: false }, 503);
         try {
-          let body: { action?: unknown; userId?: unknown; godId?: unknown; amount?: unknown; reason?: unknown; role?: unknown };
+          let body: { action?: unknown; userId?: unknown; godId?: unknown; amount?: unknown; reason?: unknown; role?: unknown; creatureId?: unknown; slot?: unknown };
           try {
             body = (await request.json()) as typeof body;
           } catch {
@@ -133,8 +134,12 @@ export const Route = createFileRoute("/api/staff")({
 
           // The profile row may not exist yet for a brand-new account.
           await sql`insert into player_profiles (user_id) values (${target.id}) on conflict (user_id) do nothing`;
-          const profile = await sql<{ cards: unknown; pills: number }>`select cards, pills from player_profiles where user_id = ${target.id}`;
+          const profile = await sql<{ cards: unknown; pills: number; extras: unknown }>`select cards, pills, extras from player_profiles where user_id = ${target.id}`;
           const cards = parseCards(profile[0]?.cards);
+
+          const extras = sanitizeExtras(profile[0]?.extras);
+          const saveExtras = (next: Extras) =>
+            sql`update player_profiles set extras = ${JSON.stringify(next)}::jsonb, admin_rev = admin_rev + 1, updated_at = now() where user_id = ${target.id}`;
 
           const godName = (id: string) => gods.find((g) => g.id === id)?.name ?? id;
           const godId = typeof body.godId === "string" ? body.godId : "";
@@ -151,11 +156,47 @@ export const Route = createFileRoute("/api/staff")({
           }
 
           if (action === "give-card") {
-            if (!gods.some((g) => g.id === godId)) return json({ error: "unknown-card" }, 400);
+            // Creatures are not cards: they go to the Creatures section (see give-creature).
+            if (!gods.some((g) => g.id === godId && !g.tags.includes("creature"))) return json({ error: "unknown-card" }, 400);
             if (cards[godId]) return json({ error: "already-owned" }, 409);
             const next = { ...cards, [godId]: 1 };
             await sql`update player_profiles set cards = ${JSON.stringify(next)}::jsonb, admin_rev = admin_rev + 1, updated_at = now() where user_id = ${target.id}`;
             await log("give-card", godName(godId));
+            return json({ ok: true });
+          }
+
+          if (action === "give-creature") {
+            const { getCreature, creatureRarity } = await import("@/data/creatures");
+            const creatureId = typeof body.creatureId === "string" ? body.creatureId : "";
+            const creature = getCreature(creatureId);
+            if (!creature) return json({ error: "unknown-creature" }, 400);
+            if (extras.creature?.creatureId === creatureId || extras.secondCreature?.creatureId === creatureId) return json({ error: "already-owned" }, 409);
+            // Pick the slot: the one the admin chose, otherwise the main slot, otherwise the second slot.
+            const wanted = body.slot === "main" || body.slot === "second" ? body.slot : null;
+            const slot = wanted ?? (!extras.creature ? "main" : !extras.secondCreature ? "second" : null);
+            if (!slot) return json({ error: "slots-full" }, 409);
+            if (slot === "main" ? extras.creature : extras.secondCreature) return json({ error: "slot-taken" }, 409);
+            const rarity = creatureRarity(creatureId);
+            const next: Extras =
+              slot === "main"
+                ? { ...extras, creature: { creatureId, rarity, at: Date.now(), age: null }, creatureStars: { ...extras.creatureStars, main: 0 } }
+                : { ...extras, secondCreature: { creatureId, rarity, at: Date.now() }, creatureStars: { ...extras.creatureStars, second: 0 } };
+            await saveExtras(next);
+            await log("give-creature", `${creature.name} (${slot} slot)`);
+            return json({ ok: true });
+          }
+
+          if (action === "remove-creature") {
+            const { getCreature } = await import("@/data/creatures");
+            const slot = body.slot === "second" ? "second" : "main";
+            const current = slot === "main" ? extras.creature : extras.secondCreature;
+            if (!current) return json({ error: "not-owned" }, 404);
+            const next: Extras =
+              slot === "main"
+                ? { ...extras, creature: null, creatureStars: { ...extras.creatureStars, main: 0 } }
+                : { ...extras, secondCreature: null, creatureStars: { ...extras.creatureStars, second: 0 } };
+            await saveExtras(next);
+            await log("remove-creature", `${getCreature(current.creatureId)?.name ?? current.creatureId} (${slot} slot)`);
             return json({ ok: true });
           }
 

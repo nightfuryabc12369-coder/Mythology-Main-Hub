@@ -1,3 +1,4 @@
+import { sanitizeExtras } from "@/lib/extras";
 import { createFileRoute } from "@tanstack/react-router";
 
 /**
@@ -42,6 +43,7 @@ type Row = {
   banned: boolean | null;
   ban_reason: string | null;
   staff_role: string | null;
+  extras: unknown;
 };
 
 function parseCards(value: Row["cards"]): Record<string, number> {
@@ -57,7 +59,7 @@ function parseCards(value: Row["cards"]): Record<string, number> {
 
 const SELECT = `
   select u."id", u."name", u."email", u."createdAt" as created_at,
-         p.cards, p.pills, p.next_wish_at, (p.avatar is not null) as has_avatar,
+         p.cards, p.pills, p.next_wish_at, p.extras, (p.avatar is not null) as has_avatar,
          (b.user_id is not null) as banned, b.reason as ban_reason, s.role as staff_role
   from "user" u
   left join player_profiles p on p.user_id = u."id"
@@ -96,6 +98,7 @@ export const Route = createFileRoute("/api/players")({
                 role: roleFor(row),
                 hasAvatar: Boolean(row.has_avatar),
                 cards: parseCards(row.cards),
+                ...sanitizeExtras(row.extras),
                 banned,
                 ...(staff
                   ? {

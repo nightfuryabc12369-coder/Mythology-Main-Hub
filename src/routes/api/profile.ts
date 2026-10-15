@@ -4,10 +4,12 @@ import { createFileRoute } from "@tanstack/react-router";
  * /api/profile — the signed-in player's saved profile.
  *
  *   GET  -> { dbReady, profile, user }   (401 + { dbReady } when signed out)
- *   PUT  -> body { state: { cards, pills, nextWishAt } }  or  { avatar: dataUrl | null }
+ *   PUT  -> body { state: { cards, pills, nextWishAt, extras } }  or  { avatar: dataUrl | null }
  *
  * Every query is scoped to the user id of the verified session — never to an id sent by the browser.
  */
+
+import { emptyExtras, sanitizeExtras, type Extras } from "@/lib/extras";
 
 const MAX_LEVEL = 10;
 const MAX_PILLS = 100000;
@@ -43,6 +45,7 @@ type Row = {
   next_wish_at: number;
   avatar: string | null;
   admin_rev: number | null;
+  extras: unknown;
 };
 
 function parseCards(value: Row["cards"]): Record<string, number> {
@@ -69,14 +72,14 @@ export const Route = createFileRoute("/api/profile")({
           const ban = await banOf(user.id, user.email);
           if (ban) return json({ dbReady: true, banned: true, reason: ban.reason }, 403);
           const sql = await getSql();
-          const rows = await sql<Row>`select cards, pills, next_wish_at, avatar, admin_rev from player_profiles where user_id = ${user.id}`;
+          const rows = await sql<Row>`select cards, pills, next_wish_at, avatar, admin_rev, extras from player_profiles where user_id = ${user.id}`;
           const row = rows[0];
           return json({
             dbReady: true,
             role: await roleOf(user),
             user: { name: user.name, email: user.email, createdAt: new Date(user.createdAt).toISOString() },
             profile: row
-              ? { cards: parseCards(row.cards), pills: Number(row.pills), nextWishAt: Number(row.next_wish_at), avatar: row.avatar, rev: Number(row.admin_rev ?? 0) }
+              ? { cards: parseCards(row.cards), pills: Number(row.pills), nextWishAt: Number(row.next_wish_at), avatar: row.avatar, rev: Number(row.admin_rev ?? 0), extras: sanitizeExtras(row.extras) }
               : null,
           });
         } catch (error) {
@@ -124,7 +127,7 @@ export const Route = createFileRoute("/api/profile")({
           }
 
           // Cards, ambrosia and wish cooldown.
-          const state = body.state as { cards?: unknown; pills?: unknown; nextWishAt?: unknown } | undefined;
+          const state = body.state as { cards?: unknown; pills?: unknown; nextWishAt?: unknown; extras?: unknown } | undefined;
           if (!state || typeof state !== "object") return json({ error: "bad-request" }, 400);
 
           const { gods } = await import("@/data/gods");
@@ -143,7 +146,7 @@ export const Route = createFileRoute("/api/profile")({
 
           // Staff can change a profile (remove a card, gift ambrosia...). A device that has not seen the
           // newest change must take the saved profile instead of pushing its old copy back over it.
-          const current = await sql<Row>`select cards, pills, next_wish_at, avatar, admin_rev from player_profiles where user_id = ${user.id}`;
+          const current = await sql<Row>`select cards, pills, next_wish_at, avatar, admin_rev, extras from player_profiles where user_id = ${user.id}`;
           const savedRev = Number(current[0]?.admin_rev ?? 0);
           if (Math.floor(Number(body.rev)) !== savedRev) {
             const row = current[0];
@@ -151,26 +154,42 @@ export const Route = createFileRoute("/api/profile")({
               {
                 stale: true,
                 profile: row
-                  ? { cards: parseCards(row.cards), pills: Number(row.pills), nextWishAt: Number(row.next_wish_at), avatar: row.avatar, rev: savedRev }
-                  : { cards: {}, pills: 0, nextWishAt: 0, avatar: null, rev: savedRev },
+                  ? { cards: parseCards(row.cards), pills: Number(row.pills), nextWishAt: Number(row.next_wish_at), avatar: row.avatar, rev: savedRev, extras: sanitizeExtras(row.extras) }
+                  : { cards: {}, pills: 0, nextWishAt: 0, avatar: null, rev: savedRev, extras: emptyExtras() },
               },
               409,
             );
           }
 
           // Cards are never taken away by a device: keep the higher level of what is saved and what arrives.
-          const existing = await sql<Row>`select cards from player_profiles where user_id = ${user.id}`;
+          const existing = await sql<Row>`select cards, extras from player_profiles where user_id = ${user.id}`;
           const saved = existing[0] ? parseCards(existing[0].cards) : {};
           const cards: Record<string, number> = { ...saved };
           for (const [id, level] of Object.entries(incoming)) cards[id] = Math.max(cards[id] ?? 0, level);
 
+          // The god title and creatures: a device can replace them (a retake) but never empty them.
+          const savedExtras = sanitizeExtras(existing[0]?.extras);
+          const incomingExtras = sanitizeExtras(state.extras);
+          const extras: Extras = {
+            identity: incomingExtras.identity ?? savedExtras.identity,
+            creature: incomingExtras.creature ?? savedExtras.creature,
+            secondCreature: incomingExtras.secondCreature ?? savedExtras.secondCreature,
+            creatureStars: {
+              main: incomingExtras.creature && savedExtras.creature && incomingExtras.creature.creatureId !== savedExtras.creature.creatureId
+                ? incomingExtras.creatureStars.main
+                : Math.max(incomingExtras.creatureStars.main, savedExtras.creatureStars.main),
+              second: Math.max(incomingExtras.creatureStars.second, savedExtras.creatureStars.second),
+            },
+          };
+
           await sql`
-            insert into player_profiles (user_id, cards, pills, next_wish_at)
-            values (${user.id}, ${JSON.stringify(cards)}::jsonb, ${pills}, ${nextWishAt})
+            insert into player_profiles (user_id, cards, pills, next_wish_at, extras)
+            values (${user.id}, ${JSON.stringify(cards)}::jsonb, ${pills}, ${nextWishAt}, ${JSON.stringify(extras)}::jsonb)
             on conflict (user_id) do update set
               cards = excluded.cards,
               pills = excluded.pills,
               next_wish_at = excluded.next_wish_at,
+              extras = excluded.extras,
               updated_at = now()`;
           return json({ ok: true, cards, rev: savedRev });
         } catch (error) {

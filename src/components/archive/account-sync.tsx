@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 /**
  * Invisible helper mounted once in the app shell.
  * - When a player signs in, it loads their saved profile and merges it with this device.
- * - While they play, every change to cards / ambrosia / wish cooldown is saved to their account.
+ * - While they play, every change to cards / ambrosia / wish cooldown / god title / creatures is saved to their account.
  */
 export function AccountSync() {
   const { player } = usePlayer();
@@ -30,7 +30,15 @@ export function AccountSync() {
   useEffect(() => {
     if (!playerId) return;
     const unsubscribe = useArchiveStore.subscribe((state, previous) => {
-      if (state.cards !== previous.cards || state.pills !== previous.pills || state.nextWishAt !== previous.nextWishAt) {
+      if (
+        state.cards !== previous.cards ||
+        state.pills !== previous.pills ||
+        state.nextWishAt !== previous.nextWishAt ||
+        state.identity !== previous.identity ||
+        state.creature !== previous.creature ||
+        state.secondCreature !== previous.secondCreature ||
+        state.creatureStars !== previous.creatureStars
+      ) {
         schedulePush();
       }
     });

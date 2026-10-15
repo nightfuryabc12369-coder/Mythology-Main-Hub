@@ -1,6 +1,7 @@
 import { useArchiveStore } from "@/lib/archive-store";
 import { authEnabled, getBearerToken, signOut } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
+import { emptyExtras, type Extras } from "@/lib/extras";
 import { create } from "zustand";
 
 /** Which account the cards on this device belong to (so guest progress is only merged once). */
@@ -39,7 +40,7 @@ export const useAccountStore = create<AccountState>()((set) => ({
   set: (patch) => set(patch),
 }));
 
-type ServerProfile = { cards: Record<string, number>; pills: number; nextWishAt: number; avatar: string | null; rev?: number };
+type ServerProfile = { cards: Record<string, number>; pills: number; nextWishAt: number; avatar: string | null; rev?: number; extras?: Extras };
 type ProfileResponse = {
   dbReady?: boolean;
   role?: StaffRole;
@@ -124,14 +125,28 @@ let mergedFor: string | null = null;
 let pushSuspended = false;
 let pushTimer: number | undefined;
 
+function localExtras(): Extras {
+  const { identity, creature, secondCreature, creatureStars } = useArchiveStore.getState();
+  return { identity, creature, secondCreature, creatureStars };
+}
+
 function currentState() {
   const { cards, pills, nextWishAt } = useArchiveStore.getState();
-  return { cards, pills, nextWishAt };
+  return { cards, pills, nextWishAt, extras: localExtras() };
 }
 
 /** Staff changed this profile (or the account was banned): take what the server has. */
 function applyServerProfile(profile: ServerProfile) {
-  useArchiveStore.setState({ cards: profile.cards ?? {}, pills: profile.pills ?? 0, nextWishAt: profile.nextWishAt ?? 0 });
+  const extras = profile.extras ?? emptyExtras();
+  useArchiveStore.setState({
+    cards: profile.cards ?? {},
+    pills: profile.pills ?? 0,
+    nextWishAt: profile.nextWishAt ?? 0,
+    identity: extras.identity,
+    creature: extras.creature,
+    secondCreature: extras.secondCreature,
+    creatureStars: extras.creatureStars,
+  });
   const rev = Number(profile.rev ?? 0);
   useAccountStore.getState().set({ rev, avatar: profile.avatar ?? useAccountStore.getState().avatar });
   writeRev(mergedFor, rev);
@@ -224,7 +239,22 @@ export async function loadAccount(userId: string): Promise<void> {
     const pills = serverWins ? (server?.pills ?? 0) : server ? server.pills + (sameDeviceOwner ? 0 : local.pills) : local.pills;
     const nextWishAt = serverWins ? (server?.nextWishAt ?? 0) : Math.max(server?.nextWishAt ?? 0, local.nextWishAt);
 
-    useArchiveStore.setState({ cards, pills, nextWishAt });
+    // Title and creatures: the saved ones win; a guest's own are kept only if the account has none yet.
+    const savedExtras = server?.extras ?? emptyExtras();
+    const mine = localExtras();
+    const extras: Extras = serverWins
+      ? savedExtras
+      : {
+          identity: savedExtras.identity ?? mine.identity,
+          creature: savedExtras.creature ?? mine.creature,
+          secondCreature: savedExtras.secondCreature ?? mine.secondCreature,
+          creatureStars: {
+            main: savedExtras.creature && mine.creature && savedExtras.creature.creatureId !== mine.creature.creatureId ? savedExtras.creatureStars.main : Math.max(savedExtras.creatureStars.main, mine.creatureStars.main),
+            second: Math.max(savedExtras.creatureStars.second, mine.creatureStars.second),
+          },
+        };
+
+    useArchiveStore.setState({ cards, pills, nextWishAt, ...extras });
     writeMarker(userId);
     writeRev(userId, serverRev);
     mergedFor = userId;
@@ -260,7 +290,7 @@ export function resetAccountMemory() {
 export async function signOutAndClear(userId: string) {
   pushSuspended = true;
   window.clearTimeout(pushTimer);
-  useArchiveStore.setState({ cards: {}, pills: 0 });
+  useArchiveStore.setState({ cards: {}, pills: 0, ...emptyExtras() });
   writeMarker(null);
   writeRev(null, null);
   try {
