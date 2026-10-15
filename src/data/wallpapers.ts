@@ -4,10 +4,13 @@
  *   preview = the "medium"/viewer image link (i.ibb.co/...), shown on the page
  *   page    = the ImgBB page link (ibb.co/...), where visitors press Download
  * New wallpapers go at the bottom of the list and appear last on the page.
+ *
+ * WALLPAPERS = desktop wallpapers. MOBILE_WALLPAPERS = phone wallpapers (below).
  */
 export type Wallpaper = {
   id: string;
   title: string;
+  /** Direct image link (i.ibb.co/...). Leave empty until you have it; the card shows a placeholder. */
   preview: string;
   page: string;
   size: string;
@@ -90,5 +93,188 @@ export const WALLPAPERS: Wallpaper[] = [
     preview: "https://i.ibb.co/TBRjkR98/Three-Headed-Hellhound-Over-Infernal-Ruins.png",
     page: "https://ibb.co/C5vCzvR7",
     size: "1920 × 1080 · PNG",
+  },
+];
+
+/**
+ * Mobile (phone) wallpapers, in the order they were added. Each one is a god or goddess.
+ * preview = the ImgBB viewer image (smaller, fast to load), page = the ImgBB page where visitors press Download.
+ * To add one: upload it to ImgBB, then add a line at the bottom of MOBILE_WALLPAPERS.
+ */
+export const MOBILE_WALLPAPERS: Wallpaper[] = [
+  {
+    id: "mobile-helios",
+    title: "Helios",
+    preview: "https://i.ibb.co/4g32BLjd/Helios.png",
+    page: "https://ibb.co/S7GcqgKr",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-pan",
+    title: "Pan",
+    preview: "https://i.ibb.co/gMWjMJtZ/Pan.png",
+    page: "https://ibb.co/JRpBRHrj",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-eros",
+    title: "Eros",
+    preview: "https://i.ibb.co/GwFmTZQ/Eros.png",
+    page: "https://ibb.co/yTV2SzF",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-leto",
+    title: "Leto",
+    preview: "https://i.ibb.co/zT51My3z/Leto.png",
+    page: "https://ibb.co/q3nzStHv",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-rhea",
+    title: "Rhea",
+    preview: "https://i.ibb.co/Xkj42SPp/Rhea.png",
+    page: "https://ibb.co/S75xsRg0",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-cronus",
+    title: "Cronus",
+    preview: "https://i.ibb.co/gMqkDb5G/Cronus.png",
+    page: "https://ibb.co/BVW0gHXm",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-uranus",
+    title: "Uranus",
+    preview: "https://i.ibb.co/5hyf8cqk/Uranus.png",
+    page: "https://ibb.co/1G5wq2HM",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-gaia",
+    title: "Gaia",
+    preview: "https://i.ibb.co/67J43NB9/Gaia.png",
+    page: "https://ibb.co/Zp1hnNm4",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-prometheus",
+    title: "Prometheus",
+    preview: "https://i.ibb.co/Q7ScR5sg/Prometheus.png",
+    page: "https://ibb.co/rK8tSWnj",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-hecate",
+    title: "Hecate",
+    preview: "https://i.ibb.co/7tS2Fvzs/Hecate.png",
+    page: "https://ibb.co/60yg5YZj",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-hestia",
+    title: "Hestia",
+    preview: "https://i.ibb.co/m5PRxTCN/Hestia.png",
+    page: "https://ibb.co/k2PGdBgm",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-persephone",
+    title: "Persephone",
+    preview: "https://i.ibb.co/V0KLQ951/Persephone.png",
+    page: "https://ibb.co/FkPh03Cr",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-hades",
+    title: "Hades",
+    preview: "https://i.ibb.co/ccsR2Tp7/Hades.png",
+    page: "https://ibb.co/d0HXkK3z",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-dionysus",
+    title: "Dionysus",
+    preview: "https://i.ibb.co/3m70K0DN/Dionysus.png",
+    page: "https://ibb.co/k2xhZhR8",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-hermes",
+    title: "Hermes",
+    preview: "https://i.ibb.co/TDWm8s9W/Hermes.png",
+    page: "https://ibb.co/NgTZjMcT",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-hephaestus",
+    title: "Hephaestus",
+    preview: "https://i.ibb.co/vCGBwNrH/Hephaestus.png",
+    page: "https://ibb.co/nqv0gXVb",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-aphrodite",
+    title: "Aphrodite",
+    preview: "https://i.ibb.co/twZn6348/Aphrodite.png",
+    page: "https://ibb.co/Ng1fq7sZ",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-ares",
+    title: "Ares",
+    preview: "https://i.ibb.co/93dvqM3n/Ares.png",
+    page: "https://ibb.co/vvMBJtv1",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-artemis",
+    title: "Artemis",
+    preview: "https://i.ibb.co/p6jLyS9d/Artemis.png",
+    page: "https://ibb.co/203kNTfd",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-apollo",
+    title: "Apollo",
+    preview: "https://i.ibb.co/hFJXZbfv/Apollo.png",
+    page: "https://ibb.co/k2s39j1F",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-athena",
+    title: "Athena",
+    preview: "https://i.ibb.co/3mLd0VBB/Athena.png",
+    page: "https://ibb.co/yFbP8KWW",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-demeter",
+    title: "Demeter",
+    preview: "https://i.ibb.co/Kxyj7HJ1/Demeter.png",
+    page: "https://ibb.co/YBj78Gxr",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-poseidon",
+    title: "Poseidon",
+    preview: "https://i.ibb.co/RT4BSdQd/Poseidon.png",
+    page: "https://ibb.co/4RgYf343",
+    size: "1145 × 1374 · PNG",
+  },
+  {
+    id: "mobile-hera",
+    title: "Hera",
+    preview: "https://i.ibb.co/JR9xbkyG/Hera.png",
+    page: "https://ibb.co/ccjbpTCZ",
+    size: "1024 × 1536 · PNG",
+  },
+  {
+    id: "mobile-zeus",
+    title: "Zeus",
+    preview: "https://i.ibb.co/CKvKw6My/Zeus.png",
+    page: "https://ibb.co/PG4GrM9y",
+    size: "1145 × 1374 · PNG",
   },
 ];
