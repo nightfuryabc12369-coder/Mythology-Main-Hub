@@ -19,18 +19,32 @@ export function IdentityImage({
   className,
   children,
   focus,
+  fallbackSrc,
 }: {
   focus?: string;
+  /** Tried when `src` fails to load, before the emblem placeholder is shown. */
+  fallbackSrc?: string;
   src: string;
   emblem: Emblem;
   className?: string;
   children?: ReactNode;
 }) {
   const [failed, setFailed] = useState(false);
-  useEffect(() => setFailed(false), [src]);
+  const [useFallback, setUseFallback] = useState(false);
+  useEffect(() => {
+    setFailed(false);
+    setUseFallback(false);
+  }, [src, fallbackSrc]);
+  const shown = useFallback && fallbackSrc ? fallbackSrc : src;
   return (
     <div className={cn("relative overflow-hidden bg-bg-deep", className)}>
-      {!failed ? <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" style={focus ? { objectPosition: focus } : undefined} onError={() => setFailed(true)} /> : null}
+      {!failed ? <img
+          src={shown}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          style={focus && shown !== src ? { objectPosition: focus } : undefined}
+          onError={() => (!useFallback && fallbackSrc ? setUseFallback(true) : setFailed(true))}
+        /> : null}
       {failed ? (
         <>
           <div

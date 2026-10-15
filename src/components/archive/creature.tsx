@@ -81,7 +81,7 @@ export function CreatureWindow() {
         className="pressable group block w-full overflow-hidden rounded-md text-left shadow-border"
         aria-label={`Open your creature: ${creature.name}`}
       >
-        <IdentityImage src={creature.god.image} focus={creature.god.focus} emblem={creature.god.emblem} className="h-52 w-full sm:h-64">
+        <IdentityImage src={`/cards/${creature.god.id}.webp`} fallbackSrc={creature.god.image} focus={creature.god.focus} emblem={creature.god.emblem} className="h-52 w-full sm:h-64">
           <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg/30 to-transparent" />
           <div className="absolute inset-0 flex flex-col items-center justify-end px-4 pb-6 text-center">
             <p className={cn("text-xs tracking-kicker uppercase", RARITY_TEXT[result.rarity])}>{rarity.label} creature</p>
@@ -105,7 +105,7 @@ export function CreatureWindow() {
               className="panel-in max-h-[94svh] w-full max-w-4xl overflow-y-auto overscroll-contain rounded-md border border-border bg-surface"
               onClick={(event) => event.stopPropagation()}
             >
-              <IdentityImage src={creature.god.image} focus={creature.god.focus} emblem={creature.god.emblem} className="h-72 w-full sm:h-[24rem]">
+              <IdentityImage src={`/cards/${creature.god.id}.webp`} fallbackSrc={creature.god.image} focus={creature.god.focus} emblem={creature.god.emblem} className="h-72 w-full sm:h-[24rem]">
                 <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-bg/30" />
                 <button
                   type="button"
