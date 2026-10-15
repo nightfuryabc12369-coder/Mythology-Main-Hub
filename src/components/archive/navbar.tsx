@@ -1,6 +1,5 @@
 import { Avatar } from "@/components/archive/avatar";
 import { CodexMark } from "@/components/archive/mark";
-import { SoundControl } from "@/components/archive/sound-control";
 import { useAccountStore, usePlayer } from "@/lib/account";
 import { useArchiveStore } from "@/lib/archive-store";
 import { cn } from "@/lib/utils";
@@ -68,7 +67,6 @@ export function Navbar() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-1">
-          <SoundControl />
           <Link
             to={accountsOn && !player ? "/login" : "/profile"}
             aria-label={player ? "My profile" : accountsOn ? "Sign in or create an account" : "My cards"}

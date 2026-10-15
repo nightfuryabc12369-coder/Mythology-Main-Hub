@@ -2,7 +2,6 @@ import { AccountSync } from "@/components/archive/account-sync";
 import { BannedScreen } from "@/components/archive/banned-screen";
 import { ChatDock } from "@/components/archive/chat-dock";
 import { Footer } from "@/components/archive/footer";
-import { MusicPlayer } from "@/components/archive/sound-control";
 import { Navbar, ScrollProgress } from "@/components/archive/navbar";
 import { CouncilModal, DetailSheet, Dossier, SearchOverlay } from "@/components/archive/overlays";
 import { useArchiveStore } from "@/lib/archive-store";
@@ -59,7 +58,6 @@ export function AppShell() {
       <ScrollProgress />
       <AccountSync />
       <BannedScreen />
-      <MusicPlayer />
       <ChatDock />
       <Navbar />
       <div key={pathname} className="page-enter pt-16">
