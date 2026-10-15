@@ -4,6 +4,7 @@ import { getGod, realmLabel } from "@/data/gods";
 import type { Age, Epic, God, Myth } from "@/data/types";
 import { useArchiveStore } from "@/lib/archive-store";
 import { cn } from "@/lib/utils";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 /**
@@ -69,12 +70,11 @@ export function GodCard({ god, index = 0 }: { god: God; index?: number }) {
 }
 
 export function AgeCard({ age }: { age: Age }) {
-  const openOverlay = useArchiveStore((state) => state.openOverlay);
   return (
-    <button
-      type="button"
-      onClick={() => openOverlay({ type: "age", id: age.id })}
-      className="pressable group relative min-h-64 overflow-hidden rounded-md text-left shadow-border"
+    <Link
+      to="/ages/$ageId"
+      params={{ ageId: age.id }}
+      className="pressable group relative block min-h-64 overflow-hidden rounded-md text-left shadow-border"
     >
       <img
         src={age.image}
@@ -90,7 +90,7 @@ export function AgeCard({ age }: { age: Age }) {
         <h3 className="mt-1 font-display text-3xl text-fg">{age.name}</h3>
         <p className="mt-2 max-w-sm text-sm text-fg/85">{age.summary}</p>
       </div>
-    </button>
+    </Link>
   );
 }
 

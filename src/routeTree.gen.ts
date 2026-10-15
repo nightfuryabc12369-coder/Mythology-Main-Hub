@@ -36,6 +36,7 @@ import { Route as ApiStaffRouteImport } from './routes/api/staff'
 import { Route as ApiAvatarRouteImport } from './routes/api/avatar'
 import { Route as ApiPlayersRouteImport } from './routes/api/players'
 import { Route as LibrarySlugRouteImport } from './routes/library_.$slug'
+import { Route as AgesAgeIdRouteImport } from './routes/ages_.$ageId'
 import { Route as QuizQuizIdRouteImport } from './routes/quiz.$quizId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
@@ -174,6 +175,11 @@ const LibrarySlugRoute = LibrarySlugRouteImport.update({
   path: '/library/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgesAgeIdRoute = AgesAgeIdRouteImport.update({
+  id: '/ages_/$ageId',
+  path: '/ages/$ageId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuizQuizIdRoute = QuizQuizIdRouteImport.update({
   id: '/quiz/$quizId',
   path: '/quiz/$quizId',
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/api/avatar': typeof ApiAvatarRoute
   '/api/players': typeof ApiPlayersRoute
   '/library/$slug': typeof LibrarySlugRoute
+  '/ages/$ageId': typeof AgesAgeIdRoute
   '/quiz/$quizId': typeof QuizQuizIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/api/avatar': typeof ApiAvatarRoute
   '/api/players': typeof ApiPlayersRoute
   '/library/$slug': typeof LibrarySlugRoute
+  '/ages/$ageId': typeof AgesAgeIdRoute
   '/quiz/$quizId': typeof QuizQuizIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -276,6 +284,7 @@ export interface FileRoutesById {
   '/api/avatar': typeof ApiAvatarRoute
   '/api/players': typeof ApiPlayersRoute
   '/library_/$slug': typeof LibrarySlugRoute
+  '/ages_/$ageId': typeof AgesAgeIdRoute
   '/quiz/$quizId': typeof QuizQuizIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -309,6 +318,7 @@ export interface FileRouteTypes {
     | '/api/avatar'
     | '/api/players'
     | '/library/$slug'
+    | '/ages/$ageId'
     | '/quiz/$quizId'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
@@ -340,6 +350,7 @@ export interface FileRouteTypes {
     | '/api/avatar'
     | '/api/players'
     | '/library/$slug'
+    | '/ages/$ageId'
     | '/quiz/$quizId'
     | '/api/auth/$'
   id:
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/api/avatar'
     | '/api/players'
     | '/library_/$slug'
+    | '/ages_/$ageId'
     | '/quiz/$quizId'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
@@ -403,6 +415,7 @@ export interface RootRouteChildren {
   ApiAvatarRoute: typeof ApiAvatarRoute
   ApiPlayersRoute: typeof ApiPlayersRoute
   LibrarySlugRoute: typeof LibrarySlugRoute
+  AgesAgeIdRoute: typeof AgesAgeIdRoute
   QuizQuizIdRoute: typeof QuizQuizIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -598,6 +611,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LibrarySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ages_/$ageId': {
+      id: '/ages_/$ageId'
+      path: '/ages/$ageId'
+      fullPath: '/ages/$ageId'
+      preLoaderRoute: typeof AgesAgeIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/quiz/$quizId': {
       id: '/quiz/$quizId'
       path: '/quiz/$quizId'
@@ -643,6 +663,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAvatarRoute: ApiAvatarRoute,
   ApiPlayersRoute: ApiPlayersRoute,
   LibrarySlugRoute: LibrarySlugRoute,
+  AgesAgeIdRoute: AgesAgeIdRoute,
   QuizQuizIdRoute: QuizQuizIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
