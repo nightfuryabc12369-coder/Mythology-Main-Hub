@@ -325,7 +325,7 @@ export function WishSystem() {
               <p className="text-xs tracking-kicker text-gold uppercase">The Pantheon stands ready</p>
               <h3 className="mt-2 font-display text-3xl text-fg sm:text-5xl">Speak your wish</h3>
               <p className="mt-2 max-w-2xl text-sm text-muted">
-                One wish at a time. After any wish the Pantheon rests for {REST_HOURS} hours. This is a game: the odds in the details are the real odds. Creatures can never be won by wishing: find yours with the quiz.
+                One wish at a time. After any wish the Pantheon rests for {REST_HOURS} {REST_HOURS === 1 ? "hour" : "hours"}. This is a game: the odds in the details are the real odds. Creatures can never be won by wishing: find yours with the quiz.
               </p>
               <div className="mt-6 grid gap-4 md:grid-cols-3">
                 {WISHES.map((wish) => {
@@ -481,7 +481,7 @@ export function WishSystem() {
                   </>
                 )}
                 <p className="mt-4 text-xs text-muted">
-                  {isChange(open.kind) ? "This wish does not use the Pantheon's rest." : `After any wish the Pantheon rests for ${REST_HOURS} hours.`}
+                  {isChange(open.kind) ? "This wish does not use the Pantheon's rest." : `After any wish the Pantheon rests for ${REST_HOURS} ${REST_HOURS === 1 ? "hour" : "hours"}.`}
                 </p>
                 {!isChange(open.kind) && resting ? (
                   <p className="mt-2 text-xs tracking-kicker text-gold uppercase">The Pantheon is resting. Next wish in {formatRest(restMs)}.</p>
