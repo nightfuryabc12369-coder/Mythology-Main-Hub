@@ -16,6 +16,14 @@ import { artemis } from "./artemis";
 import { demeter } from "./demeter";
 import { aphrodite } from "./aphrodite";
 import { heracles } from "./heracles";
+import { hestia } from "./hestia";
+import { cronus } from "./cronus";
+import { gaia } from "./gaia";
+import { pan } from "./pan";
+import { eros } from "./eros";
+import { nemesis } from "./nemesis";
+import { hypnos } from "./hypnos";
+import { thanatos } from "./thanatos";
 import type { Article } from "./types";
 
 export type { Article } from "./types";
@@ -41,6 +49,14 @@ export const ARTICLES: Article[] = [
   aphrodite,
   demeter,
   artemis,
+  hestia,
+  cronus,
+  gaia,
+  pan,
+  eros,
+  nemesis,
+  hypnos,
+  thanatos,
 ];
 
 export function getArticle(slug: string): Article | undefined {
