@@ -1,5 +1,5 @@
 /** Change the email here once and every legal page, the footer and the About page update together. */
-export const CONTACT_EMAIL = "YOUR-EMAIL@example.com";
+export const CONTACT_EMAIL = "nightfuryabc12369@gmail.com";
 export const SITE_NAME = "Aether Codex";
 export const LEGAL_UPDATED = "October 14, 2026";
 
