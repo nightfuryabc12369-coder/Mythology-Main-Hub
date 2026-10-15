@@ -5,7 +5,7 @@ export type Rarity = "common" | "rare" | "epic" | "legendary";
 
 export const RARITIES: Rarity[] = ["common", "rare", "epic", "legendary"];
 export const MAX_LEVEL = 10;
-export const REST_HOURS = 6;
+export const REST_HOURS = 1;
 export const PILLS_PER_WISH = 3;
 export const LEGENDARY_UNLOCK_CARDS = 3;
 
