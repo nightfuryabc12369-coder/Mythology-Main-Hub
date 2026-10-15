@@ -385,3 +385,29 @@
     animation: none;
   }
 }
+
+/* Wallpaper button: blue, with a slow glow. */
+.wallpaper-btn {
+  background: #1d5fd6;
+  color: #f1f7ff;
+  border: 1px solid #6fa8ff;
+  box-shadow: 0 0 14px rgba(70, 140, 255, 0.55), 0 0 34px rgba(30, 100, 230, 0.35);
+  animation: wallpaper-glow 2.2s ease-in-out infinite;
+}
+.wallpaper-btn:hover {
+  background: #2a6ee8;
+}
+@keyframes wallpaper-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(70, 140, 255, 0.45), 0 0 24px rgba(30, 100, 230, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(100, 170, 255, 0.85), 0 0 52px rgba(40, 110, 240, 0.5);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wallpaper-btn {
+    animation: none;
+  }
+}

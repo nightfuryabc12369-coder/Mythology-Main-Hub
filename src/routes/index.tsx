@@ -93,6 +93,15 @@ function Home() {
             >
               FAQ
             </Link>
+            <Link
+              to="/wallpapers"
+              onClick={() => {
+                if (sound) playTone(330, 0.12, 0.04);
+              }}
+              className="wallpaper-btn pressable inline-flex min-h-12 items-center rounded-sm px-5 text-sm font-medium tracking-kicker uppercase"
+            >
+              Wallpaper
+            </Link>
           </div>
         </div>
       </section>
