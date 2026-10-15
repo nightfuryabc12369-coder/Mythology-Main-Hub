@@ -95,10 +95,9 @@ export function AgeCard({ age }: { age: Age }) {
 }
 
 export function MythCard({ myth }: { myth: Myth }) {
-  const openOverlay = useArchiveStore((state) => state.openOverlay);
   return (
     <div className="group relative overflow-hidden rounded-md bg-surface text-left shadow-border">
-      <button type="button" onClick={() => openOverlay({ type: "myth", id: myth.id })} className="pressable w-full text-left">
+      <Link to="/myths/$mythId" params={{ mythId: myth.id }} className="pressable block w-full text-left">
         <div className="relative h-36 overflow-hidden">
           <img
             src={myth.image}
@@ -115,7 +114,7 @@ export function MythCard({ myth }: { myth: Myth }) {
           <h3 className="mt-1 font-display text-2xl text-fg">{myth.name}</h3>
           <p className="mt-2 line-clamp-3 text-sm text-muted">{myth.logline}</p>
         </div>
-      </button>
+      </Link>
       <div className="absolute top-3 right-3 z-10">
         <FavoriteButton kind="myth" id={myth.id} label={myth.name} />
       </div>

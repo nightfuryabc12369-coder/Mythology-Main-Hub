@@ -53,6 +53,13 @@ export const EXTRA_NAMES: Record<string, string> = {
   phorcys: "Phorcys",
   ceto: "Ceto",
   stheno: "Stheno",
+  paris: "Paris",
+  helen: "Helen",
+  achilles: "Achilles",
+  hector: "Hector",
+  jason: "Jason",
+  medea: "Medea",
+  pandora: "Pandora",
 };
 
 export type Family = {
