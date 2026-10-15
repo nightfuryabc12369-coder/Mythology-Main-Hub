@@ -12,6 +12,10 @@ import { persephone } from "./persephone";
 import { poseidon } from "./poseidon";
 import { prometheus } from "./prometheus";
 import { zeus } from "./zeus";
+import { artemis } from "./artemis";
+import { demeter } from "./demeter";
+import { aphrodite } from "./aphrodite";
+import { heracles } from "./heracles";
 import type { Article } from "./types";
 
 export type { Article } from "./types";
