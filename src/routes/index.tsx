@@ -14,7 +14,6 @@ export const Route = createFileRoute("/")({ component: Home });
 function Home() {
   const sound = useArchiveStore((state) => state.sound);
   const [shift, setShift] = useState({ x: 0, y: 0 });
-  const [flash, setFlash] = useState(0);
 
   return (
     <main>
@@ -39,7 +38,6 @@ function Home() {
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/55 to-bg/20" />
-        {flash > 0 ? <div key={flash} className="storm-flash pointer-events-none absolute inset-0 bg-fg" /> : null}
         <MoteField />
         <div className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-7xl flex-col justify-end px-4 pt-16 pb-16 sm:px-6">
           <p className="stagger-in text-xs tracking-kicker text-gold uppercase">Myth archive · The bright court</p>
@@ -86,16 +84,15 @@ function Home() {
             >
               Library
             </Link>
-            <button
-              type="button"
+            <Link
+              to="/faq"
               onClick={() => {
-                setFlash((value) => value + 1);
                 if (sound) playTone(196, 0.18, 0.04);
               }}
               className="pressable inline-flex min-h-12 items-center rounded-sm border border-fg/30 bg-bg/40 px-5 text-sm text-fg backdrop-blur-sm"
             >
-              Stir the storm
-            </button>
+              FAQ
+            </Link>
           </div>
         </div>
       </section>

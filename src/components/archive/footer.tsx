@@ -32,6 +32,9 @@ export function Footer() {
           <Link to="/terms" className="min-h-11 inline-flex items-center hover:text-fg">
             Terms &amp; Conditions
           </Link>
+          <Link to="/faq" className="min-h-11 inline-flex items-center hover:text-fg">
+            FAQ
+          </Link>
           <Link to="/contact" className="min-h-11 inline-flex items-center hover:text-fg">
             Contact
           </Link>
