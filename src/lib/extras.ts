@@ -8,9 +8,11 @@ export type Extras = {
   creature: { creatureId: string; rarity: Rarity; at: number; age: { stage: AgeStage; label: string; text: string } | null } | null;
   secondCreature: { creatureId: string; rarity: Rarity; at: number } | null;
   creatureStars: { main: number; second: number };
+  /** Chosen once at sign-up and never changed. Decides "God of" or "Goddess of". */
+  gender: "male" | "female" | null;
 };
 
-export const emptyExtras = (): Extras => ({ identity: null, creature: null, secondCreature: null, creatureStars: { main: 0, second: 0 } });
+export const emptyExtras = (): Extras => ({ identity: null, creature: null, secondCreature: null, creatureStars: { main: 0, second: 0 }, gender: null });
 
 const STAGES: AgeStage[] = ["baby", "young", "grown", "ancient"];
 const num = (value: unknown, fallback = 0) => (Number.isFinite(Number(value)) ? Number(value) : fallback);
@@ -59,6 +61,7 @@ export function sanitizeExtras(value: unknown): Extras {
   if (r.creatureStars && typeof r.creatureStars === "object") {
     out.creatureStars = { main: stars(r.creatureStars.main), second: stars(r.creatureStars.second) };
   }
+  if (r.gender === "male" || r.gender === "female") out.gender = r.gender;
   if (!out.creature) out.creatureStars.main = 0;
   if (!out.secondCreature) out.creatureStars.second = 0;
   return out;

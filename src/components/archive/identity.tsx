@@ -87,6 +87,7 @@ function LevelMeter({ level }: { level: string | null }) {
 export function IdentityWindow() {
   const hydrated = useArchiveStore((state) => state.hydrated);
   const identity = useArchiveStore((state) => state.identity);
+  const gender = useArchiveStore((state) => state.gender);
   const sound = useArchiveStore((state) => state.sound);
   const [open, setOpen] = useState(false);
 
@@ -136,7 +137,7 @@ export function IdentityWindow() {
   }
 
   const level = getLevel(identity.level);
-  const title = fullTitle(archetype, identity.level);
+  const title = fullTitle(archetype, identity.level, gender);
 
   return (
     <>
@@ -153,7 +154,7 @@ export function IdentityWindow() {
           <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg/30 to-transparent" />
           <div className="absolute inset-0 flex flex-col items-center justify-end px-4 pb-8 text-center">
             <p className="text-xs tracking-kicker text-gold uppercase">You are</p>
-            <h3 className="mt-2 font-display text-3xl text-fg uppercase transition-transform duration-300 group-hover:scale-105 sm:text-4xl">{archetypeTitle(archetype)}</h3>
+            <h3 className="mt-2 font-display text-3xl text-fg uppercase transition-transform duration-300 group-hover:scale-105 sm:text-4xl">{archetypeTitle(archetype, gender)}</h3>
             <p className="mt-2 font-display text-lg text-fg/90 sm:text-2xl">{level ? `${level.label} level` : "Level not chosen yet"}</p>
             <p className="mt-4 text-xs tracking-kicker text-primary uppercase">Open your history</p>
           </div>
@@ -188,7 +189,7 @@ export function IdentityWindow() {
                 </button>
                 <div className="absolute inset-x-0 bottom-0 px-5 pb-4 sm:px-8">
                   <p className="text-xs tracking-kicker text-gold uppercase">You are</p>
-                  <h3 className="mt-1 font-display text-4xl text-fg sm:text-6xl">{archetypeTitle(archetype)}</h3>
+                  <h3 className="mt-1 font-display text-4xl text-fg sm:text-6xl">{archetypeTitle(archetype, gender)}</h3>
                   {level ? <p className="mt-1 font-display text-lg text-fg/90 sm:text-2xl">{level.label} level</p> : null}
                 </div>
               </IdentityImage>
@@ -229,7 +230,7 @@ export function IdentityWindow() {
                       </>
                     ) : (
                       <p className="mt-4 text-sm text-muted">
-                        Your level is not set. Answer a second short quiz to find out whether you are a lesser, mid, high or legendary {archetypeTitle(archetype)}.
+                        Your level is not set. Answer a second short quiz to find out whether you are a lesser, mid, high or legendary {archetypeTitle(archetype, gender)}.
                       </p>
                     )}
                     <Link

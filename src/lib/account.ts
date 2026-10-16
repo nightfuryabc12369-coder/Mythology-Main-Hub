@@ -126,8 +126,8 @@ let pushSuspended = false;
 let pushTimer: number | undefined;
 
 function localExtras(): Extras {
-  const { identity, creature, secondCreature, creatureStars } = useArchiveStore.getState();
-  return { identity, creature, secondCreature, creatureStars };
+  const { identity, creature, secondCreature, creatureStars, gender } = useArchiveStore.getState();
+  return { identity, creature, secondCreature, creatureStars, gender };
 }
 
 function currentState() {
@@ -146,6 +146,7 @@ function applyServerProfile(profile: ServerProfile) {
     creature: extras.creature,
     secondCreature: extras.secondCreature,
     creatureStars: extras.creatureStars,
+    gender: extras.gender,
   });
   const rev = Number(profile.rev ?? 0);
   useAccountStore.getState().set({ rev, avatar: profile.avatar ?? useAccountStore.getState().avatar });
@@ -248,6 +249,7 @@ export async function loadAccount(userId: string): Promise<void> {
           identity: savedExtras.identity ?? mine.identity,
           creature: savedExtras.creature ?? mine.creature,
           secondCreature: savedExtras.secondCreature ?? mine.secondCreature,
+          gender: savedExtras.gender ?? mine.gender,
           creatureStars: {
             main: savedExtras.creature && mine.creature && savedExtras.creature.creatureId !== mine.creature.creatureId ? savedExtras.creatureStars.main : Math.max(savedExtras.creatureStars.main, mine.creatureStars.main),
             second: Math.max(savedExtras.creatureStars.second, mine.creatureStars.second),

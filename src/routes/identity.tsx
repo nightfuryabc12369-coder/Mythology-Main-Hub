@@ -143,6 +143,7 @@ function QuestionCard({
 
 /** Quiz 1: ten random questions, then the god. */
 function GodQuiz() {
+  const gender = useArchiveStore((state) => state.gender);
   const sound = useArchiveStore((state) => state.sound);
   const setIdentity = useArchiveStore((state) => state.setIdentity);
   const [questions, setQuestions] = useState<IdentityQuestion[] | null>(null);
@@ -174,7 +175,7 @@ function GodQuiz() {
             <div className="mx-auto mt-6 flex size-28 items-center justify-center rounded-full border border-primary/60 bg-surface shadow-glow">
               <EmblemMark name={god.emblem} className="size-12 text-gold" />
             </div>
-            <h1 className="mt-6 font-display text-5xl text-fg uppercase sm:text-7xl">{archetypeTitle(archetype)}</h1>
+            <h1 className="mt-6 font-display text-5xl text-fg uppercase sm:text-7xl">{archetypeTitle(archetype, gender)}</h1>
             <p className="mx-auto mt-6 max-w-xl text-lg text-fg">{archetype.tagline}</p>
             <p className="mx-auto mt-3 max-w-xl text-sm text-muted">{archetype.reading}</p>
             <p className="mx-auto mt-6 max-w-xl text-sm text-muted">{retake ? "Your one change has been used, so this can't be changed again. " : ""}Saved. It now shows on the home page, and you can open it for the full history.</p>
@@ -236,6 +237,7 @@ function GodQuiz() {
 
 /** Quiz 2: eight random questions, then the level of your god. */
 function LevelQuiz({ godId }: { godId: string }) {
+  const gender = useArchiveStore((state) => state.gender);
   const sound = useArchiveStore((state) => state.sound);
   const setIdentityLevel = useArchiveStore((state) => state.setIdentityLevel);
   const [questions, setQuestions] = useState<LevelQuestion[] | null>(null);
@@ -267,7 +269,7 @@ function LevelQuiz({ godId }: { godId: string }) {
         <div className="panel-in text-center">
           <p className="text-xs tracking-kicker text-gold uppercase">Your level</p>
           <h1 className="mt-4 font-display text-5xl text-fg uppercase sm:text-7xl">{info.label}</h1>
-          <p className="mt-3 font-display text-xl text-gold sm:text-2xl">{fullTitle(archetype, result.level)}</p>
+          <p className="mt-3 font-display text-xl text-gold sm:text-2xl">{fullTitle(archetype, result.level, gender)}</p>
           <div className="mx-auto mt-8 flex max-w-md gap-1.5" role="img" aria-label={`${info.label} of four levels`}>
             {LEVELS.map((entry, i) => (
               <div key={entry.id} className="flex-1">
@@ -320,7 +322,7 @@ function LevelQuiz({ godId }: { godId: string }) {
   return (
     <Shell>
       <p className="mb-6 text-sm text-muted">
-        Level quiz for the <span className="text-gold">{archetypeTitle(archetype)}</span>
+        Level quiz for the <span className="text-gold">{archetypeTitle(archetype, gender)}</span>
       </p>
       <QuestionCard
         question={question}

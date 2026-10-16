@@ -37,7 +37,8 @@ export function AccountSync() {
         state.identity !== previous.identity ||
         state.creature !== previous.creature ||
         state.secondCreature !== previous.secondCreature ||
-        state.creatureStars !== previous.creatureStars
+        state.creatureStars !== previous.creatureStars ||
+        state.gender !== previous.gender
       ) {
         schedulePush();
       }

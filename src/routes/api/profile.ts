@@ -174,6 +174,8 @@ export const Route = createFileRoute("/api/profile")({
             identity: incomingExtras.identity ?? savedExtras.identity,
             creature: incomingExtras.creature ?? savedExtras.creature,
             secondCreature: incomingExtras.secondCreature ?? savedExtras.secondCreature,
+            // Chosen once: the saved value always wins, so it can never be changed afterwards.
+            gender: savedExtras.gender ?? incomingExtras.gender,
             creatureStars: {
               main: incomingExtras.creature && savedExtras.creature && incomingExtras.creature.creatureId !== savedExtras.creature.creatureId
                 ? incomingExtras.creatureStars.main

@@ -276,7 +276,7 @@ function PlayerView({ id }: { id: string }) {
         {archetype ? (
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-gold/60 bg-bg/50 px-4 py-1.5 font-display text-lg text-gold sm:text-xl">
-              {archetypeTitle(archetype)}
+              {archetypeTitle(archetype, player.gender ?? null)}
               {identityLevel ? ` · ${identityLevel.label} level` : ""}
             </span>
           </div>

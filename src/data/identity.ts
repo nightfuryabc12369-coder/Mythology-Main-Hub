@@ -160,8 +160,10 @@ export function getArchetype(godId: string | null | undefined) {
   return ARCHETYPES.find((entry) => entry.godId === godId) ?? null;
 }
 
-export function archetypeTitle(entry: Archetype) {
-  return `${entry.rank} of ${entry.domain}`;
+/** A person's title follows who they are: men are "God of ...", women are "Goddess of ...". Without a choice, the god's own rank is used. */
+export function archetypeTitle(entry: Archetype, gender?: "male" | "female" | null) {
+  const rank = gender === "male" ? "God" : gender === "female" ? "Goddess" : entry.rank;
+  return `${rank} of ${entry.domain}`;
 }
 
 // ── Levels ───────────────────────────────────────────────────────────────────────
@@ -213,9 +215,9 @@ export function levelFromPercent(percent: number): LevelInfo {
   return result;
 }
 
-export function fullTitle(entry: Archetype, level: LevelId | null | undefined) {
+export function fullTitle(entry: Archetype, level: LevelId | null | undefined, gender?: "male" | "female" | null) {
   const info = getLevel(level);
-  return info ? `${info.label} ${archetypeTitle(entry)}` : archetypeTitle(entry);
+  return info ? `${info.label} ${archetypeTitle(entry, gender)}` : archetypeTitle(entry, gender);
 }
 
 // ── Quiz 1: who you are ──────────────────────────────────────────────────────────

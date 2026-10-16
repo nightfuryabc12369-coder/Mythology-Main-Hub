@@ -1,4 +1,5 @@
 import { Avatar } from "@/components/archive/avatar";
+import { GenderGate } from "@/components/archive/gender-pick";
 import { CardTile, Stars } from "@/components/archive/wish";
 import { PageHero } from "@/components/archive/widgets";
 import { MAX_LEVEL, MAX_STARS, STAR_COPIES, godPower, rarityOf } from "@/data/cards";
@@ -30,6 +31,7 @@ function ProfilePage() {
   const cards = useArchiveStore((state) => state.cards);
   const pills = useArchiveStore((state) => state.pills);
   const identity = useArchiveStore((state) => state.identity);
+  const gender = useArchiveStore((state) => state.gender);
   const creatureResult = useArchiveStore((state) => state.creature);
   const quizResults = useArchiveStore((state) => state.quizResults);
   const copies = useArchiveStore((state) => state.copies);
@@ -78,7 +80,7 @@ function ProfilePage() {
           <div className="stagger-in mt-3 flex flex-wrap items-center gap-2" style={{ ["--d" as string]: "120ms" }}>
             {archetype ? (
               <span className="rounded-full border border-gold/60 bg-bg/50 px-4 py-1.5 font-display text-lg text-gold sm:text-xl">
-                {archetypeTitle(archetype)}
+                {archetypeTitle(archetype, gender)}
                 {level ? ` · ${level.label} level` : ""}
               </span>
             ) : null}
@@ -96,6 +98,7 @@ function ProfilePage() {
       </PageHero>
       <div className="mx-auto max-w-7xl space-y-14 px-4 py-10 sm:px-6">
         {player ? <AccountPanel name={player.name} email={player.email} id={player.id} /> : null}
+        {player ? <GenderGate /> : null}
 
         {!player && !isPending && accountsOn ? (
           <div className="flex flex-col gap-4 rounded-md bg-surface p-6 shadow-border sm:flex-row sm:items-center sm:justify-between">

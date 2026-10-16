@@ -66,6 +66,9 @@ type ArchiveState = {
   /** The second creature, bought in the shop. One only, for good. */
   secondCreature: SecondCreature | null;
   creatureStars: { main: number; second: number };
+  /** Chosen once at sign-up. It can be set only while empty. */
+  gender: "male" | "female" | null;
+  setGender: (gender: "male" | "female") => void;
   earn: (amount: number) => void;
   buyCard: (id: string, price: number) => boolean;
   buyPills: (count: number, price: number) => boolean;
@@ -129,6 +132,11 @@ export const useArchiveStore = create<ArchiveState>()(
       stars: {},
       secondCreature: null,
       creatureStars: { main: 0, second: 0 },
+      gender: null,
+      setGender: (gender) => {
+        if (get().gender) return;
+        set({ gender });
+      },
       earn: (amount) => set({ drachmas: get().drachmas + Math.max(0, Math.floor(amount)) }),
       buyCard: (id, price) => {
         const { drachmas, cards, copies } = get();
@@ -285,6 +293,7 @@ export const useArchiveStore = create<ArchiveState>()(
         stars: state.stars,
         secondCreature: state.secondCreature,
         creatureStars: state.creatureStars,
+        gender: state.gender,
       }),
     },
   ),

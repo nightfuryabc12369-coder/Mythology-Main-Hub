@@ -1,6 +1,8 @@
 import { Avatar } from "@/components/archive/avatar";
+import { GenderChoice, type Gender } from "@/components/archive/gender-pick";
 import { fetchProfile, imageFileToAvatar, saveAvatar, useAccountStore, usePlayer } from "@/lib/account";
 import { authClient } from "@/lib/auth/client";
+import { useArchiveStore } from "@/lib/archive-store";
 import { cn } from "@/lib/utils";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Camera, X } from "lucide-react";
@@ -25,6 +27,7 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
+  const [gender, setGender] = useState<Gender | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -65,6 +68,7 @@ function LoginPage() {
     if (mode === "signup") {
       if (!name.trim()) return setMessage("Choose a name for your profile.");
       if (name.trim().length > 40) return setMessage("Keep your name under 40 characters.");
+      if (!gender) return setMessage("Choose male or female. It cannot be changed later.");
     }
     if (!cleanEmail) return setMessage("Enter your email.");
     if (password.length < 8) return setMessage("Your password needs at least 8 characters.");
@@ -77,6 +81,7 @@ function LoginPage() {
           setMessage(error.message ?? "We could not create your account.");
           return;
         }
+        if (gender) useArchiveStore.getState().setGender(gender);
         if (photo) {
           try {
             await saveAvatar(photo);
@@ -196,6 +201,8 @@ function LoginPage() {
                     </label>
                     <input id="name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="nickname" maxLength={40} placeholder="What should we call you?" className={inputClass} />
                   </div>
+
+                  <GenderChoice value={gender} onChange={setGender} />
                 </>
               ) : null}
 
