@@ -1,4 +1,5 @@
 import { AccountSync } from "@/components/archive/account-sync";
+import { GenderPrompt } from "@/components/archive/gender-pick";
 import { BannedScreen } from "@/components/archive/banned-screen";
 import { ChatDock } from "@/components/archive/chat-dock";
 import { Footer } from "@/components/archive/footer";
@@ -57,6 +58,7 @@ export function AppShell() {
     <div className="ink-grid min-h-screen bg-bg text-fg">
       <ScrollProgress />
       <AccountSync />
+      <GenderPrompt />
       <BannedScreen />
       <ChatDock />
       <Navbar />
