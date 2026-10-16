@@ -129,34 +129,6 @@ export const WALLPAPERS: Wallpaper[] = [
     page: "https://ibb.co/HTkdV6Cf",
     size: "1920 × 1080 · PNG",
   },
-  {
-    id: "hades-crimson-underworld-ii",
-    title: "Hades in the Crimson Underworld II",
-    preview: "https://i.ibb.co/Hf790zv1/Hades-in-the-Crimson-Underworld.png",
-    page: "https://ibb.co/dwBHS291",
-    size: "1920 × 1080 · PNG",
-  },
-  {
-    id: "lion-clad-hero-ii",
-    title: "Lion-Clad Hero Beneath Fiery Skies II",
-    preview: "https://i.ibb.co/fzSnT0fw/Lion-Clad-Hero-Beneath-Fiery-Skies.png",
-    page: "https://ibb.co/7dzR0yPm",
-    size: "1920 × 1080 · PNG",
-  },
-  {
-    id: "storm-god-electric-blue-ii",
-    title: "Storm God in Electric Blue II",
-    preview: "https://i.ibb.co/gGySKBf/Storm-God-in-Electric-Blue-1.png",
-    page: "https://ibb.co/vb13nKT",
-    size: "1920 × 1080 · PNG",
-  },
-  {
-    id: "storm-kissed-queen-ii",
-    title: "Storm-Kissed Queen with Peacock II",
-    preview: "https://i.ibb.co/RGycs4Cv/Storm-Kissed-Queen-with-Peacock.png",
-    page: "https://ibb.co/ymSqZB8f",
-    size: "1920 × 1080 · PNG",
-  },
 ];
 
 /**
