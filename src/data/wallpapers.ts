@@ -3,7 +3,7 @@
  * To add one: upload it to ImgBB, then add a line below with
  *   preview = the "medium"/viewer image link (i.ibb.co/...), shown on the page
  *   page    = the ImgBB page link (ibb.co/...), where visitors press Download
- * New wallpapers go at the bottom of the list and appear last on the page.
+ * Add new wallpapers at the bottom of the list. The page shows the list newest-first, so they appear at the top.
  *
  * WALLPAPERS = desktop wallpapers. MOBILE_WALLPAPERS = phone wallpapers (below).
  */
@@ -94,12 +94,75 @@ export const WALLPAPERS: Wallpaper[] = [
     page: "https://ibb.co/C5vCzvR7",
     size: "1920 × 1080 · PNG",
   },
+  {
+    id: "hecate-triple-moon",
+    title: "Hecate Beneath the Triple Moon",
+    preview: "https://i.ibb.co/GQvFkGm3/Hecate-Beneath-the-Triple-Moon.png",
+    page: "https://ibb.co/fdYQtZJG",
+    size: "1920 × 1080 · PNG",
+  },
+  {
+    id: "hestia-hearth-ruins",
+    title: "Hestia's Hearth Among Ancient Ruins",
+    preview: "https://i.ibb.co/nsxtw1yf/Hestia-s-Hearth-Among-Ancient-Ruins.png",
+    page: "https://ibb.co/gMkhrW8w",
+    size: "1920 × 1080 · PNG",
+  },
+  {
+    id: "mythic-blacksmith-flames",
+    title: "Mythic Blacksmith Amidst the Flames",
+    preview: "https://i.ibb.co/N27xyQjP/Mythic-Blacksmith-Amidst-the-Flames.png",
+    page: "https://ibb.co/Mk9nCWV4",
+    size: "1920 × 1080 · PNG",
+  },
+  {
+    id: "persephone-crimson-garden",
+    title: "Persephone in the Crimson Underworld Garden",
+    preview: "https://i.ibb.co/tM8CL0jT/Persephone-in-the-Crimson-Underworld-Garden.png",
+    page: "https://ibb.co/qMk1JHq3",
+    size: "1920 × 1080 · PNG",
+  },
+  {
+    id: "serpent-queen-ruined-temple",
+    title: "Serpent Queen of the Ruined Temple",
+    preview: "https://i.ibb.co/qYP5dKC3/Serpent-Queen-of-the-Ruined-Temple.png",
+    page: "https://ibb.co/HTkdV6Cf",
+    size: "1920 × 1080 · PNG",
+  },
+  {
+    id: "hades-crimson-underworld-ii",
+    title: "Hades in the Crimson Underworld II",
+    preview: "https://i.ibb.co/Hf790zv1/Hades-in-the-Crimson-Underworld.png",
+    page: "https://ibb.co/dwBHS291",
+    size: "1920 × 1080 · PNG",
+  },
+  {
+    id: "lion-clad-hero-ii",
+    title: "Lion-Clad Hero Beneath Fiery Skies II",
+    preview: "https://i.ibb.co/fzSnT0fw/Lion-Clad-Hero-Beneath-Fiery-Skies.png",
+    page: "https://ibb.co/7dzR0yPm",
+    size: "1920 × 1080 · PNG",
+  },
+  {
+    id: "storm-god-electric-blue-ii",
+    title: "Storm God in Electric Blue II",
+    preview: "https://i.ibb.co/gGySKBf/Storm-God-in-Electric-Blue-1.png",
+    page: "https://ibb.co/vb13nKT",
+    size: "1920 × 1080 · PNG",
+  },
+  {
+    id: "storm-kissed-queen-ii",
+    title: "Storm-Kissed Queen with Peacock II",
+    preview: "https://i.ibb.co/RGycs4Cv/Storm-Kissed-Queen-with-Peacock.png",
+    page: "https://ibb.co/ymSqZB8f",
+    size: "1920 × 1080 · PNG",
+  },
 ];
 
 /**
  * Mobile (phone) wallpapers, in the order they were added. Each one is a god or goddess.
  * preview = the ImgBB viewer image (smaller, fast to load), page = the ImgBB page where visitors press Download.
- * To add one: upload it to ImgBB, then add a line at the bottom of MOBILE_WALLPAPERS.
+ * To add one: upload it to ImgBB, then add a line at the bottom of MOBILE_WALLPAPERS (the page shows it newest-first).
  */
 export const MOBILE_WALLPAPERS: Wallpaper[] = [
   {

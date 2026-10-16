@@ -115,13 +115,13 @@ function WallpapersPage() {
         </div>
         {tab === "desktop" ? (
           <div className="space-y-14">
-            {WALLPAPERS.map((item, index) => (
+            {[...WALLPAPERS].reverse().map((item, index) => (
               <WallpaperCard key={item.id} item={item} index={index} />
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3">
-            {MOBILE_WALLPAPERS.map((item, index) => (
+            {[...MOBILE_WALLPAPERS].reverse().map((item, index) => (
               <MobileCard key={item.id} item={item} index={index} />
             ))}
           </div>
