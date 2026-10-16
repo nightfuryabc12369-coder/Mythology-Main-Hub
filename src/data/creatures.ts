@@ -147,6 +147,66 @@ const raw: Array<[string, string, Opt[]]> = [
     ["Wings", 1, { wild: 2 }],
     ["To never be forgotten", 2, { command: 2, passion: 1 }],
   ]],
+  ["c21", "Pick a gift for the road.", [
+    ["A warm cloak", 0, { hearth: 1 }],
+    ["A sharp knife", 1, { fury: 1, craft: 1 }],
+    ["A map nobody else can read", 1, { wisdom: 2 }],
+    ["Nothing. I take what I find", 2, { wild: 2, shadow: 1 }],
+  ]],
+  ["c22", "A storm hits while you are travelling.", [
+    ["Find shelter at once", 0, { hearth: 1 }],
+    ["Keep walking, grumbling", 0, { wit: 1, fury: 1 }],
+    ["Enjoy it", 1, { wild: 2 }],
+    ["Make the storm part of the plan", 2, { command: 2, wisdom: 1 }],
+  ]],
+  ["c23", "How do you treat a stranger who is hurt?", [
+    ["Help and move on", 0, { hearth: 1 }],
+    ["Help and stay until they are well", 1, { hearth: 2, passion: 1 }],
+    ["Help, then ask what they owe", 1, { wit: 1, shadow: 1 }],
+    ["Help them so well they never forget it", 2, { command: 1, passion: 2 }],
+  ]],
+  ["c24", "Choose a hiding place.", [
+    ["Under a bed", 0, { hearth: 1 }],
+    ["A hollow tree", 0, { wild: 1 }],
+    ["A cave behind a waterfall", 1, { wild: 1, shadow: 1 }],
+    ["Nowhere. I let them find me", 2, { command: 2, fury: 1 }],
+  ]],
+  ["c25", "What is your favourite time of day?", [
+    ["Midday, with everyone around", 0, { passion: 1 }],
+    ["Dusk", 1, { shadow: 1, wisdom: 1 }],
+    ["Dawn, alone", 1, { wild: 1, wisdom: 1 }],
+    ["The hour before a storm", 2, { fury: 1, command: 1, shadow: 1 }],
+  ]],
+  ["c26", "A friend asks you to keep a dangerous secret.", [
+    ["Refuse politely", 0, { wisdom: 1 }],
+    ["Keep it and worry", 0, { hearth: 1 }],
+    ["Keep it and watch for trouble", 1, { shadow: 1, wisdom: 1 }],
+    ["Keep it, and turn it to everyone's advantage", 2, { wit: 2, command: 1 }],
+  ]],
+  ["c27", "How do you answer a challenge?", [
+    ["Walk away", 0, { wit: 1 }],
+    ["Meet it with a joke", 0, { wit: 1, passion: 1 }],
+    ["Accept it, and win cleanly", 1, { fury: 1, craft: 1 }],
+    ["Turn the challenger into a legend about me", 2, { command: 1, wit: 1, passion: 1 }],
+  ]],
+  ["c28", "Pick something to guard.", [
+    ["A small garden", 0, { hearth: 1 }],
+    ["A bridge", 1, { command: 1, wisdom: 1 }],
+    ["A treasure under a mountain", 1, { shadow: 1, craft: 1 }],
+    ["A secret even the gods forgot", 2, { shadow: 2, wisdom: 1 }],
+  ]],
+  ["c29", "What does your voice sound like?", [
+    ["Quiet and quick", 0, { wit: 1 }],
+    ["Warm and steady", 0, { hearth: 1, passion: 1 }],
+    ["Deep, like a distant drum", 1, { command: 1, fury: 1 }],
+    ["Like something very old finally speaking", 2, { shadow: 1, wisdom: 2 }],
+  ]],
+  ["c30", "What do you do when the sky turns strange?", [
+    ["Hide", 0, { hearth: 1 }],
+    ["Look up and wonder", 1, { wisdom: 1, wild: 1 }],
+    ["Follow it", 1, { wild: 2 }],
+    ["Recognize it, and say its name", 2, { wisdom: 2, shadow: 1 }],
+  ]],
 ];
 
 export const CREATURE_POOL: CreatureQuestion[] = raw.map(([id, prompt, options]) => ({
@@ -241,6 +301,12 @@ const ageRaw: Array<[string, string, [string, 0 | 1 | 2 | 3][]]> = [
   ["a6", "How does it play?", [["Chasing its own tail", 0], ["With other young ones", 1], ["It does not play. It practices", 2], ["It tells stories now", 3]]],
   ["a7", "How does it speak?", [["Squeaks and chirps", 0], ["A few clear words", 1], ["Sentences, with strong opinions", 2], ["Slowly, and the room goes quiet", 3]]],
   ["a8", "Pick a scar it carries.", [["None yet", 0], ["A small nick", 1], ["A long one from a fight", 2], ["One from a war everyone forgot", 3]]],
+  ["a9", "How does it respond to its own name?", [["Does not know it yet", 0], ["Comes when called", 1], ["Comes when it feels like it", 2], ["Has had many names and answers to none", 3]]],
+  ["a10", "What does it do at the first snowfall?", [["Tumbles in it", 0], ["Tracks it, curious", 1], ["Walks through it, unbothered", 2], ["Remembers a winter that lasted years", 3]]],
+  ["a11", "How does it hunt or forage?", [["Stays near a parent", 0], ["Tries, and often misses", 1], ["Patient and precise", 2], ["It does not hunt. Things come to it", 3]]],
+  ["a12", "What does it do when it sees its reflection?", [["Pounces on it", 0], ["Studies it", 1], ["Ignores it", 2], ["Remembers when the face looked different", 3]]],
+  ["a13", "How does it greet the dawn?", [["Still asleep", 0], ["Stretches and yawns", 1], ["Already awake and alert", 2], ["It has watched ten thousand sunrises", 3]]],
+  ["a14", "What does it do when it hears a lullaby?", [["Falls asleep", 0], ["Listens, wide-eyed", 1], ["Hums along a little", 2], ["Knows who wrote it", 3]]],
 ];
 
 export const AGE_POOL: AgeQuestion[] = ageRaw.map(([id, prompt, options]) => ({ id, prompt, options: options.map(([text, points]) => ({ text, points })) }));

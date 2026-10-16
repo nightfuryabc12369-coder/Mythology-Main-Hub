@@ -469,6 +469,166 @@ export const IDENTITY_POOL: IdentityQuestion[] = [
       { text: "Find the library", w: { wisdom: 2, shadow: 1 } },
     ],
   },
+  {
+    id: "i25",
+    prompt: "A lost wallet with a lot of cash turns up in your hands. You...",
+    options: [
+      { text: "Return it, with the cash, and walk away", w: { hearth: 2, command: 1 } },
+      { text: "Return it and make sure everyone hears about it", w: { command: 2, passion: 1 } },
+      { text: "Study the ID, then decide what the owner deserves", w: { shadow: 2, wisdom: 1 } },
+      { text: "Leave it where the owner will look, and watch from a distance", w: { wit: 2, wild: 1 } },
+    ],
+  },
+  {
+    id: "i26",
+    prompt: "Your friends are arguing and ask you to decide. You...",
+    options: [
+      { text: "Hear everyone out, then settle it", w: { wisdom: 2, command: 1 } },
+      { text: "Tell them both they are wrong", w: { fury: 2, wit: 1 } },
+      { text: "Change the subject until they forget", w: { wit: 2, hearth: 1 } },
+      { text: "Cook something and let them cool down", w: { hearth: 2, passion: 1 } },
+    ],
+  },
+  {
+    id: "i27",
+    prompt: "A big deadline is tomorrow and nothing is ready. You...",
+    options: [
+      { text: "Work through the night until it is built right", w: { craft: 2, wisdom: 1 } },
+      { text: "Rally everyone and divide the work", w: { command: 2, hearth: 1 } },
+      { text: "Improvise something brilliant at the last minute", w: { wit: 2, passion: 1 } },
+      { text: "Go for a long walk first, and then it comes together", w: { wild: 2, shadow: 1 } },
+    ],
+  },
+  {
+    id: "i28",
+    prompt: "You meet someone who is clearly better than you at something. You...",
+    options: [
+      { text: "Learn everything they know", w: { wisdom: 2, craft: 1 } },
+      { text: "Challenge them, openly", w: { fury: 2, command: 1 } },
+      { text: "Befriend them and cheer them on", w: { hearth: 2, passion: 1 } },
+      { text: "Watch them, and learn where the cracks are", w: { shadow: 2, wit: 1 } },
+    ],
+  },
+  {
+    id: "i29",
+    prompt: "Which sound do you love most?",
+    options: [
+      { text: "Thunder overhead", w: { command: 2, fury: 1 } },
+      { text: "A fire crackling in a quiet room", w: { hearth: 2, craft: 1 } },
+      { text: "Wind in an empty forest", w: { wild: 2, shadow: 1 } },
+      { text: "A crowd laughing at your joke", w: { wit: 2, passion: 1 } },
+    ],
+  },
+  {
+    id: "i30",
+    prompt: "How do you want to be remembered?",
+    options: [
+      { text: "As the one who held everything together", w: { hearth: 2, wisdom: 1 } },
+      { text: "As someone nobody dared to cross", w: { fury: 2, command: 1 } },
+      { text: "As someone who loved loudly", w: { passion: 2, wit: 1 } },
+      { text: "As someone who made something that lasted", w: { craft: 2, wisdom: 1 } },
+    ],
+  },
+  {
+    id: "i31",
+    prompt: "You are told a secret. What do you do with it?",
+    options: [
+      { text: "Keep it forever", w: { shadow: 2, hearth: 1 } },
+      { text: "Use it, carefully, only when it matters", w: { wisdom: 1, shadow: 1, command: 1 } },
+      { text: "Tell one person, and regret it", w: { passion: 2, wit: 1 } },
+      { text: "Turn it into a very good story, with the names changed", w: { wit: 2, craft: 1 } },
+    ],
+  },
+  {
+    id: "i32",
+    prompt: "Pick a place to build a home.",
+    options: [
+      { text: "A hilltop with a view of everything", w: { command: 2, wisdom: 1 } },
+      { text: "A valley with a warm kitchen", w: { hearth: 2, passion: 1 } },
+      { text: "A cabin among the trees", w: { wild: 2, shadow: 1 } },
+      { text: "A workshop with a bed in the corner", w: { craft: 2, fury: 1 } },
+    ],
+  },
+  {
+    id: "i33",
+    prompt: "A rival makes a joke about you in front of others. You...",
+    options: [
+      { text: "Answer with a better joke", w: { wit: 2, passion: 1 } },
+      { text: "Stare at them until they stop", w: { shadow: 2, command: 1 } },
+      { text: "Challenge them to prove it", w: { fury: 2, command: 1 } },
+      { text: "Laugh along, and remember it later", w: { shadow: 1, hearth: 1, wit: 1 } },
+    ],
+  },
+  {
+    id: "i34",
+    prompt: "What would you most like to master?",
+    options: [
+      { text: "A craft no one else can do", w: { craft: 2, wisdom: 1 } },
+      { text: "The art of persuasion", w: { wit: 2, command: 1 } },
+      { text: "The wild places and the creatures in them", w: { wild: 2, shadow: 1 } },
+      { text: "The hearts of the people around you", w: { passion: 2, hearth: 1 } },
+    ],
+  },
+  {
+    id: "i35",
+    prompt: "Your group is lost. You...",
+    options: [
+      { text: "Take charge and choose a direction", w: { command: 2, fury: 1 } },
+      { text: "Read the stars and the land", w: { wisdom: 2, wild: 1 } },
+      { text: "Keep spirits up with songs and snacks", w: { hearth: 2, passion: 1 } },
+      { text: "Slip ahead alone to scout", w: { shadow: 2, wit: 1 } },
+    ],
+  },
+  {
+    id: "i36",
+    prompt: "Which gift would you most like to receive?",
+    options: [
+      { text: "A crown", w: { command: 2, fury: 1 } },
+      { text: "A perfectly balanced tool", w: { craft: 2, wisdom: 1 } },
+      { text: "An open road and a fast horse", w: { wild: 2, wit: 1 } },
+      { text: "A table that is always full of friends", w: { hearth: 2, passion: 1 } },
+    ],
+  },
+  {
+    id: "i37",
+    prompt: "Someone you trust lies to you. How do you react?",
+    options: [
+      { text: "Cold silence, then a clean break", w: { shadow: 2, wisdom: 1 } },
+      { text: "A fierce argument that clears the air", w: { fury: 2, passion: 1 } },
+      { text: "I find out why before I judge", w: { wisdom: 2, hearth: 1 } },
+      { text: "I am hurt, and I show it", w: { passion: 2, hearth: 1 } },
+    ],
+  },
+  {
+    id: "i38",
+    prompt: "When you win, you...",
+    options: [
+      { text: "Share it with everyone around you", w: { hearth: 2, passion: 1 } },
+      { text: "Claim the prize and take your place", w: { command: 2, fury: 1 } },
+      { text: "Quietly note what you learned", w: { wisdom: 2, shadow: 1 } },
+      { text: "Turn it into a legend", w: { wit: 2, passion: 1 } },
+    ],
+  },
+  {
+    id: "i39",
+    prompt: "What is your idea of a perfect night?",
+    options: [
+      { text: "Stars, a fire, and silence", w: { wild: 2, shadow: 1 } },
+      { text: "Music, dancing, and a little too much wine", w: { passion: 2, wit: 1 } },
+      { text: "Finishing a project I am proud of", w: { craft: 2, wisdom: 1 } },
+      { text: "Sitting at the head of a long table", w: { command: 2, hearth: 1 } },
+    ],
+  },
+  {
+    id: "i40",
+    prompt: "What frightens you most?",
+    options: [
+      { text: "Being powerless", w: { command: 2, fury: 1 } },
+      { text: "Being forgotten", w: { passion: 2, craft: 1 } },
+      { text: "Being shut indoors forever", w: { wild: 2, wit: 1 } },
+      { text: "Not understanding something important", w: { wisdom: 2, shadow: 1 } },
+    ],
+  },
 ];
 
 // ── Quiz 2: your level ───────────────────────────────────────────────────────────
@@ -641,6 +801,86 @@ export const LEVEL_POOL: LevelQuestion[] = [
       { text: "Learn and try something smaller", points: 1 },
       { text: "Learn and try again", points: 2 },
       { text: "Build the next attempt on top of it, bigger", points: 3 },
+    ],
+  },
+  {
+    id: "l17",
+    prompt: "Mortals pray to you for help. You...",
+    options: [
+      { text: "Ignore most of them", points: 0 },
+      { text: "Answer when it is convenient", points: 1 },
+      { text: "Answer the ones that please you", points: 2 },
+      { text: "Rearrange a kingdom for the ones who honour you", points: 3 },
+    ],
+  },
+  {
+    id: "l18",
+    prompt: "A rival god insults your temple. You...",
+    options: [
+      { text: "Shrug it off", points: 0 },
+      { text: "Complain to a friend", points: 1 },
+      { text: "Send a pointed omen", points: 2 },
+      { text: "Answer so that nobody forgets it", points: 3 },
+    ],
+  },
+  {
+    id: "l19",
+    prompt: "How do you feel about your name carved on a monument?",
+    options: [
+      { text: "Embarrassed", points: 0 },
+      { text: "Pleased", points: 1 },
+      { text: "I expect it", points: 2 },
+      { text: "I ask for it to be bigger", points: 3 },
+    ],
+  },
+  {
+    id: "l20",
+    prompt: "A hero asks for your blessing. You...",
+    options: [
+      { text: "Send them away", points: 0 },
+      { text: "Give a small token", points: 1 },
+      { text: "Guide them through a quest", points: 2 },
+      { text: "Raise them to the stars", points: 3 },
+    ],
+  },
+  {
+    id: "l21",
+    prompt: "A new age begins. What is your part in it?",
+    options: [
+      { text: "Watch from the side", points: 0 },
+      { text: "Adapt and survive", points: 1 },
+      { text: "Shape its customs", points: 2 },
+      { text: "Be its centre", points: 3 },
+    ],
+  },
+  {
+    id: "l22",
+    prompt: "How many people know your name?",
+    options: [
+      { text: "A few in a village", points: 0 },
+      { text: "A town", points: 1 },
+      { text: "A whole region", points: 2 },
+      { text: "Everyone who has ever lived", points: 3 },
+    ],
+  },
+  {
+    id: "l23",
+    prompt: "Someone dares you to prove your power. You...",
+    options: [
+      { text: "Decline", points: 0 },
+      { text: "Show them a little", points: 1 },
+      { text: "Show them enough to frighten them", points: 2 },
+      { text: "Show them what the world is like without you", points: 3 },
+    ],
+  },
+  {
+    id: "l24",
+    prompt: "Which of these do you rule over?",
+    options: [
+      { text: "A quiet corner", points: 0 },
+      { text: "A stream or a hill", points: 1 },
+      { text: "A city", points: 2 },
+      { text: "A whole realm", points: 3 },
     ],
   },
 ];
