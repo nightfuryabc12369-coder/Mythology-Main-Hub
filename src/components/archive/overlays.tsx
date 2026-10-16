@@ -9,6 +9,7 @@ import { ageMap, epicMap, epithetMap, mythMap } from "@/data/world";
 import { playSummon } from "@/lib/audio";
 import { useArchiveStore, type Overlay } from "@/lib/archive-store";
 import { cn } from "@/lib/utils";
+import { Link } from "@tanstack/react-router";
 import { Maximize2, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -399,6 +400,16 @@ export function DetailSheet() {
           <p className="text-sm text-fg/90">{sheet.body}</p>
           <p className="text-sm text-muted">{sheet.extra}</p>
           <NameChips ids={sheet.chips} />
+          {overlay.type === "epic" ? (
+            <Link
+              to="/epics/$epicId"
+              params={{ epicId: overlay.id }}
+              onClick={close}
+              className="inline-flex min-h-11 items-center text-xs tracking-kicker text-primary uppercase"
+            >
+              Read the full piece →
+            </Link>
+          ) : null}
         </div>
       </aside>
     </div>

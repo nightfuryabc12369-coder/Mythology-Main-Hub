@@ -123,11 +123,10 @@ export function MythCard({ myth }: { myth: Myth }) {
 }
 
 export function EpicCard({ epic }: { epic: Epic }) {
-  const openOverlay = useArchiveStore((state) => state.openOverlay);
   return (
-    <button
-      type="button"
-      onClick={() => openOverlay({ type: "epic", id: epic.id })}
+    <Link
+      to="/epics/$epicId"
+      params={{ epicId: epic.id }}
       className="pressable group relative min-h-56 overflow-hidden rounded-md text-left shadow-border"
     >
       <img
@@ -142,7 +141,7 @@ export function EpicCard({ epic }: { epic: Epic }) {
         <h3 className="font-display text-xl text-fg">{epic.title}</h3>
         <p className="mt-1 text-xs text-fg/75">{epic.year}</p>
       </div>
-    </button>
+    </Link>
   );
 }
 
